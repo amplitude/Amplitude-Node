@@ -8,6 +8,8 @@ export interface Event {
     country?: string;
     region?: string;
     city?: string;
+    location_lat: number;
+    location_lng: number;
     //** The current Designated Market Area of the user. */
     dma?: string;
     language?: string;
