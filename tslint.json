@@ -3,7 +3,7 @@
     "rules": {
       // This rule has side effects and must be disabled
       "no-unused-variable": false,
-  
+
       "no-submodule-imports": false,
       "no-null-keyword": false,
       // We don't want these
