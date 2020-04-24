@@ -1,2 +1,3 @@
-export { SDK_NAME, SDK_VERSION } from './version';
+export { Client } from './models/client';
+export { initWithClient } from './core/sdk';
 export { init } from './sdk';

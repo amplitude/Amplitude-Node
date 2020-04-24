@@ -1,3 +1,6 @@
+/**
+ * Amplitude event definition.
+ */
 export interface Event {
   // Required
   event_type: string;
@@ -10,7 +13,7 @@ export interface Event {
   city?: string;
   location_lat: number;
   location_lng: number;
-  //** The current Designated Market Area of the user. */
+  // ** The current Designated Market Area of the user. */
   dma?: string;
   language?: string;
   device_id?: string;

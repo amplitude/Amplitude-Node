@@ -1,6 +1,7 @@
 {
     "extends": ["tslint:all", "tslint-config-prettier", "tslint-consistent-codestyle"],
     "rules": {
+      "object-literal-sort-keys": false,
       // This rule has side effects and must be disabled
       "no-unused-variable": false,
 
