@@ -18,7 +18,7 @@ import { Options } from '../models/options';
  */
 export abstract class BaseClient<O extends Options> implements Client<O> {
   /** Project Api Key */
-  protected readonly _apiKey: String;
+  protected readonly _apiKey: string;
 
   /** Options for the client. */
   protected readonly _options: O;

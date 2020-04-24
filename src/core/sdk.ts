@@ -2,7 +2,7 @@ import { Client } from '../models/client';
 import { Options } from '../models/options';
 
 /** A class object that can instanciate Client objects. */
-export type ClientClass<F extends Client, O extends Options> = new (apiKey: String, options: O) => F;
+export type ClientClass<F extends Client, O extends Options> = new (apiKey: string, options: O) => F;
 
 /**
  * Internal function to create a new SDK client instance. The client is
