@@ -1,0 +1,37 @@
+{
+  "name": "@amplitude/node",
+  "version": "0.1.0",
+  "description": "Offical Amplitude SDK for Node.js",
+  "repository": "git://github.com/amplitude/Amplitude-Node.git",
+  "homepage": "https://github.com/amplitude/Amplitude-Node",
+  "author": "Amplitude Inc",
+  "license": "MIT",
+  "engines": {
+    "node": ">=6"
+  },
+  "main": "dist/index.js",
+  "module": "esm/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^13.11.1",
+    "jest": "^25.4.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.17.0",
+    "rimraf": "^2.6.3",
+    "typescript": "^3.4.5"
+  },
+  "scripts": {
+    "build": "run-p build:es5",
+    "build:es5": "tsc -p tsconfig.build.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:watch": "run-p build:watch:es5 build:watch:esm",
+    "build:watch:es5": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
+    "build:watch:esm": "tsc -p tsconfig.esm.json -w --preserveWatchOutput",
+    "clean": "rimraf dist coverage",
+    "link:yarn": "yarn link"
+  },
+  "dependencies": {}
+}
