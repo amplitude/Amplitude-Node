@@ -1,9 +1,12 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
   "editor.formatOnType": true,
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
   "editor.rulers": [120],
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "files.autoSave": "onWindowChange",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
@@ -13,7 +16,6 @@
     "**/dist/": true
   },
   "typescript.tsdk": "./node_modules/typescript/lib",
-  "tslint.autoFixOnSave": true,
   "[json]": {
     "editor.formatOnType": false,
     "editor.formatOnPaste": false,

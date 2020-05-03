@@ -33,4 +33,6 @@ export interface Event {
 
   event_id: number;
   session_id: number;
+
+  groups?: Record<string, any>;
 }
