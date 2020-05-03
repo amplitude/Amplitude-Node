@@ -2,11 +2,12 @@
   "editor.codeActionsOnSave": {
     "source.fixAll": true
   },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnType": true,
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
   "editor.rulers": [120],
-  "editor.tabSize": 4,
+  "editor.tabSize": 2,
   "files.autoSave": "onWindowChange",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
