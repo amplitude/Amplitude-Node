@@ -10,6 +10,10 @@ export class NodeClient extends BaseClient<Options> {
    * @inheritDoc
    */
   public logEvent(event: Event): void {
+    if (this._options.optOut === true) {
+      return;
+    }
+
     this._annotateEvent(event);
 
     const payload = JSON.stringify({
@@ -17,14 +21,14 @@ export class NodeClient extends BaseClient<Options> {
       events: [event],
     });
 
-    const options = {
+    const requestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     };
 
-    const req = https.request(this._options.serverUrl ?? OPTION_DEFAULT_SERVER_URL, options);
+    const req = https.request(this._options.serverUrl ?? OPTION_DEFAULT_SERVER_URL, requestOptions);
 
     req.on('error', error => {
       console.info('[Amplitude|Error] Event is not submitted.', error);

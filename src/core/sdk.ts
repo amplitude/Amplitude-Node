@@ -17,10 +17,6 @@ export function initWithClient<F extends Client, O extends Options>(
   options: O,
   clientClass: ClientClass<F, O>,
 ): Client {
-  if (options.debug === true) {
-    //
-  }
-
   const client = new clientClass(apiKey, options);
   return client;
 }

@@ -3,15 +3,9 @@
  */
 export interface Options {
   /**
-   * Enable debug functionality in the SDK itself
+   * Whether you opt out from sending events.
    */
-  debug?: boolean;
-
-  /**
-   * Whether this SDK should activate and send events to Amplitude.
-   * Defaults to true.
-   */
-  enabled?: boolean;
+  optOut?: boolean;
 
   /**
    * Set it if you are using proxy server.

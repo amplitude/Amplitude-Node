@@ -4,19 +4,20 @@
 export interface Event {
   // Required
   event_type: string;
-  user_id: string;
-  time: number;
+  // Semi required
+  user_id?: string;
+  device_id?: string;
 
   // Optional
+  time?: number;
   country?: string;
   region?: string;
   city?: string;
-  location_lat: number;
-  location_lng: number;
+  location_lat?: number;
+  location_lng?: number;
   // ** The current Designated Market Area of the user. */
   dma?: string;
   language?: string;
-  device_id?: string;
   platform?: string;
   version_name?: string;
   library?: string;
@@ -29,10 +30,10 @@ export interface Event {
   quantity?: number;
   revenue?: number;
   productId?: string;
-  revenueType: string;
+  revenueType?: string;
 
-  event_id: number;
-  session_id: number;
+  event_id?: number;
+  session_id?: number;
 
   groups?: Record<string, any>;
 }
