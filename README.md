@@ -5,7 +5,7 @@
   <br />
 </p>
 
-# Official Amplitude SDKs for Node
+# Official Amplitude SDK for Node.js
 This is Amplitude Node.js SDK written in Typescript, the 1st backend SDK for Amplitude. Currently, it's in beta version, but we would like to hear your ideas too! At this moment, we keep it minimal and simple because we want to give more thoughts over different customers' needs. Modularization and flexiblity will be the main priorities for this SDK.
 
 ## Usage
