@@ -24,14 +24,10 @@ export class NodeClient extends BaseClient<Options> {
       },
     };
 
-    const req = https.request(this._options.serverUrl ?? OPTION_DEFAULT_SERVER_URL, options, result => {
-      result.on('data', d => {
-        process.stdout.write(d);
-      });
-    });
+    const req = https.request(this._options.serverUrl ?? OPTION_DEFAULT_SERVER_URL, options);
 
     req.on('error', error => {
-      console.error(error);
+      console.info('[Amplitude|Error] Event is not submitted.', error);
     });
 
     req.write(payload);
