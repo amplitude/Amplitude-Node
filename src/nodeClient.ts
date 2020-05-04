@@ -10,7 +10,6 @@ export class NodeClient extends BaseClient<Options> {
    * @inheritDoc
    */
   public logEvent(event: Event): void {
-    super.logEvent(event);
     this._annotateEvent(event);
 
     const payload = JSON.stringify({
@@ -19,16 +18,17 @@ export class NodeClient extends BaseClient<Options> {
     });
 
     const options = {
-      hostname: this._options.serverUrl ?? OPTION_DEFAULT_SERVER_URL,
-      port: 443,
-      path: '/2/httpapi',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     };
 
-    const req = https.request(options);
+    const req = https.request(this._options.serverUrl ?? OPTION_DEFAULT_SERVER_URL, options, result => {
+      result.on('data', d => {
+        process.stdout.write(d);
+      });
+    });
 
     req.on('error', error => {
       console.error(error);
@@ -41,5 +41,6 @@ export class NodeClient extends BaseClient<Options> {
   /** Add platform dependent field onto event. */
   private _annotateEvent(event: Event): void {
     event.library = `${SDK_NAME}-${SDK_VERSION}`;
+    event.platform = 'Node.js';
   }
 }
