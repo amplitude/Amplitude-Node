@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/node",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Offical Amplitude SDK for Node.js",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node",
@@ -14,6 +14,9 @@
   "types": "dist/index.d.ts",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/node": "^13.11.1",
@@ -47,6 +50,5 @@
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
     "fix:eslint": "eslint --fix 'src/**/*.ts'",
     "link:yarn": "yarn link"
-  },
-  "dependencies": {}
+  }
 }
