@@ -1,0 +1,24 @@
+{
+  "name": "@amplitude/typescript",
+  "version": "0.2.0",
+  "description": "Typescript configuration used at Amplitude",
+  "repository": "git://github.com/amplitude/Amplitude-Node.git",
+  "homepage": "https://github.com/amplitude/Amplitude-Node",
+  "author": "Amplitude Inc",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-consistent-codestyle": "^1.15.1"
+  },
+  "peerDependencies": {
+    "typescript": "^3.9.2",
+    "eslint": "^7.0.0"
+  },
+  "scripts": {
+    "link:yarn": "yarn link"
+  }
+}
