@@ -5,4 +5,5 @@
   <br />
 </p>
 
-[![npm version](https://badge.fury.io/js/%40amplitude%2Fnode.svg)](https://badge.fury.io/js/%40amplitude%2Fnode)
+## General
+Common typescript configuration module. It's shared by different modules at Amplitude.

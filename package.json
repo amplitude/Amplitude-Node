@@ -17,6 +17,7 @@
   ],
   "devDependencies": {
     "eslint": "^7.0.0",
-    "lerna": "^3.20.2"
+    "lerna": "^3.20.2",
+    "prettier": "^1.17.0"
   }
 }
