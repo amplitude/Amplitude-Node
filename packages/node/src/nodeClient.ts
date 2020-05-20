@@ -1,11 +1,39 @@
 import * as https from 'https';
+import { Client, Event, Options } from '@amplitude/types';
+import { SDK_NAME, SDK_VERSION, AMPLITUDE_SERVER_URL } from './constants';
 
-import { BaseClient } from './core/baseClient';
-import { Event } from './models/event';
-import { OPTION_DEFAULT_SERVER_URL, Options } from './models/options';
-import { SDK_NAME, SDK_VERSION } from './version';
+export class NodeClient implements Client<Options> {
+  /** Project Api Key */
+  protected readonly _apiKey: string;
 
-export class NodeClient extends BaseClient<Options> {
+  /** Options for the client. */
+  protected readonly _options: Options;
+
+  /**
+   * Initializes this client instance.
+   *
+   * @param apiKey API key for your project
+   * @param options options for the client
+   */
+  public constructor(apiKey: string, options: Options) {
+    this._apiKey = apiKey;
+    this._options = options;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  getOptions(): Options {
+    return this._options;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  flush(): void {
+    throw new Error('Method not implemented.');
+  }
+
   /**
    * @inheritDoc
    */
@@ -28,9 +56,9 @@ export class NodeClient extends BaseClient<Options> {
       },
     };
 
-    const req = https.request(this._options.serverUrl ?? OPTION_DEFAULT_SERVER_URL, requestOptions);
+    const req = https.request(this._options.serverUrl ?? AMPLITUDE_SERVER_URL, requestOptions);
 
-    req.on('error', error => {
+    req.on('error', (error) => {
       console.info('[Amplitude|Error] Event is not submitted.', error);
     });
 
@@ -40,7 +68,7 @@ export class NodeClient extends BaseClient<Options> {
 
   /** Add platform dependent field onto event. */
   private _annotateEvent(event: Event): void {
-    event.library = `${SDK_NAME}-${SDK_VERSION}`;
+    event.library = `${SDK_NAME}/${SDK_VERSION}`;
     event.platform = 'Node.js';
   }
 }

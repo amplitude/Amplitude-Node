@@ -1,3 +1,3 @@
-export { Client } from './models/client';
-export { initWithClient } from './core/sdk';
+export { NodeClient } from './nodeClient';
+export { Event, Options } from '@amplitude/types';
 export { init } from './sdk';

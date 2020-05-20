@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "Typescript configuration used at Amplitude",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
-  "homepage": "https://github.com/amplitude/Amplitude-Node",
+  "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/typescript",
   "author": "Amplitude Inc",
   "license": "MIT",
   "private": false,
@@ -11,8 +11,14 @@
     "access": "public"
   },
   "dependencies": {
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-consistent-codestyle": "^1.15.1"
+    "@typescript-eslint/eslint-plugin": "^2.30.0",
+    "@typescript-eslint/parser": "^2.30.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-config-standard-with-typescript": "^16.0.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
   },
   "peerDependencies": {
     "typescript": "^3.9.2",
