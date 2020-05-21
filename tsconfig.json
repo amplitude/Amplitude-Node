@@ -1,9 +1,10 @@
 {
-  "extends": "./tsconfig.build.json",
-  "include": ["src/**/*.ts", "test/**/*.ts"],
-  "exclude": ["dist"],
+  "extends": "./packages/typescript/tsconfig.json",
   "compilerOptions": {
-    "rootDir": ".",
-    "types": ["node", "jest"]
+    "baseUrl": "packages",
+    "types": ["node"],
+    "paths": {
+      "@amplitude/*": ["*/src"]
+    }
   }
 }

@@ -12,5 +12,3 @@ export interface Options {
    */
   serverUrl?: string;
 }
-
-export const OPTION_DEFAULT_SERVER_URL = 'https://api.amplitude.com/2/httpapi';
