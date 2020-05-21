@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/typescript",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Typescript configuration used at Amplitude",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/typescript",
@@ -21,8 +21,8 @@
     "eslint-plugin-standard": "^4.0.1"
   },
   "peerDependencies": {
-    "typescript": "^3.9.2",
-    "eslint": "^7.0.0"
+    "eslint": "^7.0.0",
+    "typescript": "^3.9.2"
   },
   "scripts": {
     "link:yarn": "yarn link"
