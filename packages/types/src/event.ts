@@ -23,8 +23,8 @@ export interface Event {
   library?: string;
   ip?: string;
   uuid?: string;
-  event_properties?: Record<string, any>;
-  user_properties?: Record<string, any>;
+  event_properties?: { [key: string]: any };
+  user_properties?: { [key: string]: any };
 
   price?: number;
   quantity?: number;
@@ -35,5 +35,5 @@ export interface Event {
   event_id?: number;
   session_id?: number;
 
-  groups?: Record<string, any>;
+  groups?: { [key: string]: any };
 }
