@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.3.1
-- Fix incorrect library version.
+- `@amplitude/node`: Fix incorrect library version.
 
 ## 0.3.0
 - Created a new package `@amplitude/types` which contains the basic types to further modularize the project.
