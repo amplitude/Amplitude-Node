@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.2
+- `@amplitude/node`: Fix `TypeError: "listener" ...` error from http request.
+
 ## 0.3.1
 - `@amplitude/node`: Fix incorrect library version.
 

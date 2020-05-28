@@ -10,40 +10,8 @@
 # Official Amplitude SDK for Node.js
 This is Amplitude Node.js SDK written in Typescript, the 1st backend SDK for Amplitude. Currently, it's in beta version, but we would like to hear your ideas too! At this moment, we keep it minimal and simple because we want to give more thoughts over different customers' needs. Modularization and flexiblity will be the main priorities for this SDK.
 
-## Installation
-Run `npm install @amplitude/node` in your project directory, the same level with `package.json`.
-
-## Usage
-JavaScript
-```javascript
-// ES5 Syntax
-const Amplitude = require('@amplitude/node');
-// ES6 Syntax
-import * as Amplitude from '@amplitude/node';
-
-var client = amplitude.init(<AMPLITUDE_API_KEY>);
-client.logEvent({
-  event_type: 'Node.js Event',
-  user_id: 'datamonster@gmail.com',
-  location_lat: 37.77,
-  location_lng: -122.39,
-  ip: '127.0.0.1',
-});
-```
-TypeScript
-```typescript
-import * as Amplitude from '@amplitude/node';
-
-const client = Amplitude.init(<AMPLITUDE_API_KEY>);
-
-client.logEvent({
-  event_type: 'Node.js Event',
-  user_id: 'datamonster@gmail.com',
-  location_lat: 37.77,
-  location_lng: -122.39,
-  ip: '127.0.0.1',
-});
-```
+## Installation and Quick Start
+Please visit our :100:[Developer Center](https://developers.amplitude.com/docs/nodejs) for instructions on installing and using our the SDK.
 
 ## Need Help?
 If you have any problems or issues over our SDK, feel free to [create a github issue](https://github.com/amplitude/Amplitude-Node/issues/new) or submit a request on [Amplitude Help](https://help.amplitude.com/hc/en-us/requests/new).
