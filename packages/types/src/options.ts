@@ -8,7 +8,7 @@ export interface Options {
   optOut?: boolean;
 
   /**
-   * Set it if you are using proxy server.
+   * @deprecated Set it if you are using proxy server.
    */
   serverUrl?: string;
 }

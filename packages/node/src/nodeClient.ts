@@ -1,6 +1,6 @@
 import * as https from 'https';
 import { Client, Event, Options } from '@amplitude/types';
-import { SDK_NAME, SDK_VERSION, AMPLITUDE_SERVER_URL } from './constants';
+import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_HOST, AMPLITUDE_API_PATH } from './constants';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -50,15 +50,22 @@ export class NodeClient implements Client<Options> {
     });
 
     const requestOptions = {
+      hostname: AMPLITUDE_API_HOST,
+      path: AMPLITUDE_API_PATH,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     };
 
-    const req = https.request(this._options.serverUrl ?? AMPLITUDE_SERVER_URL, requestOptions);
+    const req = https.request(requestOptions, res => {
+      res.on('data', _ => {
+        // Request finishes.
+        // We currently don't have error handling or retry, but we will add it soon.
+      });
+    });
 
-    req.on('error', (error) => {
+    req.on('error', error => {
       console.info('[Amplitude|Error] Event is not submitted.', error);
     });
 
