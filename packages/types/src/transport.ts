@@ -1,11 +1,20 @@
-import { Event } from './event';
+import { Payload } from './payload';
+import { Response } from './response';
 
 /** Transport used sending data to Amplitude */
 export interface Transport {
   /**
-   * Sends the events with post body endpoint in Amplitude.
+   * Send the events payload to Amplitude.
    *
-   * @param events Events array that should be sent to Amplitude.
+   * @param payload Payload with events that should be sent to Amplitude.
    */
-  sendEvent(events: Event[]): PromiseLike<Response>;
+  sendPayload(payload: Payload): PromiseLike<Response>;
+}
+
+/** JSDoc */
+export interface TransportOptions {
+  /** Server url destination. */
+  serverUrl?: string;
+  /** Define custom headers */
+  headers?: { [key: string]: string };
 }
