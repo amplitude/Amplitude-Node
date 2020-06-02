@@ -13,8 +13,10 @@ export interface Transport {
 
 /** JSDoc */
 export interface TransportOptions {
-  /** Server url destination. */
-  serverUrl?: string;
+  /** Server host destination. */
+  serverHost: string;
+  /** Server path destination. */
+  serverPath: string;
   /** Define custom headers */
-  headers?: { [key: string]: string };
+  headers: { [key: string]: string };
 }

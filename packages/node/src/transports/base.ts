@@ -61,12 +61,18 @@ export abstract class BaseTransport implements Transport {
 
   /** JSDoc */
   protected async _sendWithModule(httpModule: HTTPRequest, payload: Payload): Promise<Response> {
+    if (this._uploadInProgress) {
+      return Promise.reject(new Error('Previous upload is in progress.'));
+    }
+
     if (new Date(Date.now()) < this._disabledUntil) {
       return Promise.reject(new Error(`Transport locked till ${this._disabledUntil} due to too many requests.`));
     }
 
     return new Promise<Response>((resolve, reject) => {
       const req = httpModule.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
+        this._uploadInProgress = false;
+
         const statusCode = res.statusCode || 500;
         const status = Status.fromHttpCode(statusCode);
 
@@ -93,13 +99,8 @@ export abstract class BaseTransport implements Transport {
       });
       req.on('error', reject);
       req.end(JSON.stringify(payload));
+
+      this._uploadInProgress = true;
     });
   }
-
-  // /**
-  //  * @inheritDoc
-  //  */
-  // public close(timeout?: number): PromiseLike<boolean> {
-  //   return this._buffer.drain(timeout);
-  // }
 }
