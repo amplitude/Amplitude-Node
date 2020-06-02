@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.3 (Hotfix)
+- `@amplitude/node`: You can customize hostname by setting `serverUrl` in options. Thanks the PR from @timsu
+
 ## 0.3.2
 - `@amplitude/node`: Fix `TypeError: "listener" ...` error from http request.
 
