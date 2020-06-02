@@ -49,8 +49,9 @@ export class NodeClient implements Client<Options> {
       events: [event],
     });
 
+    const hostname = this._options.serverUrl || AMPLITUDE_API_HOST
     const requestOptions = {
-      hostname: AMPLITUDE_API_HOST,
+      hostname: hostname,
       path: AMPLITUDE_API_PATH,
       method: 'POST',
       headers: {
