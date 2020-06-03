@@ -38,7 +38,7 @@ export abstract class BaseTransport implements Transport {
   /** Create instance and set this.dsn */
   public constructor(public options: TransportOptions) {}
 
-  sendPayload(_: Payload): PromiseLike<Response> {
+  sendPayload(_: Payload): Promise<Response> {
     throw new Error(`Method not implemented.`);
   }
 

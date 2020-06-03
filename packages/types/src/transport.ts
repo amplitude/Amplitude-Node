@@ -8,7 +8,7 @@ export interface Transport {
    *
    * @param payload Payload with events that should be sent to Amplitude.
    */
-  sendPayload(payload: Payload): PromiseLike<Response>;
+  sendPayload(payload: Payload): Promise<Response>;
 }
 
 /** JSDoc */

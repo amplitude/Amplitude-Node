@@ -1,5 +1,5 @@
 import * as https from 'https';
-import { Client, Event, Options, Transport, TransportOptions, Payload } from '@amplitude/types';
+import { Client, Event, Options, Response, Transport, TransportOptions, Payload, Status } from '@amplitude/types';
 import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_HOST, AMPLITUDE_API_PATH } from './constants';
 import { HTTPSTransport, HTTPTransport } from './transports';
 
@@ -36,7 +36,16 @@ export class NodeClient implements Client<Options> {
    * @inheritDoc
    */
   public flush(): Promise<Response> {
-    return this._transport.sendPayload(this._getCurrentPayload());
+    // Record the current last event index
+    const arraryLength = this._events.length;
+    const response = this._transport.sendPayload(this._getCurrentPayload());
+    response.then(res => {
+      if (res.status === Status.Success) {
+        // Clean up the events
+        this._events.splice(0, arraryLength);
+      }
+    });
+    return response;
   }
 
   /**
