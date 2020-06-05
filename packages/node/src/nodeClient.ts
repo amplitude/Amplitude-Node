@@ -1,5 +1,4 @@
-import * as https from 'https';
-import { Client, Event, Options, Response, Transport, TransportOptions, Payload, Status } from '@amplitude/types';
+import { Client, Event, Options, Transport, TransportOptions, Payload, Status } from '@amplitude/types';
 import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_HOST, AMPLITUDE_API_PATH } from './constants';
 import { HTTPSTransport, HTTPTransport } from './transports';
 
@@ -10,7 +9,7 @@ export class NodeClient implements Client<Options> {
   /** Options for the client. */
   protected readonly _options: Options;
 
-  private _events: Event[] = [];
+  private _events: Event[];
   private _transport: Transport;
 
   /**
@@ -22,7 +21,14 @@ export class NodeClient implements Client<Options> {
   public constructor(apiKey: string, options: Options = {}) {
     this._apiKey = apiKey;
     this._options = options;
+    this._events = [];
     this._transport = this._setupTransport();
+
+    const uploadIntervalInSec = options.uploadIntervalInSec ?? 30;
+    var self = this;
+    setInterval(function() {
+      self.flush();
+    }, uploadIntervalInSec * 1000);
   }
 
   /**
@@ -35,9 +41,13 @@ export class NodeClient implements Client<Options> {
   /**
    * @inheritDoc
    */
-  public flush(): Promise<Response> {
-    // Record the current last event index
+  public flush(): void {
+    // Check if there's 0 events, flush is not needed.
     const arraryLength = this._events.length;
+    if (arraryLength === 0) {
+      return;
+    }
+
     const response = this._transport.sendPayload(this._getCurrentPayload());
     response.then(res => {
       if (res.status === Status.Success) {
@@ -45,7 +55,6 @@ export class NodeClient implements Client<Options> {
         this._events.splice(0, arraryLength);
       }
     });
-    return response;
   }
 
   /**
@@ -59,36 +68,13 @@ export class NodeClient implements Client<Options> {
     this._annotateEvent(event);
     // Add event to unsent events queue.
     this._events.push(event);
-    // Check if queue reaches to the limit and flush them.
-    this._checkNeedFlush();
 
-    const payload = JSON.stringify({
-      api_key: this._apiKey,
-      events: [event],
-    });
+    const bufferLimit = this._options.maxCachedEvents ?? 100;
 
-    const requestOptions = {
-      hostname: AMPLITUDE_API_HOST,
-      path: AMPLITUDE_API_PATH,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-
-    const req = https.request(requestOptions, res => {
-      res.on('data', _ => {
-        // Request finishes.
-        // We currently don't have error handling or retry, but we will add it soon.
-      });
-    });
-
-    req.on('error', error => {
-      console.info('[Amplitude|Error] Event is not submitted.', error);
-    });
-
-    req.write(payload);
-    req.end();
+    // # of events exceeds the limit, flush them.
+    if (this._events.length >= bufferLimit) {
+      this.flush();
+    }
   }
 
   /** Add platform dependent field onto event. */
@@ -130,13 +116,6 @@ export class NodeClient implements Client<Options> {
       }
     } else {
       throw new Error('Server options are not complete. Make sure you provide all 3 server configs.');
-    }
-  }
-
-  private _checkNeedFlush() {
-    const bufferLimit = this._options.maxaCachedEvents ?? 100;
-    if (this._events.length >= bufferLimit) {
-      this.flush();
     }
   }
 

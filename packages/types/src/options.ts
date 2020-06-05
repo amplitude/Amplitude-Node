@@ -8,7 +8,10 @@ export interface Options {
   optOut?: boolean;
 
   /** The maximum events in the buffer */
-  maxaCachedEvents?: number;
+  maxCachedEvents?: number;
+
+  /** The events upload interval */
+  uploadIntervalInSec?: number;
 
   /** If you're using a proxy server, set the network protocal it's using. (http or https) */
   serverProtocal?: string;

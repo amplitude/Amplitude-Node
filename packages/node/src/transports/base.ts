@@ -54,6 +54,8 @@ export abstract class BaseTransport implements Transport {
       agent: this.client,
       headers,
       method: 'POST',
+      hostname: this.options.serverHost,
+      path: this.options.serverPath,
     };
 
     return options;
