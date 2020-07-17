@@ -1,4 +1,5 @@
 import * as https from 'https';
+import { logger } from '@amplitude/utils';
 import { Client, Event, Options } from '@amplitude/types';
 import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_HOST, AMPLITUDE_API_PATH } from './constants';
 
@@ -18,6 +19,9 @@ export class NodeClient implements Client<Options> {
   public constructor(apiKey: string, options: Options) {
     this._apiKey = apiKey;
     this._options = options;
+    if (options.debug || options.logLevel) {
+      logger.enable(options.logLevel);
+    }
   }
 
   /**
@@ -49,7 +53,7 @@ export class NodeClient implements Client<Options> {
       events: [event],
     });
 
-    const hostname = this._options.serverUrl || AMPLITUDE_API_HOST
+    const hostname = this._options.serverUrl || AMPLITUDE_API_HOST;
     const requestOptions = {
       hostname: hostname,
       path: AMPLITUDE_API_PATH,

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@amplitude/types": "^0.3.2",
+    "@amplitude/utils": "^0.3.2",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
