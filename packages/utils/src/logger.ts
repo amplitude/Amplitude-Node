@@ -1,7 +1,8 @@
 import { LogLevel } from '@amplitude/types';
+import { getGlobalObject } from './misc';
 
 // TODO: Type the global constant
-const global: any = this;
+const global = getGlobalObject();
 
 /** Prefix for logging strings */
 const PREFIX = 'Amplitude Logger ';
