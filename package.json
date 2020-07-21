@@ -13,7 +13,8 @@
   "workspaces": [
     "packages/node",
     "packages/types",
-    "packages/typescript"
+    "packages/typescript",
+    "packages/utils"
   ],
   "devDependencies": {
     "eslint": "^7.0.0",
