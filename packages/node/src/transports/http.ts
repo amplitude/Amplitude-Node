@@ -1,4 +1,4 @@
-import { Event, Payload, Response, Status, Transport, TransportOptions } from '@amplitude/types';
+import { Payload, Response, Status, Transport, TransportOptions } from '@amplitude/types';
 
 import * as http from 'http';
 import * as https from 'https';
@@ -24,8 +24,6 @@ export interface HTTPRequest {
 export class HTTPTransport implements Transport {
   /** The Agent used for corresponding transport */
   public module?: HTTPRequest;
-
-  public event?: Event;
 
   protected _uploadInProgress: Boolean = false;
 
