@@ -13,12 +13,6 @@ export interface Options {
   /** The events upload interval */
   uploadIntervalInSec?: number;
 
-  /** If you're using a proxy server, set the network protocal it's using. (http or https) */
-  serverProtocal?: string;
-
-  /** If you're using a proxy server, set its host name. */
-  serverHost?: string;
-
-  /** If you're using a proxy server, set its path. */
-  serverPath?: string;
+  /** If you're using a proxy server, set its url here. */
+  serverUrl?: string;
 }

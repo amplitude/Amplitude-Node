@@ -1,4 +1,4 @@
-import { Payload } from './payload';
+import { Payload } from './event';
 import { Response } from './response';
 
 /** Transport used sending data to Amplitude */
@@ -13,10 +13,8 @@ export interface Transport {
 
 /** JSDoc */
 export interface TransportOptions {
-  /** Server host destination. */
-  serverHost: string;
   /** Server path destination. */
-  serverPath: string;
+  serverUrl: string;
   /** Define custom headers */
   headers: { [key: string]: string };
 }

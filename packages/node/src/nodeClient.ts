@@ -1,6 +1,6 @@
-import { Client, Event, Options, Transport, TransportOptions, Payload, Status } from '@amplitude/types';
-import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_HOST, AMPLITUDE_API_PATH } from './constants';
-import { HTTPSTransport, HTTPTransport } from './transports';
+import { Client, Event, Options, Transport, TransportOptions, Payload, Response, Status } from '@amplitude/types';
+import { SDK_NAME, SDK_VERSION, AMPLITUDE_SERVER_URL } from './constants';
+import { HTTPTransport } from './transports';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -11,6 +11,7 @@ export class NodeClient implements Client<Options> {
 
   private _events: Event[];
   private _transport: Transport;
+  private _flushTimer: number = 0;
 
   /**
    * Initializes this client instance.
@@ -23,12 +24,6 @@ export class NodeClient implements Client<Options> {
     this._options = options;
     this._events = [];
     this._transport = this._setupTransport();
-
-    const uploadIntervalInSec = options.uploadIntervalInSec ?? 30;
-    var self = this;
-    setInterval(function() {
-      self.flush();
-    }, uploadIntervalInSec * 1000);
   }
 
   /**
@@ -41,11 +36,14 @@ export class NodeClient implements Client<Options> {
   /**
    * @inheritDoc
    */
-  public flush(): void {
+  public async flush(): Promise<Response> {
+    // Clear the timeout
+    clearTimeout(this._flushTimer);
+
     // Check if there's 0 events, flush is not needed.
     const arraryLength = this._events.length;
     if (arraryLength === 0) {
-      return;
+      return { status: Status.Success, statusCode: 200 };
     }
 
     const response = this._transport.sendPayload(this._getCurrentPayload());
@@ -55,6 +53,8 @@ export class NodeClient implements Client<Options> {
         this._events.splice(0, arraryLength);
       }
     });
+
+    return response;
   }
 
   /**
@@ -69,11 +69,17 @@ export class NodeClient implements Client<Options> {
     // Add event to unsent events queue.
     this._events.push(event);
 
-    const bufferLimit = this._options.maxCachedEvents ?? 100;
+    const bufferLimit = this._options.maxCachedEvents || 100;
 
-    // # of events exceeds the limit, flush them.
     if (this._events.length >= bufferLimit) {
+      // # of events exceeds the limit, flush them.
       this.flush();
+    } else {
+      // Not ready to flush them, then set
+      const uploadIntervalInSec = this._options.uploadIntervalInSec ?? 30;
+      this._flushTimer = (setTimeout(() => {
+        this.flush();
+      }, uploadIntervalInSec * 1000) as any) as number;
     }
   }
 
@@ -85,38 +91,13 @@ export class NodeClient implements Client<Options> {
 
   private _setupTransport(): Transport {
     let transportOptions: TransportOptions;
-
-    if (this._options.serverHost == null && this._options.serverPath == null && this._options.serverProtocal == null) {
-      // If all 3 server options are missing, then we default the server to Amplitude.
-      transportOptions = {
-        serverHost: AMPLITUDE_API_HOST,
-        serverPath: AMPLITUDE_API_PATH,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-      return new HTTPSTransport(transportOptions);
-    } else if (
-      this._options.serverHost != null &&
-      this._options.serverPath != null &&
-      this._options.serverProtocal != null
-    ) {
-      // If all 3 server options have values, then we use them.
-      transportOptions = {
-        serverHost: this._options.serverHost,
-        serverPath: this._options.serverPath,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      };
-      if (this._options.serverProtocal === 'http') {
-        return new HTTPTransport(transportOptions);
-      } else {
-        return new HTTPSTransport(transportOptions);
-      }
-    } else {
-      throw new Error('Server options are not complete. Make sure you provide all 3 server configs.');
-    }
+    transportOptions = {
+      serverUrl: this._options.serverUrl || AMPLITUDE_SERVER_URL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    return new HTTPTransport(transportOptions);
   }
 
   private _getCurrentPayload(): Payload {
