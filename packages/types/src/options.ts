@@ -33,4 +33,6 @@ export interface Options {
    * logLevel is not specified.
    */
   debug?: boolean;
+
+  maxRetries?: number;
 }
