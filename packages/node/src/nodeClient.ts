@@ -159,14 +159,24 @@ export class NodeClient implements Client<Options> {
 
   private async _waitForUpload(): Promise<void> {
     return new Promise(resolve => {
-      let interval = 0;
-      interval = (setInterval(() => {
+      const interval = setInterval(() => {
         if (!this._uploadInProgress) {
           clearInterval(interval);
           resolve();
         }
-      }, 1) as any) as number;
+      }, 1);
     });
+  }
+
+  private _updateRetryIdSet(): void {
+    this._idsToRetry = this._eventsToRetry.reduce((idSet, event) => {
+      if (event.user_id) {
+        idSet.add(event.user_id);
+      } else if (event.device_id) {
+        idSet.add(event.device_id);
+      }
+      return idSet;
+    }, new Set<string>());
   }
 
   private async _retryEvents(numEvents: number): Promise<void> {
@@ -187,14 +197,7 @@ export class NodeClient implements Client<Options> {
         if (response.status === Status.Success) {
           // Clean up the events
           this._eventsToRetry.splice(0, arrayLength);
-          this._idsToRetry = this._eventsToRetry.reduce((idSet, event) => {
-            if (event.user_id) {
-              idSet.add(event.user_id);
-            } else if (event.device_id) {
-              idSet.add(event.device_id);
-            }
-            return idSet;
-          }, new Set<string>());
+          this._updateRetryIdSet();
 
           // Successfully sent the events, stop trying
           return;
@@ -211,5 +214,6 @@ export class NodeClient implements Client<Options> {
     // wait to make sure there are no uploads in progress
     await this._waitForUpload();
     this._eventsToRetry.splice(0, numEvents);
+    this._updateRetryIdSet();
   }
 }
