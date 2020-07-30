@@ -34,5 +34,6 @@ export interface Options {
    */
   debug?: boolean;
 
+  /** The maximum number of times a server will attempt to retry  */
   maxRetries?: number;
 }
