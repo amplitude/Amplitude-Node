@@ -189,8 +189,9 @@ export class NodeClient implements Client<Options> {
 
     this._retryInProgress = true;
     let numRetries = 0;
+    const maxRetries = this._options.maxRetries ?? 10;
 
-    while (typeof this._options.maxRetries === 'number' && numRetries < this._options.maxRetries) {
+    while (numRetries < maxRetries) {
       // If there's an upload currently in progress, wait for it to finish first.
       await this._waitForUpload();
       const arrayLength = this._eventsToRetry.length;
@@ -208,7 +209,7 @@ export class NodeClient implements Client<Options> {
           this._updateRetryIdSet();
 
           // Successfully sent the events, stop trying
-          return;
+          break;
         }
       } catch {
         // Do nothing if there is a failure, go on to next retry loop
@@ -218,15 +219,19 @@ export class NodeClient implements Client<Options> {
       }
     }
 
-    // We know that we've tried the first numEvents numbers for the maximum number of tries. kick them out
-    this._eventsToRetry.splice(0, numEvents);
-    this._updateRetryIdSet();
-    const numEventsRemaining = this._eventsToRetry.length;
     this._retryInProgress = false;
 
+    // If we exited the loop by hitting the retry limit
+    if (numRetries === maxRetries) {
+      // We know that we've tried the first numEvents numbers for the maximum number of tries.
+      this._eventsToRetry.splice(0, numEvents);
+      this._updateRetryIdSet();
+    }
+
+    // if more events came in during this time,
+    // retry them on a new loop
+    const numEventsRemaining = this._eventsToRetry.length;
     if (numEventsRemaining > 0) {
-      // if more events came in during this time,
-      // retry them on a new loop
       this._retryEvents(numEventsRemaining);
     }
   }
