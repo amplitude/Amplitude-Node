@@ -16,6 +16,7 @@ export class NodeClient implements Client<Options> {
   private _uploadInProgress: boolean = false;
   private _eventsToRetry: Event[];
   private _idsToRetry: Set<string>;
+  private _retryInProgress: boolean = false;
 
   /**
    * Initializes this client instance.
@@ -180,6 +181,12 @@ export class NodeClient implements Client<Options> {
   }
 
   private async _retryEvents(numEvents: number): Promise<void> {
+    if (this._retryInProgress) {
+      // If we are already retrying events, let that loop handle the retrying
+      return;
+    }
+
+    this._retryInProgress = true;
     let numRetries = 0;
 
     while (typeof this._options.maxRetries === 'number' && numRetries < this._options.maxRetries) {
@@ -212,8 +219,14 @@ export class NodeClient implements Client<Options> {
 
     // We know that we've tried the first numEvents numbers for the maximum number of tries. kick them out
     // wait to make sure there are no uploads in progress
-    await this._waitForUpload();
     this._eventsToRetry.splice(0, numEvents);
     this._updateRetryIdSet();
+    const numEventsRemaining = this._eventsToRetry.length;
+    this._retryInProgress = false;
+
+    if (numEventsRemaining > 0) {
+      // if more events came in during this time, retry them on a new loop
+      this._retryEvents(numEventsRemaining);
+    }
   }
 }
