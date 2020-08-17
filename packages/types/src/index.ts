@@ -1,3 +1,4 @@
+export { LogLevel } from './logger';
 export { Client } from './client';
 export { Event, Payload } from './event';
 export { Options } from './options';

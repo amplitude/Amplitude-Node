@@ -1,5 +1,6 @@
 import { Client, Event, Options, Transport, TransportOptions, Payload, Response, Status } from '@amplitude/types';
 import { SDK_NAME, SDK_VERSION, AMPLITUDE_SERVER_URL } from './constants';
+import { logger } from '@amplitude/utils';
 import { HTTPTransport } from './transports';
 
 export class NodeClient implements Client<Options> {
@@ -24,6 +25,9 @@ export class NodeClient implements Client<Options> {
     this._options = options;
     this._events = [];
     this._transport = this._setupTransport();
+    if (options.debug || options.logLevel) {
+      logger.enable(options.logLevel);
+    }
   }
 
   /**

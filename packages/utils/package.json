@@ -1,9 +1,9 @@
 {
-  "name": "@amplitude/node",
-  "version": "0.3.3",
-  "description": "Offical Amplitude SDK for Node.js",
+  "name": "@amplitude/utils",
+  "version": "0.3.2",
+  "description": "Utility functions for the Amplitude JavaScript SDK",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
-  "homepage": "https://github.com/amplitude/Amplitude-Node",
+  "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/utils",
   "author": "Amplitude Inc",
   "license": "MIT",
   "engines": {
@@ -16,17 +16,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@amplitude/types": "^0.3.2",
-    "@amplitude/utils": "^0.3.2",
-    "tslib": "^1.9.3"
+    "@amplitude/types": "^0.3.2"
   },
   "devDependencies": {
-    "@types/node": "^13.11.1",
     "eslint": "^7.0.0",
-    "jest": "^25.4.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.17.0",
-    "rimraf": "^2.6.3",
     "typescript": "^3.9.2"
   },
   "scripts": {
@@ -36,7 +31,6 @@
     "build:watch": "run-p build:watch:es5 build:watch:esm",
     "build:watch:es5": "tsc -p tsconfig.build.json -w --preserveWatchOutput",
     "build:watch:esm": "tsc -p tsconfig.esm.json -w --preserveWatchOutput",
-    "clean": "rimraf dist coverage",
     "lint": "run-s lint:prettier lint:eslint",
     "lint:prettier": "prettier --check \"{src,test}/**/*.ts\"",
     "lint:eslint": "eslint 'src/**/*.ts'",
@@ -44,5 +38,6 @@
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
     "fix:eslint": "eslint --fix 'src/**/*.ts'",
     "link:yarn": "yarn link"
-  }
+  },
+  "sideEffects": false
 }
