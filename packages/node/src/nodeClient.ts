@@ -13,7 +13,6 @@ export class NodeClient implements Client<Options> {
   private _events: Event[];
   private _transport: Transport;
   private _flushTimer: number = 0;
-  private _uploadInProgress: boolean = false;
   private _eventsToRetry: Event[];
   private _idsToRetry: Set<string>;
   private _retryInProgress: boolean = false;
@@ -51,7 +50,6 @@ export class NodeClient implements Client<Options> {
     clearTimeout(this._flushTimer);
 
     // If there's an upload currently in progress, wait for it to finish first.
-    await this._waitForUpload();
 
     // Check if there's 0 events, flush is not needed.
     const arrayLength = this._events.length;
@@ -59,7 +57,6 @@ export class NodeClient implements Client<Options> {
       return;
     }
 
-    this._uploadInProgress = true;
     try {
       const response = await this._transport.sendPayload(this._getCurrentPayload());
       if (response.status === Status.Success) {
@@ -91,9 +88,7 @@ export class NodeClient implements Client<Options> {
 
       this._events = events;
       this._eventsToRetry.push(...eventsToRetry);
-      this._retryEvents(eventsToRetry.length);
-    } finally {
-      this._uploadInProgress = false;
+      process.nextTick(() => this._retryEvents(eventsToRetry.length));
     }
   }
 
@@ -158,17 +153,6 @@ export class NodeClient implements Client<Options> {
     };
   }
 
-  private async _waitForUpload(): Promise<void> {
-    return new Promise(resolve => {
-      const interval = setInterval(() => {
-        if (!this._uploadInProgress) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 1);
-    });
-  }
-
   private _updateRetryIdSet(): void {
     this._idsToRetry = this._eventsToRetry.reduce((idSet, event) => {
       if (event.user_id) {
@@ -193,13 +177,10 @@ export class NodeClient implements Client<Options> {
 
     while (numRetries < maxRetries) {
       // If there's an upload currently in progress, wait for it to finish first.
-      await this._waitForUpload();
       const arrayLength = this._eventsToRetry.length;
       if (arrayLength === 0) {
         return;
       }
-
-      this._uploadInProgress = true;
 
       try {
         const response = await this._transport.sendPayload(this._getRetryPayload());
@@ -214,7 +195,6 @@ export class NodeClient implements Client<Options> {
       } catch {
         // Do nothing if there is a failure, go on to next retry loop
       } finally {
-        this._uploadInProgress = false;
         numRetries += 1;
       }
     }
@@ -232,7 +212,7 @@ export class NodeClient implements Client<Options> {
     // retry them on a new loop
     const numEventsRemaining = this._eventsToRetry.length;
     if (numEventsRemaining > 0) {
-      this._retryEvents(numEventsRemaining);
+      process.nextTick(() => this._retryEvents(numEventsRemaining));
     }
   }
 }

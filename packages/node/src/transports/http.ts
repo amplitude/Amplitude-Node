@@ -38,24 +38,6 @@ export class HTTPTransport implements Transport {
     }
   }
 
-  public awaitUpload(limit: number = 0): Promise<void> {
-    return new Promise((resolve, reject) => {
-      let time = 0;
-      const interval = setInterval(() => {
-        if (!this._uploadInProgress) {
-          clearInterval(interval);
-          resolve();
-        } else {
-          time += 1;
-          if (limit > 0 && time >= limit) {
-            clearInterval(interval);
-            reject();
-          }
-        }
-      }, 1);
-    });
-  }
-
   /**
    * @inheritDoc
    */
@@ -85,10 +67,32 @@ export class HTTPTransport implements Transport {
     return options;
   }
 
+  private _awaitUpload(limit: number = 0): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let time = 0;
+      const interval = setInterval(() => {
+        if (!this._uploadInProgress) {
+          clearInterval(interval);
+          resolve();
+        } else {
+          time += 1;
+          if (limit > 0 && time >= limit) {
+            clearInterval(interval);
+            reject();
+          }
+        }
+      }, 1);
+    });
+  }
+
   /** JSDoc */
   protected async _sendWithModule(httpModule: HTTPRequest, payload: Payload): Promise<Response> {
     if (this._uploadInProgress) {
-      return Promise.reject(new Error('Previous upload is in progress.'));
+      try {
+        await this._awaitUpload(200);
+      } catch {
+        return Promise.reject(new Error('Previous Upload is in progress'));
+      }
     }
 
     return new Promise<Response>((resolve, reject) => {
