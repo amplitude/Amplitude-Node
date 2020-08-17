@@ -38,6 +38,24 @@ export class HTTPTransport implements Transport {
     }
   }
 
+  public awaitUpload(limit: number = 0): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let time = 0;
+      const interval = setInterval(() => {
+        if (!this._uploadInProgress) {
+          clearInterval(interval);
+          resolve();
+        } else {
+          time += 1;
+          if (limit > 0 && time >= limit) {
+            clearInterval(interval);
+            reject();
+          }
+        }
+      }, 1);
+    });
+  }
+
   /**
    * @inheritDoc
    */
@@ -82,15 +100,7 @@ export class HTTPTransport implements Transport {
 
         res.setEncoding('utf8');
 
-        if (status === Status.Success) {
-          resolve({ status: status, statusCode: statusCode });
-        } else {
-          if (status === Status.RateLimit) {
-            // TODO: Logic when throttling happens
-          }
-          let rejectionMessage = `HTTP Error (${statusCode})`;
-          reject(new Error(rejectionMessage));
-        }
+        resolve({ status: status, statusCode: statusCode });
 
         // Force the socket to drain
         res.on('data', () => {
