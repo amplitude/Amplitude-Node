@@ -3,10 +3,11 @@ import { AMPLITUDE_SERVER_URL } from '../src/constants';
 import { Status } from '@amplitude/types';
 import * as nock from 'nock';
 
+const anyMatch = () => true;
 describe('http transport layer', () => {
   it('returns a success status', async () => {
     nock(AMPLITUDE_SERVER_URL)
-      .post('')
+      .post(anyMatch)
       .reply(200);
 
     const response = await new TestTransport().sendDummyPayload();
@@ -17,7 +18,7 @@ describe('http transport layer', () => {
 
   it('returns a throttle status', async () => {
     nock(AMPLITUDE_SERVER_URL)
-      .post('')
+      .post(anyMatch)
       .reply(429);
 
     const response = await new TestTransport().sendDummyPayload();
@@ -28,7 +29,7 @@ describe('http transport layer', () => {
 
   it('returns an invalid status', async () => {
     nock(AMPLITUDE_SERVER_URL)
-      .post('')
+      .post(anyMatch)
       .reply(400);
 
     const response = await new TestTransport().sendDummyPayload();
@@ -39,8 +40,8 @@ describe('http transport layer', () => {
 
   it('returns an failed status', async () => {
     nock(AMPLITUDE_SERVER_URL)
-      .post('')
-      .reply(400);
+      .post(anyMatch)
+      .reply(500);
 
     const response = await new TestTransport().sendDummyPayload();
 
@@ -48,9 +49,9 @@ describe('http transport layer', () => {
     expect(response.statusCode).toBe(500);
   });
 
-  it('returns an unknownd status', async () => {
+  it('returns an unknown status', async () => {
     nock(AMPLITUDE_SERVER_URL)
-      .post('')
+      .post(anyMatch)
       .reply(100);
 
     const response = await new TestTransport().sendDummyPayload();
