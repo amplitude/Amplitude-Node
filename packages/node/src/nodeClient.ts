@@ -62,6 +62,8 @@ export class NodeClient implements Client<Options> {
       if (response.status === Status.Success) {
         // Clean up the events
         this._events.splice(0, arrayLength);
+      } else {
+        throw new Error(response.status);
       }
     } catch {
       const failedEvents = this._events.slice(0, arrayLength);
@@ -188,13 +190,13 @@ export class NodeClient implements Client<Options> {
           // Clean up the events
           this._eventsToRetry.splice(0, arrayLength);
           this._updateRetryIdSet();
-
           // Successfully sent the events, stop trying
           break;
+        } else {
+          throw new Error(response.status);
         }
       } catch {
-        // Do nothing if there is a failure, go on to next retry loop
-      } finally {
+        // Go on to next retry loop
         numRetries += 1;
       }
     }
