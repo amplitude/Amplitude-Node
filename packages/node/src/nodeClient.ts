@@ -1,4 +1,4 @@
-import { Client, Event, Options, Transport, TransportOptions, Payload, Response, Status } from '@amplitude/types';
+import { Client, Event, Options, Transport, TransportOptions, Payload, Status } from '@amplitude/types';
 import { SDK_NAME, SDK_VERSION, AMPLITUDE_SERVER_URL } from './constants';
 import { logger } from '@amplitude/utils';
 import { HTTPTransport } from './transports';
@@ -13,6 +13,9 @@ export class NodeClient implements Client<Options> {
   private _events: Event[];
   private _transport: Transport;
   private _flushTimer: number = 0;
+  private _eventsToRetry: Event[];
+  private _idsToRetry: Set<string>;
+  private _retryInProgress: boolean = false;
 
   /**
    * Initializes this client instance.
@@ -24,6 +27,8 @@ export class NodeClient implements Client<Options> {
     this._apiKey = apiKey;
     this._options = options;
     this._events = [];
+    this._eventsToRetry = [];
+    this._idsToRetry = new Set<string>();
     this._transport = this._setupTransport();
     if (options.debug || options.logLevel) {
       logger.enable(options.logLevel);
@@ -40,25 +45,53 @@ export class NodeClient implements Client<Options> {
   /**
    * @inheritDoc
    */
-  public async flush(): Promise<Response> {
+  public async flush(): Promise<void> {
     // Clear the timeout
     clearTimeout(this._flushTimer);
 
+    // If there's an upload currently in progress, wait for it to finish first.
+
     // Check if there's 0 events, flush is not needed.
-    const arraryLength = this._events.length;
-    if (arraryLength === 0) {
-      return { status: Status.Success, statusCode: 200 };
+    const arrayLength = this._events.length;
+    if (arrayLength === 0) {
+      return;
     }
 
-    const response = this._transport.sendPayload(this._getCurrentPayload());
-    response.then(res => {
-      if (res.status === Status.Success) {
+    try {
+      const response = await this._transport.sendPayload(this._getCurrentPayload());
+      if (response.status === Status.Success) {
         // Clean up the events
-        this._events.splice(0, arraryLength);
+        this._events.splice(0, arrayLength);
+      } else {
+        throw new Error(response.status);
       }
-    });
+    } catch {
+      const failedEvents = this._events.slice(0, arrayLength);
+      failedEvents.forEach(event => {
+        if (typeof event.user_id === 'string') {
+          this._idsToRetry.add(event.user_id);
+        } else if (typeof event.device_id === 'string') {
+          this._idsToRetry.add(event.device_id);
+        }
+        // events should either have user or device id
+      });
 
-    return response;
+      const events: Array<Event> = [];
+      const eventsToRetry: Array<Event> = [];
+      this._events.forEach(event => {
+        let hasId = this._idsToRetry.has(event.user_id ?? event.device_id ?? '');
+
+        if (hasId) {
+          eventsToRetry.push(event);
+        } else {
+          events.push(event);
+        }
+      });
+
+      this._events = events;
+      this._eventsToRetry.push(...eventsToRetry);
+      process.nextTick(() => this._retryEvents(eventsToRetry.length));
+    }
   }
 
   /**
@@ -71,9 +104,13 @@ export class NodeClient implements Client<Options> {
 
     this._annotateEvent(event);
     // Add event to unsent events queue.
-    this._events.push(event);
+    if (this._idsToRetry.has(event.user_id ?? event.device_id ?? '')) {
+      this._eventsToRetry.push(event);
+    } else {
+      this._events.push(event);
+    }
 
-    const bufferLimit = this._options.maxCachedEvents || 100;
+    const bufferLimit = this._options.maxCachedEvents ?? 100;
 
     if (this._events.length >= bufferLimit) {
       // # of events exceeds the limit, flush them.
@@ -109,5 +146,75 @@ export class NodeClient implements Client<Options> {
       api_key: this._apiKey,
       events: this._events,
     };
+  }
+
+  private _getRetryPayload(): Payload {
+    return {
+      api_key: this._apiKey,
+      events: this._eventsToRetry,
+    };
+  }
+
+  private _updateRetryIdSet(): void {
+    this._idsToRetry = this._eventsToRetry.reduce((idSet, event) => {
+      if (event.user_id) {
+        idSet.add(event.user_id);
+      } else if (event.device_id) {
+        idSet.add(event.device_id);
+      }
+      return idSet;
+    }, new Set<string>());
+  }
+
+  private async _retryEvents(numEvents: number): Promise<void> {
+    if (this._retryInProgress) {
+      // If we are already retrying events, let that loop handle the retrying
+      // Do nothing
+      return;
+    }
+
+    this._retryInProgress = true;
+    let numRetries = 0;
+    const maxRetries = this._options.maxRetries ?? 10;
+
+    while (numRetries < maxRetries) {
+      // If there's an upload currently in progress, wait for it to finish first.
+      const arrayLength = this._eventsToRetry.length;
+      if (arrayLength === 0) {
+        return;
+      }
+
+      try {
+        const response = await this._transport.sendPayload(this._getRetryPayload());
+        if (response.status === Status.Success) {
+          // Clean up the events
+          this._eventsToRetry.splice(0, arrayLength);
+          this._updateRetryIdSet();
+          // Successfully sent the events, stop trying
+          break;
+        } else {
+          throw new Error(response.status);
+        }
+      } catch {
+        // Go on to next retry loop
+        numRetries += 1;
+      }
+    }
+
+    this._retryInProgress = false;
+
+    // If we exited the loop by hitting the retry limit
+    if (numRetries === maxRetries) {
+      // We know that we've tried the first numEvents numbers for the maximum number of tries.
+      this._eventsToRetry.splice(0, numEvents);
+      this._updateRetryIdSet();
+    }
+
+    // if more events came in during this time,
+    // retry them on a new loop
+    const numEventsRemaining = this._eventsToRetry.length;
+    if (numEventsRemaining > 0) {
+      process.nextTick(() => this._retryEvents(numEventsRemaining));
+    }
   }
 }

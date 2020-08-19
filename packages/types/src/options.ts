@@ -33,4 +33,7 @@ export interface Options {
    * logLevel is not specified.
    */
   debug?: boolean;
+
+  /** The maximum number of times a server will attempt to retry  */
+  maxRetries?: number;
 }
