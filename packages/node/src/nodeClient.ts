@@ -1,4 +1,4 @@
-import { Client, Event, Options, Payload, Status } from '@amplitude/types';
+import { Client, Event, Options, Status } from '@amplitude/types';
 import { SDK_NAME, SDK_VERSION } from './constants';
 import { logger } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
@@ -55,9 +55,8 @@ export class NodeClient implements Client<Options> {
     if (arrayLength === 0) {
       return { status: Status.Success, statusCode: 200 };
     }
-    const response = await this._transport.sendEventsWithRetry(this._events);
-    this._events.splice(0, arrayLength);
-    return response;
+    const eventsToSend = this._events.splice(0, arrayLength);
+    return this._transport.sendEventsWithRetry(eventsToSend);
   }
 
   /**
