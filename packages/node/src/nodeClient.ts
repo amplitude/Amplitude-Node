@@ -13,8 +13,6 @@ export class NodeClient implements Client<Options> {
   private _events: Event[];
   private _transport: RetryHandler;
   private _flushTimer: number = 0;
-  private _eventsToRetry: Event[];
-  private _idsToRetry: Set<string>;
 
   /**
    * Initializes this client instance.
@@ -26,8 +24,6 @@ export class NodeClient implements Client<Options> {
     this._apiKey = apiKey;
     this._options = options;
     this._events = [];
-    this._eventsToRetry = [];
-    this._idsToRetry = new Set<string>();
     this._transport = this._setupTransport();
     if (options.debug || options.logLevel) {
       logger.enable(options.logLevel);
@@ -69,11 +65,7 @@ export class NodeClient implements Client<Options> {
 
     this._annotateEvent(event);
     // Add event to unsent events queue.
-    if (this._idsToRetry.has(event.user_id ?? event.device_id ?? '')) {
-      this._eventsToRetry.push(event);
-    } else {
-      this._events.push(event);
-    }
+    this._events.push(event);
 
     const bufferLimit = this._options.maxCachedEvents ?? 100;
 

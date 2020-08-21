@@ -17,7 +17,7 @@ export class RetryHandler {
   }
 
   public async sendEventsWithRetry(events: Array<Event>): Promise<Response> {
-    let response: Response;
+    let response: Response = { status: Status.Unknown, statusCode: 0 };
     const eventsToSend = this._pruneEvents(events);
     try {
       response = await this._transport.sendPayload(this._getPayload(eventsToSend));
@@ -45,7 +45,7 @@ export class RetryHandler {
         });
       }
     } finally {
-      return response ?? { status: Status.Unknown, statusCode: 0 };
+      return response;
     }
   }
 
