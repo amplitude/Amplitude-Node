@@ -142,7 +142,6 @@ export class RetryHandler {
         if (response.status === Status.Success) {
           // Clean up the events
           eventsToRetry.splice(0, arrayLength);
-          this._idToBuffer.delete(id);
           this._eventsInRetry -= arrayLength;
           // Successfully sent the events, stop trying
           break;
