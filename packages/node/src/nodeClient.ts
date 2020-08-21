@@ -44,8 +44,6 @@ export class NodeClient implements Client<Options> {
     // Clear the timeout
     clearTimeout(this._flushTimer);
 
-    // If there's an upload currently in progress, wait for it to finish first.
-
     // Check if there's 0 events, flush is not needed.
     const arrayLength = this._events.length;
     if (arrayLength === 0) {

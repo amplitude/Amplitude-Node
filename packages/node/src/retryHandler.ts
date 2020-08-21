@@ -131,7 +131,7 @@ export class RetryHandler {
     const maxRetries = this._options.maxRetries ?? 0;
 
     while (numRetries < maxRetries) {
-      // If there's an upload currently in progress, wait for it to finish first.
+      // If new events came in in the meantime, collect them as well
       const arrayLength = eventsToRetry.length;
       if (arrayLength === 0) {
         return;
@@ -156,7 +156,8 @@ export class RetryHandler {
 
     // If we exited the loop by hitting the retry limit
     if (numRetries === maxRetries) {
-      // We know that we've tried the first numEvents numbers for the maximum number of tries.
+      // We know that we've tried the first events for the maximum number of tries.
+      // Remove them permanently
       eventsToRetry.splice(0, initialEventCount);
       this._eventsInRetry -= initialEventCount;
     }
