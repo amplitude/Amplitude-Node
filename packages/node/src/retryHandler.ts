@@ -2,12 +2,13 @@ import { Event, Options, Transport, TransportOptions, Payload, Status } from '@a
 import { AMPLITUDE_SERVER_URL } from './constants';
 import { HTTPTransport } from './transports';
 
-export class ErrorClient {
+export class RetryHandler {
   protected readonly _apiKey: string;
 
   private _idToBuffer: Map<string, Array<Event>> = new Map<string, Array<Event>>();
   private _options: Options;
   private _transport: Transport;
+  private _eventsInRetry: number = 0;
 
   public constructor(apiKey: string, options: Options) {
     this._apiKey = apiKey;
@@ -24,22 +25,25 @@ export class ErrorClient {
         throw new Error(response.status);
       }
     } catch {
-      const newIds: Array<string> = [];
-      events.forEach((event: Event) => {
-        const id = this._getId(event);
-        if (id) {
-          let retryBuffer = this._idToBuffer.get(id);
-          if (!retryBuffer) {
-            retryBuffer = [];
-            this._idToBuffer.set(id, retryBuffer);
-            newIds.push(id);
-            // In the next event loop, start retrying these events
-            process.nextTick(() => this._retryEvents(id));
-          }
+      if (this._shouldAttemptRetry()) {
+        const newIds: Array<string> = [];
+        events.forEach((event: Event) => {
+          const id = this._getId(event);
+          if (id) {
+            let retryBuffer = this._idToBuffer.get(id);
+            if (!retryBuffer) {
+              retryBuffer = [];
+              this._idToBuffer.set(id, retryBuffer);
+              newIds.push(id);
+              this._eventsInRetry++;
+              // In the next event loop, start retrying these events
+              process.nextTick(() => this._retryEvents(id));
+            }
 
-          retryBuffer.push(event);
-        }
-      });
+            retryBuffer.push(event);
+          }
+        });
+      }
     } finally {
       return response ?? { status: Status.Unknown, statusCode: 0 };
     }
@@ -56,6 +60,16 @@ export class ErrorClient {
     return new HTTPTransport(transportOptions);
   }
 
+  private _shouldAttemptRetry(): boolean {
+    if (typeof this._options.maxRetries === 'number' && this._options.maxRetries <= 0) {
+      return false;
+    }
+
+    const bufferLimit = this._options.maxCachedEvents ?? 100;
+
+    return this._eventsInRetry < bufferLimit;
+  }
+
   // Sends events with ids currently in active retry buffers straight
   // to the retry buffer they should be in
   private _pruneEvents(events: Array<Event>): Array<Event> {
@@ -66,6 +80,7 @@ export class ErrorClient {
         const retryBuffer = this._idToBuffer.get(id);
         if (retryBuffer?.length) {
           retryBuffer.push(event);
+          this._eventsInRetry++;
         } else {
           prunedEvents.push(event);
         }
@@ -113,7 +128,7 @@ export class ErrorClient {
     const initialEventCount = eventsToRetry.length;
 
     let numRetries = 0;
-    const maxRetries = this._options.maxRetries ?? 10;
+    const maxRetries = this._options.maxRetries ?? 0;
 
     while (numRetries < maxRetries) {
       // If there's an upload currently in progress, wait for it to finish first.
@@ -128,6 +143,7 @@ export class ErrorClient {
           // Clean up the events
           eventsToRetry.splice(0, arrayLength);
           this._idToBuffer.delete(id);
+          this._eventsInRetry -= arrayLength;
           // Successfully sent the events, stop trying
           break;
         } else {
@@ -143,6 +159,7 @@ export class ErrorClient {
     if (numRetries === maxRetries) {
       // We know that we've tried the first numEvents numbers for the maximum number of tries.
       eventsToRetry.splice(0, initialEventCount);
+      this._eventsInRetry -= initialEventCount;
     }
 
     // if more events came in during this time,
