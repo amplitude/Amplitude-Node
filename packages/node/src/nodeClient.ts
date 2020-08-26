@@ -1,4 +1,4 @@
-import { Client, Event, Options, Status } from '@amplitude/types';
+import { Client, Event, Options, Status, Response } from '@amplitude/types';
 import { SDK_NAME, SDK_VERSION } from './constants';
 import { logger } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';

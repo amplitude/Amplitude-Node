@@ -1,4 +1,4 @@
-import { Event, Options, Transport, TransportOptions, Payload, Status } from '@amplitude/types';
+import { Event, Options, Transport, TransportOptions, Payload, Status, Response } from '@amplitude/types';
 import { AMPLITUDE_SERVER_URL } from './constants';
 import { HTTPTransport } from './transports';
 
@@ -37,7 +37,7 @@ export class RetryHandler {
               newIds.push(id);
               this._eventsInRetry++;
               // In the next event loop, start retrying these events
-              process.nextTick(() => this._retryEvents(id));
+              setImmediate(() => this._retryEvents(id));
             }
 
             retryBuffer.push(event);
@@ -166,7 +166,7 @@ export class RetryHandler {
     // retry them on a new loop
     const numEventsRemaining = eventsToRetry.length;
     if (numEventsRemaining > 0) {
-      process.nextTick(() => this._retryEvents(id));
+      setImmediate(() => this._retryEvents(id));
     } else {
       this._cleanUpBuffer(id);
     }
