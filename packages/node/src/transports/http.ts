@@ -83,6 +83,7 @@ export class HTTPTransport implements Transport {
 
       this._requestQueue.push(callback);
 
+      // If the limit exists, set a timeout to remove the callback and reject the promise
       if (limit > 0) {
         setTimeout(() => {
           const callBackIndex = this._requestQueue.indexOf(callback);
@@ -108,12 +109,10 @@ export class HTTPTransport implements Transport {
 
   /** JSDoc */
   protected async _sendWithModule(httpModule: HTTPRequest, payload: Payload): Promise<Response> {
-    if (this._uploadInProgress) {
-      try {
-        await this._awaitUploadFinish(200);
-      } catch {
-        return Promise.reject(new Error('Previous send is in progress'));
-      }
+    try {
+      await this._awaitUploadFinish(200);
+    } catch {
+      return Promise.reject(new Error('Previous send is in progress'));
     }
 
     return new Promise<Response>((resolve, reject) => {
