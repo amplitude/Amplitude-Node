@@ -16,7 +16,7 @@ export class RetryHandler {
     this._transport = this._setupTransport();
   }
 
-  public async sendEventsWithRetry(events: Array<Event>): Promise<Response> {
+  public async sendEventsWithRetry(events: ReadonlyArray<Event>): Promise<Response> {
     let response: Response = { status: Status.Unknown, statusCode: 0 };
     const eventsToSend = this._pruneEvents(events);
     try {
@@ -26,23 +26,7 @@ export class RetryHandler {
       }
     } catch {
       if (this._shouldAttemptRetry()) {
-        const newIds: Array<string> = [];
-        events.forEach((event: Event) => {
-          const id = this._getId(event);
-          if (id) {
-            let retryBuffer = this._idToBuffer.get(id);
-            if (!retryBuffer) {
-              retryBuffer = [];
-              this._idToBuffer.set(id, retryBuffer);
-              newIds.push(id);
-              this._eventsInRetry++;
-              // In the next event loop, start retrying these events
-              setImmediate(() => this._retryEvents(id));
-            }
-
-            retryBuffer.push(event);
-          }
-        });
+        this._queueFailedEvents(events);
       }
     } finally {
       return response;
@@ -72,7 +56,7 @@ export class RetryHandler {
 
   // Sends events with ids currently in active retry buffers straight
   // to the retry buffer they should be in
-  private _pruneEvents(events: Array<Event>): Array<Event> {
+  private _pruneEvents(events: ReadonlyArray<Event>): Array<Event> {
     const prunedEvents: Array<Event> = [];
     events.forEach(event => {
       const id = this._getId(event);
@@ -116,6 +100,26 @@ export class RetryHandler {
     }
   }
 
+  private _queueFailedEvents(events: ReadonlyArray<Event>): void {
+    const newIds: Array<string> = [];
+    events.forEach((event: Event) => {
+      const id = this._getId(event);
+      if (id) {
+        let retryBuffer = this._idToBuffer.get(id);
+        if (!retryBuffer) {
+          retryBuffer = [];
+          this._idToBuffer.set(id, retryBuffer);
+          newIds.push(id);
+          this._eventsInRetry++;
+          // In the next event loop, start retrying these events
+          setImmediate(() => this._retryEvents(id));
+        }
+
+        retryBuffer.push(event);
+      }
+    });
+  }
+
   private async _retryEvents(id: string): Promise<void> {
     const eventsToRetry = this._idToBuffer.get(id);
     if (!eventsToRetry?.length) {
@@ -132,6 +136,7 @@ export class RetryHandler {
       // If new events came in in the meantime, collect them as well
       const arrayLength = eventsToRetry.length;
       if (arrayLength === 0) {
+        this._cleanUpBuffer(id);
         return;
       }
 
@@ -162,11 +167,7 @@ export class RetryHandler {
 
     // if more events came in during this time,
     // retry them on a new loop
-    const numEventsRemaining = eventsToRetry.length;
-    if (numEventsRemaining > 0) {
-      setImmediate(() => this._retryEvents(id));
-    } else {
-      this._cleanUpBuffer(id);
-    }
+    // otherwise, this call will immediately return on the next event loop.
+    setImmediate(() => this._retryEvents(id));
   }
 }

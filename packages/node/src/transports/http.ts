@@ -23,9 +23,9 @@ export interface HTTPRequest {
 /** Base Transport class implementation */
 export class HTTPTransport implements Transport {
   /** The Agent used for corresponding transport */
-  public module?: HTTPRequest;
+  public module: HTTPRequest;
 
-  protected _uploadInProgress: Boolean = false;
+  protected _uploadInProgress: boolean = false;
   protected _requestQueue: Array<() => void> = [];
 
   /** Create instance and set this.dsn */
@@ -43,9 +43,6 @@ export class HTTPTransport implements Transport {
    * @inheritDoc
    */
   public async sendPayload(payload: Payload): Promise<Response> {
-    if (!this.module) {
-      throw new Error('No module available in HTTPTransport');
-    }
     return this._sendWithModule(this.module, payload);
   }
 
@@ -123,7 +120,7 @@ export class HTTPTransport implements Transport {
       const req = httpModule.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
         this._uploadInProgress = false;
 
-        const statusCode = res.statusCode == null ? 500 : res.statusCode;
+        const statusCode = res.statusCode === undefined ? 0 : res.statusCode;
         const status = Status.fromHttpCode(statusCode);
 
         res.setEncoding('utf8');
