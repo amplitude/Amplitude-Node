@@ -90,18 +90,16 @@ export class RetryHandler {
     return prunedEvents;
   }
 
-  private _getId(event: Event): string {
+  private _getId(event: Event): string | void {
     // events should either have user or device id
     if (typeof event.user_id === 'string') {
       return event.user_id;
     } else if (typeof event.device_id === 'string') {
       return event.device_id;
-    } else {
-      return '';
     }
   }
 
-  private _getPayload(events: Array<Event>): Payload {
+  private _getPayload(events: ReadonlyArray<Event>): Payload {
     return {
       api_key: this._apiKey,
       events,

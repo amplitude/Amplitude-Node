@@ -26,6 +26,7 @@ export class HTTPTransport implements Transport {
   public module?: HTTPRequest;
 
   protected _uploadInProgress: Boolean = false;
+  protected _requestQueue: Array<() => void> = [];
 
   /** Create instance and set this.dsn */
   public constructor(public options: TransportOptions) {
@@ -45,7 +46,7 @@ export class HTTPTransport implements Transport {
     if (!this.module) {
       throw new Error('No module available in HTTPTransport');
     }
-    return await this._sendWithModule(this.module, payload);
+    return this._sendWithModule(this.module, payload);
   }
 
   /** Returns a build request option object used by request */
@@ -67,31 +68,54 @@ export class HTTPTransport implements Transport {
     return options;
   }
 
-  private _awaitUpload(limit: number = 0): Promise<void> {
+  // Awaits the finish of all requests that have been queued up before it
+  // And will expire itself (reject the promise) after waiting limit ms
+  // or never expire, if limit is not set
+  private _awaitUploadFinish(limit: number = 0): Promise<void> {
+    if (!this._uploadInProgress) {
+      this._uploadInProgress = true;
+
+      return Promise.resolve<void>(undefined);
+    }
+
     return new Promise((resolve, reject) => {
-      let time = 0;
-      const interval = setInterval(() => {
-        if (!this._uploadInProgress) {
-          clearInterval(interval);
-          resolve();
-        } else {
-          time += 1;
-          if (limit > 0 && time >= limit) {
-            clearInterval(interval);
-            reject();
+      const callback = () => {
+        this._uploadInProgress = true;
+        resolve();
+      };
+
+      this._requestQueue.push(callback);
+
+      if (limit > 0) {
+        setTimeout(() => {
+          const callBackIndex = this._requestQueue.indexOf(callback);
+
+          if (callBackIndex > -1 && callBackIndex < this._requestQueue.length) {
+            this._requestQueue.splice(callBackIndex, 1);
           }
-        }
-      }, 1);
+
+          reject();
+        }, limit);
+      }
     });
+  }
+
+  // Notify the oldest awaiting send that the transport is ready for another request
+  private _notifyUploadFinish(): void {
+    this._uploadInProgress = false;
+    if (this._requestQueue.length > 0) {
+      const oldestAwaitingCallback = this._requestQueue.splice(0, 1)[0];
+      oldestAwaitingCallback();
+    }
   }
 
   /** JSDoc */
   protected async _sendWithModule(httpModule: HTTPRequest, payload: Payload): Promise<Response> {
     if (this._uploadInProgress) {
       try {
-        await this._awaitUpload(200);
+        await this._awaitUploadFinish(200);
       } catch {
-        return Promise.reject(new Error('Previous Upload is in progress'));
+        return Promise.reject(new Error('Previous send is in progress'));
       }
     }
 
@@ -105,6 +129,7 @@ export class HTTPTransport implements Transport {
         res.setEncoding('utf8');
 
         resolve({ status: status, statusCode: statusCode });
+        this._notifyUploadFinish();
 
         // Force the socket to drain
         res.on('data', () => {
@@ -116,8 +141,6 @@ export class HTTPTransport implements Transport {
       });
       req.on('error', reject);
       req.end(JSON.stringify(payload));
-
-      this._uploadInProgress = true;
     });
   }
 }
