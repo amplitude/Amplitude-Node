@@ -45,7 +45,7 @@ export class RetryHandler {
   }
 
   private _shouldAttemptRetry(): boolean {
-    if (typeof this._options.maxRetries === 'number' && this._options.maxRetries <= 0) {
+    if (typeof this._options.maxRetries !== 'number' || this._options.maxRetries <= 0) {
       return false;
     }
 
@@ -90,6 +90,7 @@ export class RetryHandler {
     };
   }
 
+  // cleans up the id to buffer map if the job is done
   private _cleanUpBuffer(id: string): void {
     const eventsToRetry = this._idToBuffer.get(id);
     if (!eventsToRetry) {
@@ -101,7 +102,6 @@ export class RetryHandler {
   }
 
   private _queueFailedEvents(events: ReadonlyArray<Event>): void {
-    const newIds: Array<string> = [];
     events.forEach((event: Event) => {
       const id = this._getId(event);
       if (id) {
@@ -109,12 +109,11 @@ export class RetryHandler {
         if (!retryBuffer) {
           retryBuffer = [];
           this._idToBuffer.set(id, retryBuffer);
-          newIds.push(id);
-          this._eventsInRetry++;
           // In the next event loop, start retrying these events
           setImmediate(() => this._retryEvents(id));
         }
 
+        this._eventsInRetry++;
         retryBuffer.push(event);
       }
     });
