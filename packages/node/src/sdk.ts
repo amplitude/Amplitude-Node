@@ -8,7 +8,7 @@ import { NodeClient } from './nodeClient';
  * @param apiKey API Key for project.
  * @param options Options to pass to the client.
  */
-export function init(apiKey: string, options: Options = {}): NodeClient {
+export function init(apiKey: string, options: Partial<Options> = {}): NodeClient {
   const nodeClient = new NodeClient(apiKey, options);
   return nodeClient;
 }

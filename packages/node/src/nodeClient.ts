@@ -1,7 +1,7 @@
 import * as https from 'https';
 import { logger } from '@amplitude/utils';
 import { Client, Event, Options } from '@amplitude/types';
-import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_HOST, AMPLITUDE_API_PATH } from './constants';
+import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_PATH, DEFAULT_OPTIONS } from './constants';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -16,12 +16,10 @@ export class NodeClient implements Client<Options> {
    * @param apiKey API key for your project
    * @param options options for the client
    */
-  public constructor(apiKey: string, options: Options) {
+  public constructor(apiKey: string, options: Partial<Options>) {
     this._apiKey = apiKey;
-    this._options = options;
-    if (options.debug || options.logLevel) {
-      logger.enable(options.logLevel);
-    }
+    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._setUpLogging();
   }
 
   /**
@@ -53,9 +51,8 @@ export class NodeClient implements Client<Options> {
       events: [event],
     });
 
-    const hostname = this._options.serverUrl || AMPLITUDE_API_HOST;
     const requestOptions = {
-      hostname: hostname,
+      hostname: this._options.serverUrl,
       path: AMPLITUDE_API_PATH,
       method: 'POST',
       headers: {
@@ -82,5 +79,15 @@ export class NodeClient implements Client<Options> {
   private _annotateEvent(event: Event): void {
     event.library = `${SDK_NAME}/${SDK_VERSION}`;
     event.platform = 'Node.js';
+  }
+
+  private _setUpLogging(): void {
+    if (this._options.debug || this._options.logLevel) {
+      if (this._options.logLevel) {
+        logger.enable(this._options.logLevel);
+      } else {
+        logger.enable();
+      }
+    }
   }
 }
