@@ -1,11 +1,10 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response } from '@amplitude/types';
-import { AMPLITUDE_SERVER_URL } from './constants';
 import { HTTPTransport } from './transports';
 
 export class RetryHandler {
   protected readonly _apiKey: string;
 
-  private _idToBuffer: Map<string, Array<Event>> = new Map<string, Array<Event>>();
+  private _idToBuffer: Map<string, Map<string, Array<Event>>> = new Map<string, Map<string, Array<Event>>>();
   private _options: Options;
   private _transport: Transport;
   private _eventsInRetry: number = 0;
@@ -16,6 +15,9 @@ export class RetryHandler {
     this._transport = this._setupTransport();
   }
 
+  /**
+   * @inheritDoc
+   */
   public async sendEventsWithRetry(events: ReadonlyArray<Event>): Promise<Response> {
     let response: Response = { status: Status.Unknown, statusCode: 0 };
     const eventsToSend = this._pruneEvents(events);
@@ -25,8 +27,8 @@ export class RetryHandler {
         throw new Error(response.status);
       }
     } catch {
-      if (this._shouldAttemptRetry()) {
-        this._queueFailedEvents(events);
+      if (this.shouldRetryEvents()) {
+        this.onEventsError(events);
       }
     } finally {
       return response;
@@ -36,7 +38,7 @@ export class RetryHandler {
   private _setupTransport(): Transport {
     let transportOptions: TransportOptions;
     transportOptions = {
-      serverUrl: this._options.serverUrl || AMPLITUDE_SERVER_URL,
+      serverUrl: this._options.serverUrl,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -44,12 +46,15 @@ export class RetryHandler {
     return new HTTPTransport(transportOptions);
   }
 
-  private _shouldAttemptRetry(): boolean {
+  /**
+   * @inheritDoc
+   */
+  public shouldRetryEvents(): boolean {
     if (typeof this._options.maxRetries !== 'number' || this._options.maxRetries <= 0) {
       return false;
     }
 
-    const bufferLimit = this._options.maxCachedEvents ?? 100;
+    const bufferLimit = this._options.maxCachedEvents;
 
     return this._eventsInRetry < bufferLimit;
   }
@@ -59,9 +64,9 @@ export class RetryHandler {
   private _pruneEvents(events: ReadonlyArray<Event>): Array<Event> {
     const prunedEvents: Array<Event> = [];
     events.forEach(event => {
-      const id = this._getId(event);
-      if (id) {
-        const retryBuffer = this._idToBuffer.get(id);
+      const { user_id: userId = '', device_id: deviceId = '' } = event;
+      if (userId || deviceId) {
+        const retryBuffer = this._getRetryBuffer(userId, deviceId);
         if (retryBuffer?.length) {
           retryBuffer.push(event);
           this._eventsInRetry++;
@@ -74,15 +79,6 @@ export class RetryHandler {
     return prunedEvents;
   }
 
-  private _getId(event: Event): string | void {
-    // events should either have user or device id
-    if (typeof event.user_id === 'string') {
-      return event.user_id;
-    } else if (typeof event.device_id === 'string') {
-      return event.device_id;
-    }
-  }
-
   private _getPayload(events: ReadonlyArray<Event>): Payload {
     return {
       api_key: this._apiKey,
@@ -90,27 +86,51 @@ export class RetryHandler {
     };
   }
 
+  private _getRetryBuffer(userId: string, deviceId: string): Array<Event> | null {
+    const deviceToBufferMap = this._idToBuffer.get(userId);
+    if (!deviceToBufferMap) {
+      return null;
+    }
+
+    return deviceToBufferMap.get(deviceId) || null;
+  }
+
   // cleans up the id to buffer map if the job is done
-  private _cleanUpBuffer(id: string): void {
-    const eventsToRetry = this._idToBuffer.get(id);
-    if (!eventsToRetry) {
+  private _cleanUpBuffer(userId: string, deviceId: string): void {
+    const deviceToBufferMap = this._idToBuffer.get(userId);
+    if (!deviceToBufferMap) {
       return;
-    } else if (!eventsToRetry.length) {
-      this._idToBuffer.delete(id);
-      return;
+    }
+
+    const eventsToRetry = deviceToBufferMap.get(deviceId);
+    if (!eventsToRetry?.length) {
+      deviceToBufferMap.delete(deviceId);
+    }
+
+    if (deviceToBufferMap.size === 0) {
+      this._idToBuffer.delete(userId);
     }
   }
 
-  private _queueFailedEvents(events: ReadonlyArray<Event>): void {
+  /**
+   * @inheritDoc
+   */
+  public onEventsError(events: ReadonlyArray<Event>): void {
     events.forEach((event: Event) => {
-      const id = this._getId(event);
-      if (id) {
-        let retryBuffer = this._idToBuffer.get(id);
+      const { user_id: userId = '', device_id: deviceId = '' } = event;
+      if (userId || deviceId) {
+        let deviceToBufferMap = this._idToBuffer.get(userId);
+        if (!deviceToBufferMap) {
+          deviceToBufferMap = new Map<string, Array<Event>>();
+          this._idToBuffer.set(userId, deviceToBufferMap);
+        }
+
+        let retryBuffer = deviceToBufferMap.get(deviceId);
         if (!retryBuffer) {
           retryBuffer = [];
-          this._idToBuffer.set(id, retryBuffer);
+          deviceToBufferMap.set(deviceId, retryBuffer);
           // In the next event loop, start retrying these events
-          setImmediate(() => this._retryEvents(id));
+          setImmediate(() => this._retryEventsOnLoop(userId, deviceId));
         }
 
         this._eventsInRetry++;
@@ -119,10 +139,10 @@ export class RetryHandler {
     });
   }
 
-  private async _retryEvents(id: string): Promise<void> {
-    const eventsToRetry = this._idToBuffer.get(id);
+  private async _retryEventsOnLoop(userId: string, deviceId: string): Promise<void> {
+    const eventsToRetry = this._getRetryBuffer(userId, deviceId);
     if (!eventsToRetry?.length) {
-      this._cleanUpBuffer(id);
+      this._cleanUpBuffer(userId, deviceId);
       return;
     }
 
@@ -135,7 +155,7 @@ export class RetryHandler {
       // If new events came in in the meantime, collect them as well
       const arrayLength = eventsToRetry.length;
       if (arrayLength === 0) {
-        this._cleanUpBuffer(id);
+        this._cleanUpBuffer(userId, deviceId);
         return;
       }
 
@@ -167,6 +187,6 @@ export class RetryHandler {
     // if more events came in during this time,
     // retry them on a new loop
     // otherwise, this call will immediately return on the next event loop.
-    setImmediate(() => this._retryEvents(id));
+    setImmediate(() => this._retryEventsOnLoop(userId, deviceId));
   }
 }
