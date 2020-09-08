@@ -1,7 +1,7 @@
 import { Client, Event, Options, Status, Response } from '@amplitude/types';
-import { SDK_NAME, SDK_VERSION } from './constants';
 import { logger } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
+import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -10,7 +10,7 @@ export class NodeClient implements Client<Options> {
   /** Options for the client. */
   protected readonly _options: Options;
 
-  private _events: Event[];
+  private _events: Array<Event> = [];
   private _transport: RetryHandler;
   private _flushTimer: number = 0;
 
@@ -20,14 +20,11 @@ export class NodeClient implements Client<Options> {
    * @param apiKey API key for your project
    * @param options options for the client
    */
-  public constructor(apiKey: string, options: Options = {}) {
+  public constructor(apiKey: string, options: Partial<Options> = {}) {
     this._apiKey = apiKey;
-    this._options = options;
-    this._events = [];
+    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._transport = this._setupTransport();
-    if (options.debug || options.logLevel) {
-      logger.enable(options.logLevel);
-    }
+    this._setUpLogging();
   }
 
   /**
@@ -65,14 +62,14 @@ export class NodeClient implements Client<Options> {
     // Add event to unsent events queue.
     this._events.push(event);
 
-    const bufferLimit = this._options.maxCachedEvents ?? 100;
+    const bufferLimit = this._options.maxCachedEvents;
 
     if (this._events.length >= bufferLimit) {
       // # of events exceeds the limit, flush them.
       this.flush();
     } else {
       // Not ready to flush them, then set
-      const uploadIntervalInSec = this._options.uploadIntervalInSec ?? 30;
+      const uploadIntervalInSec = this._options.uploadIntervalInSec;
       this._flushTimer = (setTimeout(() => {
         this.flush();
       }, uploadIntervalInSec * 1000) as any) as number;
@@ -87,5 +84,15 @@ export class NodeClient implements Client<Options> {
 
   private _setupTransport(): RetryHandler {
     return new RetryHandler(this._apiKey, this._options);
+  }
+
+  private _setUpLogging(): void {
+    if (this._options.debug || this._options.logLevel) {
+      if (this._options.logLevel) {
+        logger.enable(this._options.logLevel);
+      } else {
+        logger.enable();
+      }
+    }
   }
 }
