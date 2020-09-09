@@ -6,6 +6,8 @@ import { asyncSleep } from '@amplitude/utils';
 export class RetryHandler {
   protected readonly _apiKey: string;
 
+  // A map of maps to event buffers for failed events
+  // The first key is userId (or ''), and second is deviceId (or '')
   private _idToBuffer: Map<string, Map<string, Array<Event>>> = new Map<string, Map<string, Array<Event>>>();
   private _options: Options;
   private _transport: Transport;
@@ -38,8 +40,7 @@ export class RetryHandler {
   }
 
   private _setupDefaultTransport(): Transport {
-    let transportOptions: TransportOptions;
-    transportOptions = {
+    const transportOptions: TransportOptions = {
       serverUrl: this._options.serverUrl,
       headers: {
         'Content-Type': 'application/json',
@@ -136,31 +137,26 @@ export class RetryHandler {
   }
 
   private async _retryEventsOnLoop(userId: string, deviceId: string): Promise<void> {
-    const eventsToRetry = this._getRetryBuffer(userId, deviceId);
-    if (!eventsToRetry?.length) {
+    const eventsBuffer = this._getRetryBuffer(userId, deviceId);
+    if (!eventsBuffer?.length) {
       this._cleanUpBuffer(userId, deviceId);
       return;
     }
 
-    const initialEventCount = eventsToRetry.length;
+    const initialEventCount = eventsBuffer.length;
 
     let numRetries = 0;
     const maxRetries = this._options.maxRetries;
 
     while (numRetries < maxRetries) {
-      // If new events came in in the meantime, collect them as well
-      const arrayLength = eventsToRetry.length;
-      if (arrayLength === 0) {
-        this._cleanUpBuffer(userId, deviceId);
-        return;
-      }
-
       try {
+        // Don't try any new events that came in, to prevent overwhelming the api servers
+        const eventsToRetry = eventsBuffer.slice(0, initialEventCount);
         const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
         if (response.status === Status.Success) {
           // Clean up the events
-          eventsToRetry.splice(0, arrayLength);
-          this._eventsInRetry -= arrayLength;
+          eventsBuffer.splice(0, initialEventCount);
+          this._eventsInRetry -= initialEventCount;
           // Successfully sent the events, stop trying
           break;
         } else {
@@ -171,13 +167,13 @@ export class RetryHandler {
         numRetries += 1;
         // If we hit the retry limit
         if (numRetries === maxRetries) {
-          // We know that we've tried the first events for the maximum number of tries.
+          // We've tried the events for the max number of tries.
           // Remove them permanently
-          eventsToRetry.splice(0, initialEventCount);
+          eventsBuffer.splice(0, initialEventCount);
           this._eventsInRetry -= initialEventCount;
         } else {
           // Exponential backoff - sleep for 2^(failed tries) ms before trying again
-          await asyncSleep(1 >> numRetries);
+          await asyncSleep(1 << numRetries);
         }
       }
     }
