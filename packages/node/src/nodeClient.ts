@@ -1,4 +1,4 @@
-import { Client, Event, Options, Status, Response } from '@amplitude/types';
+import { Client, Event, Options, Status, Response, RetryClass } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
@@ -11,7 +11,7 @@ export class NodeClient implements Client<Options> {
   protected readonly _options: Options;
 
   private _events: Array<Event> = [];
-  private _transport: RetryHandler;
+  private _transportWithRetry: RetryClass;
   private _flushTimer: number = 0;
 
   /**
@@ -23,7 +23,7 @@ export class NodeClient implements Client<Options> {
   public constructor(apiKey: string, options: Partial<Options> = {}) {
     this._apiKey = apiKey;
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-    this._transport = this._setupTransport();
+    this._transportWithRetry = this._options.retryClass || this._setupDefaultTransport();
     this._setUpLogging();
   }
 
@@ -47,7 +47,7 @@ export class NodeClient implements Client<Options> {
       return { status: Status.Success, statusCode: 200 };
     }
     const eventsToSend = this._events.splice(0, arrayLength);
-    return this._transport.sendEventsWithRetry(eventsToSend);
+    return this._transportWithRetry.sendEventsWithRetry(eventsToSend);
   }
 
   /**
@@ -82,7 +82,7 @@ export class NodeClient implements Client<Options> {
     event.platform = 'Node.js';
   }
 
-  private _setupTransport(): RetryHandler {
+  private _setupDefaultTransport(): RetryHandler {
     return new RetryHandler(this._apiKey, this._options);
   }
 

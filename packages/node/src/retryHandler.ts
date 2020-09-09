@@ -1,5 +1,6 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response } from '@amplitude/types';
 import { HTTPTransport } from './transports';
+import { DEFAULT_OPTIONS } from './constants';
 
 export class RetryHandler {
   protected readonly _apiKey: string;
@@ -9,10 +10,10 @@ export class RetryHandler {
   private _transport: Transport;
   private _eventsInRetry: number = 0;
 
-  public constructor(apiKey: string, options: Options) {
+  public constructor(apiKey: string, options: Partial<Options>) {
     this._apiKey = apiKey;
-    this._options = options;
-    this._transport = this._setupTransport();
+    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._transport = this._options.transportClass || this._setupDefaultTransport();
   }
 
   /**
@@ -27,15 +28,15 @@ export class RetryHandler {
         throw new Error(response.status);
       }
     } catch {
-      if (this.shouldRetryEvents()) {
-        this.onEventsError(events);
+      if (this._shouldRetryEvents()) {
+        this._onEventsError(events);
       }
     } finally {
       return response;
     }
   }
 
-  private _setupTransport(): Transport {
+  private _setupDefaultTransport(): Transport {
     let transportOptions: TransportOptions;
     transportOptions = {
       serverUrl: this._options.serverUrl,
@@ -46,10 +47,7 @@ export class RetryHandler {
     return new HTTPTransport(transportOptions);
   }
 
-  /**
-   * @inheritDoc
-   */
-  public shouldRetryEvents(): boolean {
+  private _shouldRetryEvents(): boolean {
     if (typeof this._options.maxRetries !== 'number' || this._options.maxRetries <= 0) {
       return false;
     }
@@ -112,10 +110,7 @@ export class RetryHandler {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
-  public onEventsError(events: ReadonlyArray<Event>): void {
+  private _onEventsError(events: ReadonlyArray<Event>): void {
     events.forEach((event: Event) => {
       const { user_id: userId = '', device_id: deviceId = '' } = event;
       if (userId || deviceId) {
@@ -149,7 +144,7 @@ export class RetryHandler {
     const initialEventCount = eventsToRetry.length;
 
     let numRetries = 0;
-    const maxRetries = this._options.maxRetries ?? 0;
+    const maxRetries = this._options.maxRetries;
 
     while (numRetries < maxRetries) {
       // If new events came in in the meantime, collect them as well
@@ -173,15 +168,14 @@ export class RetryHandler {
       } catch {
         // Go on to next retry loop
         numRetries += 1;
+        // If we hit the retry limit
+        if (numRetries === maxRetries) {
+          // We know that we've tried the first events for the maximum number of tries.
+          // Remove them permanently
+          eventsToRetry.splice(0, initialEventCount);
+          this._eventsInRetry -= initialEventCount;
+        }
       }
-    }
-
-    // If we exited the loop by hitting the retry limit
-    if (numRetries === maxRetries) {
-      // We know that we've tried the first events for the maximum number of tries.
-      // Remove them permanently
-      eventsToRetry.splice(0, initialEventCount);
-      this._eventsInRetry -= initialEventCount;
     }
 
     // if more events came in during this time,

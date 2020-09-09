@@ -1,25 +1,17 @@
 import { LogLevel } from './logger';
+import { Transport } from './transport';
+import { RetryClass } from './retry';
 
 /**
  * Options that you can choose to configure against the client.
  */
 export interface Options {
   /**
-   * Whether you opt out from sending events.
+   * Whether or not the SDK should be started in debug mode.
+   * This will enable the SDK to generate logs at WARN level or above, if the
+   * logLevel is not specified.
    */
-  optOut: boolean;
-
-  /** The maximum events in the buffer */
-  maxCachedEvents: number;
-
-  /** The events upload interval */
-  uploadIntervalInSec: number;
-
-  /** If you're using a proxy server, set its url here. */
-  serverUrl: string;
-
-  /** The maximum number of times a server will attempt to retry  */
-  maxRetries: number;
+  debug: boolean;
 
   /**
    * Configuration of the logging verbosity of the SDK.
@@ -30,10 +22,30 @@ export interface Options {
    */
   logLevel: LogLevel;
 
+  /** The maximum events in the buffer */
+  maxCachedEvents: number;
+
+  /** The maximum number of times a server will attempt to retry  */
+  maxRetries: number;
+
   /**
-   * Whether or not the SDK should be started in debug mode.
-   * This will enable the SDK to generate logs at WARN level or above, if the
-   * logLevel is not specified.
+   * Whether you opt out from sending events.
    */
-  debug: boolean;
+  optOut: boolean;
+
+  /**
+   * The class being used to handle event retrying.
+   */
+  retryClass: RetryClass | null;
+
+  /**
+   * The class being used to transport events.
+   */
+  transportClass: Transport | null;
+
+  /** If you're using a proxy server, set its url here. */
+  serverUrl: string;
+
+  /** The events upload interval */
+  uploadIntervalInSec: number;
 }
