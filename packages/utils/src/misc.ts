@@ -24,3 +24,13 @@ export function getGlobalObject(): any {
     ? self
     : fallbackGlobalObject;
 }
+
+/**
+ * A promise-based way to sleep for x millseconds, then queue ourselves back to the
+ * JS event loop.
+ *
+ * @param milliseconds The number of milliseconds to wait for
+ */
+export function asyncSleep(milliseconds: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}

@@ -1,6 +1,7 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response } from '@amplitude/types';
 import { HTTPTransport } from './transports';
 import { DEFAULT_OPTIONS } from './constants';
+import { asyncSleep } from '@amplitude/utils';
 
 export class RetryHandler {
   protected readonly _apiKey: string;
@@ -174,6 +175,9 @@ export class RetryHandler {
           // Remove them permanently
           eventsToRetry.splice(0, initialEventCount);
           this._eventsInRetry -= initialEventCount;
+        } else {
+          // Exponential backoff - sleep for 2^(failed tries) ms before trying again
+          await asyncSleep(1 >> numRetries);
         }
       }
     }
