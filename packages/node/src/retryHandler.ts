@@ -1,6 +1,6 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response } from '@amplitude/types';
 import { HTTPTransport } from './transports';
-import { DEFAULT_OPTIONS } from './constants';
+import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
 import { asyncSleep } from '@amplitude/utils';
 
 export class RetryHandler {
@@ -143,7 +143,7 @@ export class RetryHandler {
       return;
     }
 
-    const initialEventCount = eventsBuffer.length;
+    let eventCount = eventsBuffer.length;
 
     let numRetries = 0;
     const maxRetries = this._options.maxRetries;
@@ -151,12 +151,12 @@ export class RetryHandler {
     while (numRetries < maxRetries) {
       try {
         // Don't try any new events that came in, to prevent overwhelming the api servers
-        const eventsToRetry = eventsBuffer.slice(0, initialEventCount);
+        const eventsToRetry = eventsBuffer.slice(0, eventCount);
         const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
         if (response.status === Status.Success) {
           // Clean up the events
-          eventsBuffer.splice(0, initialEventCount);
-          this._eventsInRetry -= initialEventCount;
+          eventsBuffer.splice(0, eventCount);
+          this._eventsInRetry -= eventCount;
           // Successfully sent the events, stop trying
           break;
         } else {
@@ -167,13 +167,15 @@ export class RetryHandler {
         numRetries += 1;
         // If we hit the retry limit
         if (numRetries === maxRetries) {
-          // We've tried the events for the max number of tries.
+          // We've tried the events still in eventCount for the max number of tries.
           // Remove them permanently
-          eventsBuffer.splice(0, initialEventCount);
-          this._eventsInRetry -= initialEventCount;
+          eventsBuffer.splice(0, eventCount);
+          this._eventsInRetry -= eventCount;
         } else {
-          // Exponential backoff - sleep for 2^(failed tries) ms before trying again
-          await asyncSleep(1 << numRetries);
+          // Cut the # by half (rounded down)
+          eventCount = Math.max(eventCount >> 1, 1);
+          // Exponential backoff - sleep for BASE_RETRY_TIMEOUT * 2^(failed tries) ms before trying again
+          await asyncSleep(BASE_RETRY_TIMEOUT << numRetries);
         }
       }
     }

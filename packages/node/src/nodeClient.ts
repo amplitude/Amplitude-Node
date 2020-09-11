@@ -12,7 +12,7 @@ export class NodeClient implements Client<Options> {
 
   private _events: Array<Event> = [];
   private _transportWithRetry: RetryClass;
-  private _flushTimer: number = 0;
+  private _flushTimer: NodeJS.Timeout | null = null;
 
   /**
    * Initializes this client instance.
@@ -39,7 +39,9 @@ export class NodeClient implements Client<Options> {
    */
   public async flush(): Promise<Response> {
     // Clear the timeout
-    clearTimeout(this._flushTimer);
+    if (this._flushTimer !== null) {
+      clearTimeout(this._flushTimer);
+    }
 
     // Check if there's 0 events, flush is not needed.
     const arrayLength = this._events.length;
@@ -69,10 +71,11 @@ export class NodeClient implements Client<Options> {
       this.flush();
     } else {
       // Not ready to flush them, then set
-      const uploadIntervalInSec = this._options.uploadIntervalInSec;
-      this._flushTimer = (setTimeout(() => {
-        this.flush();
-      }, uploadIntervalInSec * 1000) as any) as number;
+      if (this._flushTimer === null) {
+        this._flushTimer = setTimeout(() => {
+          this.flush();
+        }, this._options.uploadIntervalInSec * 1000);
+      }
     }
   }
 
