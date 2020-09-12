@@ -105,7 +105,7 @@ export class HTTPTransport implements Transport {
       if (limit > 0) {
         requestObject.cancellingTimeout = setTimeout(() => {
           const callBackIndex = this._requestQueue.findIndex(requestObj => {
-            return requestObj.callback === callback;
+            return requestObj.callback === queueCallback;
           });
 
           if (callBackIndex > -1 && callBackIndex < this._requestQueue.length) {
@@ -123,10 +123,11 @@ export class HTTPTransport implements Transport {
     this._uploadInProgress = false;
     const oldestRequest = this._requestQueue.shift();
     if (oldestRequest) {
-      oldestRequest.callback();
       if (oldestRequest.cancellingTimeout !== null) {
+        // Clear the timeout where we try to remove the callback and reject the promise.
         clearTimeout(oldestRequest.cancellingTimeout);
       }
+      oldestRequest.callback();
     }
   }
 
