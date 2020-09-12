@@ -127,7 +127,7 @@ export class RetryHandler {
           retryBuffer = [];
           deviceToBufferMap.set(deviceId, retryBuffer);
           // In the next event loop, start retrying these events
-          setImmediate(() => this._retryEventsOnLoop(userId, deviceId));
+          setTimeout(() => this._retryEventsOnLoop(userId, deviceId), 0);
         }
 
         this._eventsInRetry++;
@@ -183,6 +183,6 @@ export class RetryHandler {
     // if more events came in during this time,
     // retry them on a new loop
     // otherwise, this call will immediately return on the next event loop.
-    setImmediate(() => this._retryEventsOnLoop(userId, deviceId));
+    setTimeout(() => this._retryEventsOnLoop(userId, deviceId), 0);
   }
 }

@@ -50,7 +50,7 @@ export class HTTPTransport implements Transport {
   public async sendPayload(payload: Payload): Promise<Response> {
     const call = () => this._sendWithModule(payload);
 
-    // Queue up the
+    // Queue up the call to send the payload.
     return this._awaitUploadFinish(call, 200);
   }
 
