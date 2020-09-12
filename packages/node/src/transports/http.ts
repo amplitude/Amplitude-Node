@@ -20,13 +20,18 @@ export interface HTTPRequest {
   ): http.ClientRequest;
 }
 
+type RequestQueueObject = {
+  callback: () => void;
+  cancellingTimeout: NodeJS.Timeout | null;
+};
+
 /** Base Transport class implementation */
 export class HTTPTransport implements Transport {
   /** The Agent used for corresponding transport */
   public module: HTTPRequest;
 
   protected _uploadInProgress: boolean = false;
-  protected _requestQueue: Array<() => void> = [];
+  protected _requestQueue: Array<RequestQueueObject> = [];
 
   /** Create instance and set this.dsn */
   public constructor(public options: TransportOptions) {
@@ -43,7 +48,10 @@ export class HTTPTransport implements Transport {
    * @inheritDoc
    */
   public async sendPayload(payload: Payload): Promise<Response> {
-    return this._sendWithModule(this.module, payload);
+    const call = () => this._sendWithModule(payload);
+
+    // Queue up the
+    return this._awaitUploadFinish(call, 200);
   }
 
   /** Returns a build request option object used by request */
@@ -68,25 +76,37 @@ export class HTTPTransport implements Transport {
   // Awaits the finish of all requests that have been queued up before it
   // And will expire itself (reject the promise) after waiting limit ms
   // or never expire, if limit is not set
-  private _awaitUploadFinish(limit: number = 0): Promise<void> {
-    if (!this._uploadInProgress) {
-      this._uploadInProgress = true;
-
-      return Promise.resolve<void>(undefined);
-    }
-
+  private _awaitUploadFinish(callback: () => Promise<Response>, limit: number = 0): Promise<Response> {
     return new Promise((resolve, reject) => {
-      const callback = () => {
+      const queueCallback = () => {
         this._uploadInProgress = true;
-        resolve();
+        try {
+          resolve(callback());
+        } catch (e) {
+          reject(e);
+        } finally {
+          this._notifyUploadFinish();
+        }
       };
 
-      this._requestQueue.push(callback);
+      // If there is no upload in progress
+      // Return immediately
+      if (!this._uploadInProgress) {
+        return queueCallback();
+      }
+
+      const requestObject: RequestQueueObject = {
+        callback: queueCallback,
+        cancellingTimeout: null,
+      };
+      this._requestQueue.push(requestObject);
 
       // If the limit exists, set a timeout to remove the callback and reject the promise
       if (limit > 0) {
-        setTimeout(() => {
-          const callBackIndex = this._requestQueue.indexOf(callback);
+        requestObject.cancellingTimeout = setTimeout(() => {
+          const callBackIndex = this._requestQueue.findIndex(requestObj => {
+            return requestObj.callback === callback;
+          });
 
           if (callBackIndex > -1 && callBackIndex < this._requestQueue.length) {
             this._requestQueue.splice(callBackIndex, 1);
@@ -101,32 +121,25 @@ export class HTTPTransport implements Transport {
   // Notify the oldest awaiting send that the transport is ready for another request
   private _notifyUploadFinish(): void {
     this._uploadInProgress = false;
-    if (this._requestQueue.length > 0) {
-      const oldestAwaitingCallback = this._requestQueue.splice(0, 1)[0];
-      oldestAwaitingCallback();
+    const oldestRequest = this._requestQueue.shift();
+    if (oldestRequest) {
+      oldestRequest.callback();
+      if (oldestRequest.cancellingTimeout !== null) {
+        clearTimeout(oldestRequest.cancellingTimeout);
+      }
     }
   }
 
   /** JSDoc */
-  protected async _sendWithModule(httpModule: HTTPRequest, payload: Payload): Promise<Response> {
-    try {
-      await this._awaitUploadFinish(200);
-    } catch {
-      return Promise.reject(new Error('Previous send is in progress'));
-    }
-
+  protected async _sendWithModule(payload: Payload): Promise<Response> {
     return new Promise<Response>((resolve, reject) => {
-      const req = httpModule.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
-        this._uploadInProgress = false;
-
+      const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
         const statusCode = res.statusCode === undefined ? 0 : res.statusCode;
         const status = Status.fromHttpCode(statusCode);
 
         res.setEncoding('utf8');
 
         resolve({ status: status, statusCode: statusCode });
-        this._notifyUploadFinish();
-
         // Force the socket to drain
         res.on('data', () => {
           // Drain
