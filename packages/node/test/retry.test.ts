@@ -1,9 +1,6 @@
 import { TestRetry, MOCK_MAX_RETRIES, MockThrottledTransport } from './mocks/retry';
-import * as nock from 'nock';
 import { Event, Status } from '@amplitude/types';
 import { asyncSleep } from '@amplitude/utils';
-
-import { AMPLITUDE_SERVER_URL } from '../src/constants';
 
 const FAILING_USER_ID = 'data_monster';
 const PASSING_USER_ID = 'node_monster';

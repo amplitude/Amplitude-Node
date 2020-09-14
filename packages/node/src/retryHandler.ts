@@ -152,11 +152,15 @@ export class RetryHandler {
         // Don't try any new events that came in, to prevent overwhelming the api servers
         const eventsToRetry = eventsBuffer.slice(0, eventCount);
         const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
-        if (response.status === Status.Success) {
+        // We don't want to retry payloads that returned with status 200 OR 400
+        // The first is the case where we succeeded in sending the payload
+        // The second means that the payload is malformed OR the user/device is silenced
+        // In which case it would not make sense for us to retry any further.
+        if (response.status === Status.Success || response.status === Status.Invalid) {
           // Clean up the events
           eventsBuffer.splice(0, eventCount);
           this._eventsInRetry -= eventCount;
-          // Successfully sent the events, stop trying
+          // End the retry loop
           break;
         } else {
           throw new Error(response.status);
