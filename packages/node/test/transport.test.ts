@@ -5,6 +5,8 @@ import * as nock from 'nock';
 
 const anyMatch = () => true;
 describe('http transport layer', () => {
+  // After each test, remove any remaining mocks.
+  afterEach(() => nock.cleanAll());
   it('returns a success status', async () => {
     nock(AMPLITUDE_SERVER_URL)
       .post(anyMatch)
