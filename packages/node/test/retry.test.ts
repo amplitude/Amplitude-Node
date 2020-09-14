@@ -21,6 +21,7 @@ describe('retry mechanisms layer', () => {
   // times a user id has been included and hasn't been included.
   let nockHook = { matchPassCount: 0, matchFailCount: 0 };
   beforeEach(() => {
+    // Responses with FAILING_USER_ID should fail
     nock(AMPLITUDE_SERVER_URL)
       .persist()
       .post(
@@ -40,6 +41,7 @@ describe('retry mechanisms layer', () => {
       )
       .reply(400);
 
+    // Responses without FAILING_USER_ID should return successfully
     nock(AMPLITUDE_SERVER_URL)
       .persist()
       .post(
@@ -80,6 +82,7 @@ describe('retry mechanisms layer', () => {
 
     const response = await retryHandler.sendEventsWithRetry(payload);
 
+    // Sleep and wait for retries to end
     await asyncSleep(1000);
 
     expect(response.status).toBe(Status.Invalid);
@@ -90,13 +93,13 @@ describe('retry mechanisms layer', () => {
 
   it('will not throttle user ids that are not throttled', async () => {
     const payload = [generateEvent(FAILING_USER_ID), generateEvent(PASSING_USER_ID)];
-
     const retryHandler = new TestRetry();
-
     const response = await retryHandler.sendEventsWithRetry(payload);
 
+    // Sleep and wait for retries to end
     await asyncSleep(1000);
 
+    // The initial send should return as a fail
     expect(response.status).toBe(Status.Invalid);
     expect(response.statusCode).toBe(400);
     // One response goes out matching the initial send
