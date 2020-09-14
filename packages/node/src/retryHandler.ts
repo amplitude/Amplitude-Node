@@ -54,9 +54,8 @@ export class RetryHandler {
       return false;
     }
 
-    const bufferLimit = this._options.maxCachedEvents;
-
-    return this._eventsInRetry < bufferLimit;
+    // TODO: Refine logic of what happens when we reach the queue limit.
+    return this._eventsInRetry < this._options.maxCachedEvents;
   }
 
   // Sends events with ids currently in active retry buffers straight

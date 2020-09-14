@@ -51,7 +51,8 @@ export class HTTPTransport implements Transport {
     const call = () => this._sendWithModule(payload);
 
     // Queue up the call to send the payload.
-    return this._awaitUploadFinish(call, 200);
+    // Wait 5 seconds for each request before it (default keep-alive)
+    return this._awaitUploadFinish(call, 5000 * this._requestQueue.length);
   }
 
   /** Returns a build request option object used by request */
@@ -140,7 +141,7 @@ export class HTTPTransport implements Transport {
 
         res.setEncoding('utf8');
 
-        resolve({ status: status, statusCode: statusCode });
+        resolve({ status, statusCode });
         // Force the socket to drain
         res.on('data', () => {
           // Drain

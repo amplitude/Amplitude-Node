@@ -64,13 +64,11 @@ export class NodeClient implements Client<Options> {
     // Add event to unsent events queue.
     this._events.push(event);
 
-    const bufferLimit = this._options.maxCachedEvents;
-
-    if (this._events.length >= bufferLimit) {
+    if (this._events.length >= this._options.maxCachedEvents) {
       // # of events exceeds the limit, flush them.
       this.flush();
     } else {
-      // Not ready to flush them, then set
+      // Not ready to flush them and not timing yet, then set the timeout
       if (this._flushTimer === null) {
         this._flushTimer = setTimeout(() => {
           this.flush();
