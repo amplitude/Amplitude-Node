@@ -1,7 +1,7 @@
 import { Event } from './event';
 import { Response } from './response';
 
-/** Transport used sending data to Amplitude */
+/** Layer used to send data to Amplitude while retrying throttled events in the right order.  */
 export interface RetryClass {
   /**
    * Send the events payload to Amplitude, and retry the events that failed on a loop.
