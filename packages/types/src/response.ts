@@ -1,5 +1,6 @@
 import { Status } from './status';
 
+/** A response body for a request that returned 200 (successful). */
 export type SuccessBody = {
   code: 200;
   eventsIngested: number;
@@ -7,6 +8,7 @@ export type SuccessBody = {
   serverUploadTime: number;
 };
 
+/** A response body for a request that returned 413 (invalid request). */
 export type InvalidRequestBody = {
   code: 400;
   error: string;
@@ -15,22 +17,25 @@ export type InvalidRequestBody = {
   eventsWithMissingFields: Array<number>;
 };
 
+/** A response body for a request that returned 413 (payload too large). */
 export type PayloadTooLargeBody = {
   code: 413;
   error: string;
 };
 
+/** A response body for a request that returned 429 (rate limit). */
 export type RateLimitBody = {
   code: 429;
   error: string;
   epsThreshold: number;
   throttledDevices: { [deviceId: string]: number };
   throttledUsers: { [userId: string]: number };
-  exceededDailyQuotaDevices: { [userId: string]: number };
+  exceededDailyQuotaDevices: { [deviceId: string]: number };
   exceededDailyQuotaUsers: { [userId: string]: number };
   throttledEvents: Array<number>;
 };
 
+/** Represents additional data that is provided by the http v2 API */
 export type ResponseBody = SuccessBody | InvalidRequestBody | PayloadTooLargeBody | RateLimitBody;
 
 export const mapJSONToResponse = (json: any): ResponseBody | null => {
