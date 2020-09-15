@@ -140,13 +140,19 @@ export class HTTPTransport implements Transport {
         const status = Status.fromHttpCode(statusCode);
 
         res.setEncoding('utf8');
-
+        const data: Array<Buffer> = [];
         resolve({ status, statusCode });
         // Force the socket to drain
-        res.on('data', () => {
-          // Drain
+        res.on('data', chunk => {
+          data.push(chunk);
         });
         res.on('end', () => {
+          if (res.complete) {
+            const body = JSON.parse(Buffer.concat(data).toString('utf8'));
+            resolve({ status, statusCode, body });
+          } else {
+            resolve({ status, statusCode });
+          }
           // Drain
         });
       });

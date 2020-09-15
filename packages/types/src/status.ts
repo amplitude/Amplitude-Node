@@ -6,8 +6,10 @@ export enum Status {
   Skipped = 'skipped',
   /** The event was sent successfully. */
   Success = 'success',
-  /** The client is currently rate limited and will try again later. */
+  /** A user or device in the payload is currently rate limited and should try again later. */
   RateLimit = 'rate_limit',
+  /** The sent payload was too large to be processed. */
+  PayloadTooLarge = 'payload_too_large',
   /** The event could not be processed. */
   Invalid = 'invalid',
   /** A server-side error ocurred during submission. */
@@ -29,6 +31,10 @@ export namespace Status {
 
     if (code === 429) {
       return Status.RateLimit;
+    }
+
+    if (code === 413) {
+      return Status.PayloadTooLarge;
     }
 
     if (code >= 400 && code < 500) {
