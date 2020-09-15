@@ -1,7 +1,7 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response } from '@amplitude/types';
 import { HTTPTransport } from './transports';
 import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
-import { asyncSleep } from '@amplitude/utils';
+import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
 
 export class RetryHandler {
   protected readonly _apiKey: string;
@@ -32,7 +32,7 @@ export class RetryHandler {
       }
     } catch {
       if (this._shouldRetryEvents()) {
-        this._onEventsError(events);
+        this._onEventsError(events, response);
       }
     } finally {
       return response;
@@ -111,8 +111,22 @@ export class RetryHandler {
     }
   }
 
-  private _onEventsError(events: ReadonlyArray<Event>): void {
-    events.forEach((event: Event) => {
+  private _onEventsError(events: ReadonlyArray<Event>, response: Response): void {
+    const invalidEventIndices = new Set<number>(collectInvalidEventIndices(response));
+    if (response.body?.code === 400) {
+      if (response.body?.missingField || events.length === 1) {
+        // Return early if there's an issue with the entire payload
+        // or if there's only one event and its invalid
+        return;
+      }
+    }
+
+    events.forEach((event: Event, index: number) => {
+      if (invalidEventIndices.has(index)) {
+        // End early if there was a 400 that points to this event being wrong
+        return;
+      }
+
       const { user_id: userId = '', device_id: deviceId = '' } = event;
       if (userId || deviceId) {
         let deviceToBufferMap = this._idToBuffer.get(userId);
@@ -152,11 +166,22 @@ export class RetryHandler {
         // Don't try any new events that came in, to prevent overwhelming the api servers
         const eventsToRetry = eventsBuffer.slice(0, eventCount);
         const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
-        // We don't want to retry payloads that returned with status 200 OR 400
-        // The first is the case where we succeeded in sending the payload
-        // The second means that the payload is malformed OR the user/device is silenced
-        // In which case it would not make sense for us to retry any further.
-        if (response.status === Status.Success || response.status === Status.Invalid) {
+        // Collect invalid event indices and delete them.
+        if (response.status === Status.Invalid) {
+          const invalidEventIndices = collectInvalidEventIndices(response);
+          // Reverse the indices so that splicing doesn't cause any indexing issues.
+          invalidEventIndices.reverse().forEach((index: number) => {
+            eventsBuffer.splice(index, 1);
+          });
+          // and remove them from the # of events we send
+          eventCount -= invalidEventIndices.length;
+          if (eventCount < 1) {
+            break;
+          }
+        }
+
+        // Success! We sent the events
+        if (response.status === Status.Success) {
           // Clean up the events
           eventsBuffer.splice(0, eventCount);
           this._eventsInRetry -= eventCount;

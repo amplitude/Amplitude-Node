@@ -12,9 +12,9 @@ export type SuccessBody = {
 export type InvalidRequestBody = {
   code: 400;
   error: string;
-  missingField: string;
-  eventsWithInvalidFields: Array<number>;
-  eventsWithMissingFields: Array<number>;
+  missingField: string | null;
+  eventsWithInvalidFields: { [eventField: string]: Array<number> };
+  eventsWithMissingFields: { [eventField: string]: Array<number> };
 };
 
 /** A response body for a request that returned 413 (payload too large). */
@@ -55,9 +55,9 @@ export const mapJSONToResponse = (json: any): ResponseBody | null => {
       return {
         code: 400,
         error: json.error ?? '',
-        missingField: json.missing_field,
-        eventsWithInvalidFields: json.events_with_invalid_fields ?? [],
-        eventsWithMissingFields: json.events_with_missing_fields ?? [],
+        missingField: json.missing_field ?? null,
+        eventsWithInvalidFields: json.events_with_invalid_fields ?? {},
+        eventsWithMissingFields: json.events_with_missing_fields ?? {},
       };
     case 413:
       return {

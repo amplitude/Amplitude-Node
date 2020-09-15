@@ -1,5 +1,5 @@
 import { TestRetry, MOCK_MAX_RETRIES, MockThrottledTransport } from './mocks/retry';
-import { Event, Status } from '@amplitude/types';
+import { Event, Status, ResponseBody } from '@amplitude/types';
 import { asyncSleep } from '@amplitude/utils';
 
 const FAILING_USER_ID = 'data_monster';
@@ -13,26 +13,16 @@ const generateEvent = (userId: string): Event => {
   };
 };
 
-const setupRetry = () => {
-  const transport = new MockThrottledTransport(FAILING_USER_ID);
-  const retry = new TestRetry(transport);
-  return {
-    retry,
-    transport,
-  };
-};
-
 describe('retry mechanisms layer', () => {
-  // A helper that persistently listens to nock and returns the # of
-  // times a user id has been included and hasn't been included.
+  let transport = new MockThrottledTransport(FAILING_USER_ID, null);
+  let retry = new TestRetry(transport);
 
-  let { transport, retry } = setupRetry();
-  beforeEach(() => {
-    // create new instances before each test
-    const newObjects = setupRetry();
-    transport = newObjects.transport;
-    retry = newObjects.retry;
-  });
+  const setupRetry = (body: ResponseBody | null = null) => {
+    transport = new MockThrottledTransport(FAILING_USER_ID, body);
+    retry = new TestRetry(transport);
+  };
+
+  beforeEach(() => setupRetry());
 
   it('should not retry events that pass', async () => {
     const payload = [generateEvent(PASSING_USER_ID)];
