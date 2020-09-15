@@ -1,4 +1,4 @@
-import { Payload, Response, Status, Transport, TransportOptions } from '@amplitude/types';
+import { Payload, Response, Status, Transport, TransportOptions, mapJSONToResponse } from '@amplitude/types';
 
 import * as http from 'http';
 import * as https from 'https';
@@ -138,22 +138,25 @@ export class HTTPTransport implements Transport {
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
         const statusCode = res.statusCode === undefined ? 0 : res.statusCode;
         const status = Status.fromHttpCode(statusCode);
+        const response: Response = { status, statusCode };
 
         res.setEncoding('utf8');
-        const data: Array<Buffer> = [];
-        resolve({ status, statusCode });
-        // Force the socket to drain
+        let rawData = '';
+        // Collect the body data from the response
         res.on('data', chunk => {
-          data.push(chunk);
+          rawData += chunk;
         });
+        // On completion, parse the data and resolve.
         res.on('end', () => {
-          if (res.complete) {
-            const body = JSON.parse(Buffer.concat(data).toString('utf8'));
-            resolve({ status, statusCode, body });
-          } else {
-            resolve({ status, statusCode });
+          if (res.complete && rawData) {
+            try {
+              const body = mapJSONToResponse(JSON.parse(rawData));
+              if (body !== null) {
+                response.body = body;
+              }
+            } catch {}
           }
-          // Drain
+          resolve(response);
         });
       });
       req.on('error', reject);
