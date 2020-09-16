@@ -32,7 +32,7 @@ describe('retry mechanisms layer', () => {
     expect(response.status).toBe(Status.Success);
     expect(response.statusCode).toBe(200);
     // One response goes out matching the initial send
-    expect(transport.unthrottleCount).toBe(1);
+    expect(transport.passCount).toBe(1);
   });
 
   it('should retry events that fail', async () => {
@@ -45,7 +45,7 @@ describe('retry mechanisms layer', () => {
     expect(response.status).toBe(Status.RateLimit);
     expect(response.statusCode).toBe(429);
     // One response goes out matching the initial send, MOCK_MAX_RETRIES for the retry layer
-    expect(transport.throttleCount).toBe(MOCK_MAX_RETRIES + 1);
+    expect(transport.failCount).toBe(MOCK_MAX_RETRIES + 1);
   });
 
   it('will not throttle user ids that are not throttled', async () => {
@@ -59,8 +59,64 @@ describe('retry mechanisms layer', () => {
     expect(response.status).toBe(Status.RateLimit);
     expect(response.statusCode).toBe(429);
     // One response goes out matching the initial send
-    expect(transport.throttleCount).toBe(MOCK_MAX_RETRIES + 1);
+    expect(transport.failCount).toBe(MOCK_MAX_RETRIES + 1);
     // One response goes out for the passing event not getting 'throttled'
-    expect(transport.unthrottleCount).toBe(1);
+    expect(transport.passCount).toBe(1);
+  });
+
+  describe('fast-stop mechanisms for invalid payloads', () => {
+    it('will not allow a single event that failed to be retried', async () => {
+      const body: ResponseBody = {
+        code: 400,
+        error: 'NOT_A_REAL_ERROR',
+        missingField: null,
+        eventsWithInvalidFields: {},
+        eventsWithMissingFields: {},
+      };
+      setupRetry(body);
+
+      const payload = [generateEvent(FAILING_USER_ID)];
+      const response = await retry.sendEventsWithRetry(payload);
+      expect(response.status).toBe(Status.Invalid);
+      expect(response.statusCode).toBe(400);
+      // One response goes out matching the initial send
+      expect(transport.failCount).toBe(1);
+    });
+
+    it('will not allow events with invalid fields to be retried', async () => {
+      const body: ResponseBody = {
+        code: 400,
+        error: 'NOT_A_REAL_ERROR',
+        missingField: null,
+        eventsWithInvalidFields: { MISSING_EVENT_FIELD: [0, 1] },
+        eventsWithMissingFields: {},
+      };
+      setupRetry(body);
+
+      const payload = [generateEvent(FAILING_USER_ID), generateEvent(FAILING_USER_ID)];
+      const response = await retry.sendEventsWithRetry(payload);
+      expect(response.status).toBe(Status.Invalid);
+      expect(response.statusCode).toBe(400);
+      // One response goes out matching the initial send
+      expect(transport.failCount).toBe(1);
+    });
+
+    it('will not allow payloads with invalid fields to be retried', async () => {
+      const body: ResponseBody = {
+        code: 400,
+        error: 'NOT_A_REAL_ERROR',
+        missingField: 'MISSING_PAYLOAD_FIELD',
+        eventsWithInvalidFields: {},
+        eventsWithMissingFields: {},
+      };
+      setupRetry(body);
+
+      const payload = [generateEvent(FAILING_USER_ID), generateEvent(FAILING_USER_ID)];
+      const response = await retry.sendEventsWithRetry(payload);
+      expect(response.status).toBe(Status.Invalid);
+      expect(response.statusCode).toBe(400);
+      // One response goes out matching the initial send
+      expect(transport.failCount).toBe(1);
+    });
   });
 });

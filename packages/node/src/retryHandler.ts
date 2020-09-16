@@ -171,7 +171,9 @@ export class RetryHandler {
           const invalidEventIndices = collectInvalidEventIndices(response);
           // Reverse the indices so that splicing doesn't cause any indexing issues.
           invalidEventIndices.reverse().forEach((index: number) => {
-            eventsBuffer.splice(index, 1);
+            if (index < eventCount) {
+              eventsBuffer.splice(index, 1);
+            }
           });
           // and remove them from the # of events we send
           eventCount -= invalidEventIndices.length;
