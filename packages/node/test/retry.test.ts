@@ -1,4 +1,5 @@
-import { TestRetry, MOCK_MAX_RETRIES, MockThrottledTransport } from './mocks/retry';
+import { TestRetry, MOCK_MAX_RETRIES } from './mocks/retry';
+import { MockTransport } from './mocks/transport';
 import { Event, Status, ResponseBody } from '@amplitude/types';
 import { asyncSleep } from '@amplitude/utils';
 
@@ -14,11 +15,11 @@ const generateEvent = (userId: string): Event => {
 };
 
 describe('retry mechanisms layer', () => {
-  let transport = new MockThrottledTransport(FAILING_USER_ID, null);
+  let transport = new MockTransport(FAILING_USER_ID, null);
   let retry = new TestRetry(transport);
 
   const setupRetry = (body: ResponseBody | null = null) => {
-    transport = new MockThrottledTransport(FAILING_USER_ID, body);
+    transport = new MockTransport(FAILING_USER_ID, body);
     retry = new TestRetry(transport);
   };
 
@@ -111,7 +112,7 @@ describe('retry mechanisms layer', () => {
       };
       setupRetry(body);
 
-      const payload = [generateEvent(FAILING_USER_ID), generateEvent(FAILING_USER_ID)];
+      const payload = [generateEvent(FAILING_USER_ID), generateEvent(PASSING_USER_ID)];
       const response = await retry.sendEventsWithRetry(payload);
       expect(response.status).toBe(Status.Invalid);
       expect(response.statusCode).toBe(400);
