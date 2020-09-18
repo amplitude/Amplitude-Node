@@ -112,21 +112,38 @@ export class RetryHandler {
   }
 
   private _onEventsError(events: ReadonlyArray<Event>, response: Response): void {
-    const invalidEventIndices = new Set<number>(collectInvalidEventIndices(response));
-    if (response.body?.code === 400) {
-      if (response.body?.missingField || events.length === 1) {
-        // Return early if there's an issue with the entire payload
-        // or if there's only one event and its invalid
-        return;
-      }
+    let eventsToRetry: ReadonlyArray<Event> = events;
+    switch (response.body?.code ?? response.statusCode) {
+      case 429:
+        if (response.body?.code === 429) {
+          const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
+          eventsToRetry = events.filter(({ user_id: userId, device_id: deviceId }) => {
+            if (userId && exceededDailyQuotaUsers[userId]) {
+              return false;
+            } else if (deviceId && exceededDailyQuotaDevices[deviceId]) {
+              return false;
+            } else {
+              return true;
+            }
+          });
+        }
+        break;
+      case 400:
+        if ((response.body?.code === 400 && response.body?.missingField) || events.length === 1) {
+          // Return early if there's an issue with the entire payload
+          // or if there's only one event and its invalid
+          return;
+        } else {
+          const invalidEventIndices = new Set<number>(collectInvalidEventIndices(response));
+          eventsToRetry = events.filter((_, index) => !invalidEventIndices.has(index));
+        }
+        break;
+      case 200:
+        return; // In case _onEventsError was called with not a valid error
+      default:
     }
 
-    events.forEach((event: Event, index: number) => {
-      if (invalidEventIndices.has(index)) {
-        // End early if there was a 400 that points to this event being wrong
-        return;
-      }
-
+    eventsToRetry.forEach((event: Event) => {
       const { user_id: userId = '', device_id: deviceId = '' } = event;
       if (userId || deviceId) {
         let deviceToBufferMap = this._idToBuffer.get(userId);
@@ -166,28 +183,41 @@ export class RetryHandler {
         // Don't try any new events that came in, to prevent overwhelming the api servers
         const eventsToRetry = eventsBuffer.slice(0, eventCount);
         const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
-        // Collect invalid event indices and delete them.
-        if (response.status === Status.Invalid) {
-          const invalidEventIndices = collectInvalidEventIndices(response);
-          // Reverse the indices so that splicing doesn't cause any indexing issues.
-          invalidEventIndices.reverse().forEach((index: number) => {
-            if (index < eventCount) {
-              eventsBuffer.splice(index, 1);
+        let shouldEndRetry = false;
+        switch (response.body?.code ?? response.statusCode) {
+          case 429: // RateLimit: See if we hit the daily quota
+            if (response.body?.code === 429) {
+              const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
+              if (exceededDailyQuotaDevices[deviceId] || exceededDailyQuotaUsers[userId]) {
+                shouldEndRetry = true; // This device/user may not be retried for a while. Just end and splice.
+              }
             }
-          });
-          // and remove them from the # of events we send
-          eventCount -= invalidEventIndices.length;
-          if (eventCount < 1) {
             break;
-          }
+          case 400: // Invalid: Figure out which events need to go.
+            // Collect invalid event indices and remove them.
+            const invalidEventIndices = collectInvalidEventIndices(response);
+            // Reverse the indices so that splicing doesn't cause any indexing issues.
+            invalidEventIndices.reverse().forEach((index: number) => {
+              if (index < eventCount) {
+                eventsBuffer.splice(index, 1);
+              }
+            });
+            // and remove them from the # of events we send
+            eventCount -= invalidEventIndices.length;
+            this._eventsInRetry -= eventCount;
+            if (eventCount < 1) {
+              shouldEndRetry = true;
+            }
+            break;
+          case 200: // Success! We sent the events
+            // End the retry loop
+            shouldEndRetry = true;
+            break;
+          case 413:
+          default:
         }
 
-        // Success! We sent the events
-        if (response.status === Status.Success) {
-          // Clean up the events
-          eventsBuffer.splice(0, eventCount);
-          this._eventsInRetry -= eventCount;
-          // End the retry loop
+        if (shouldEndRetry) {
           break;
         } else {
           throw new Error(response.status);
@@ -195,20 +225,21 @@ export class RetryHandler {
       } catch {
         // Go on to next retry loop
         numRetries += 1;
-        // If we hit the retry limit
-        if (numRetries === maxRetries) {
-          // We've tried the events still in eventCount for the max number of tries.
-          // Remove them permanently
-          eventsBuffer.splice(0, eventCount);
-          this._eventsInRetry -= eventCount;
-        } else {
+        // If we haven't the retry limit
+        if (numRetries !== maxRetries) {
           // Cut the # by half (rounded down)
           eventCount = Math.max(eventCount >> 1, 1);
           // Exponential backoff - sleep for BASE_RETRY_TIMEOUT * 2^(failed tries) ms before trying again
           await asyncSleep(BASE_RETRY_TIMEOUT << numRetries);
         }
+        // If we hit the limit, this while loop ends.
       }
     }
+
+    // Clean up the events
+    // Either because they were sent, or because we decided to no longer try them
+    eventsBuffer.splice(0, eventCount);
+    this._eventsInRetry -= eventCount;
 
     // if more events came in during this time,
     // retry them on a new loop
