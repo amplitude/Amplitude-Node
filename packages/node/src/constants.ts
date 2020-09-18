@@ -21,7 +21,7 @@ export const DEFAULT_OPTIONS: NodeOptions = {
 
 // A success response sent when the SDK didn't need to actually do anything
 // But also successfully returned.
-export const UNSENT_SUCCESS_RESPONSE: Response = {
+export const NOOP_SUCCESS_RESPONSE: Response = {
   statusCode: 200,
   status: Status.Success,
   body: {

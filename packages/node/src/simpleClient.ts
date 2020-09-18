@@ -1,7 +1,7 @@
 import { Client, Event, Options, Status, Response, Transport } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
 import { setupTransportFromOptions } from './transports';
-import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
+import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS, NOOP_SUCCESS_RESPONSE } from './constants';
 
 export class SimpleClient implements Client<Options> {
   /** Project Api Key */
@@ -53,14 +53,22 @@ export class SimpleClient implements Client<Options> {
   /**
    * @inheritDoc
    */
-  public logEvent(event: Event): void {
+  public logEvent(event: Event): Promise<Response> {
+    return this.logEvents(event);
+  }
+
+  /**
+   *
+   * @param event
+   */
+  public logEvents(...events: Array<Event>): Promise<Response> {
     if (this._options.optOut === true) {
-      return;
+      return Promise.resolve(NOOP_SUCCESS_RESPONSE);
     }
 
-    this._annotateEvent(event);
+    events.forEach(event => this._annotateEvent(event));
     // Immediately send the event
-    this._transport.sendPayload({ events: [event], api_key: this._apiKey });
+    return this._transport.sendPayload({ events, api_key: this._apiKey });
   }
 
   /** Add platform dependent field onto event. */

@@ -1,7 +1,7 @@
-import { Client, Event, NodeOptions, Status, Response, RetryClass } from '@amplitude/types';
+import { Client, Event, NodeOptions, Response, RetryClass } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
-import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS, UNSENT_SUCCESS_RESPONSE } from './constants';
+import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS, NOOP_SUCCESS_RESPONSE } from './constants';
 
 export class NodeClient implements Client<NodeOptions> {
   /** Project Api Key */
@@ -44,14 +44,15 @@ export class NodeClient implements Client<NodeOptions> {
       clearTimeout(this._flushTimer);
     }
 
+    let response = NOOP_SUCCESS_RESPONSE;
+    const flushListeners = this._flushListeners.splice(0, this._flushListeners.length);
     // Check if there's 0 events, flush is not needed.
     const arrayLength = this._events.length;
-    if (arrayLength === 0) {
-      return { status: Status.Success, statusCode: 200 };
+    if (arrayLength !== 0) {
+      const eventsToSend = this._events.splice(0, arrayLength);
+      response = await this._transportWithRetry.sendEventsWithRetry(eventsToSend);
     }
-    const eventsToSend = this._events.splice(0, arrayLength);
-    const flushListeners = this._flushListeners.splice(0, this._flushListeners.length);
-    const response = await this._transportWithRetry.sendEventsWithRetry(eventsToSend);
+
     flushListeners.forEach(listener => listener(response));
 
     return response;
@@ -62,7 +63,7 @@ export class NodeClient implements Client<NodeOptions> {
    */
   public logEvent(event: Event): Promise<Response> {
     if (this._options.optOut === true) {
-      return Promise.resolve(UNSENT_SUCCESS_RESPONSE);
+      return Promise.resolve(NOOP_SUCCESS_RESPONSE);
     }
 
     this._annotateEvent(event);
