@@ -1,4 +1,5 @@
 import {
+  Options,
   Payload,
   Response,
   Transport,
@@ -172,3 +173,13 @@ export class HTTPTransport implements Transport {
     });
   }
 }
+
+export const setupTransportFromOptions = (options: Options): HTTPTransport => {
+  const transportOptions: TransportOptions = {
+    serverUrl: options.serverUrl,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+  return new HTTPTransport(transportOptions);
+};

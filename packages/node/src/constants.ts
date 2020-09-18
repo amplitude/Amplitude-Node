@@ -1,13 +1,11 @@
-import { Options, LogLevel } from '@amplitude/types';
+import { NodeOptions, LogLevel } from '@amplitude/types';
 
 // constants related to this instance of the SDK
 export { version as SDK_VERSION } from '../package.json';
 export const SDK_NAME = 'amplitude-node';
 export const AMPLITUDE_SERVER_URL = 'https://api2.amplitude.com/2/httpapi';
 export const BASE_RETRY_TIMEOUT = 100;
-
-// The overidable constants of the node SDK
-export const DEFAULT_OPTIONS: Options = {
+export const DEFAULT_OPTIONS: NodeOptions = {
   serverUrl: AMPLITUDE_SERVER_URL,
   debug: false,
   // 2kb is a safe estimate for a medium size event object. This keeps the SDK's memory footprint roughly

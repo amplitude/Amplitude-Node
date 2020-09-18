@@ -1,1 +1,1 @@
-export { HTTPTransport } from './http';
+export { HTTPTransport, setupTransportFromOptions } from './http';
