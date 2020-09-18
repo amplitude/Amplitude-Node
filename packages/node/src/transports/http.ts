@@ -1,4 +1,4 @@
-import { Payload, Response, Status, Transport, TransportOptions, mapJSONToResponse } from '@amplitude/types';
+import { Options, Payload, Response, Status, Transport, TransportOptions, mapJSONToResponse } from '@amplitude/types';
 
 import * as http from 'http';
 import * as https from 'https';
@@ -164,3 +164,13 @@ export class HTTPTransport implements Transport {
     });
   }
 }
+
+export const setupTransportFromOptions = (options: Options): HTTPTransport => {
+  const transportOptions: TransportOptions = {
+    serverUrl: options.serverUrl,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+  return new HTTPTransport(transportOptions);
+};
