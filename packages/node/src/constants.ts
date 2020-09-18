@@ -1,4 +1,4 @@
-import { NodeOptions, LogLevel } from '@amplitude/types';
+import { NodeOptions, LogLevel, Response, Status } from '@amplitude/types';
 export const SDK_NAME = 'amplitude-node';
 export const SDK_VERSION = '0.3.3';
 export const AMPLITUDE_SERVER_URL = 'https://api2.amplitude.com/2/httpapi';
@@ -17,4 +17,17 @@ export const DEFAULT_OPTIONS: NodeOptions = {
   transportClass: null,
   // By default, events flush on the next event loop
   uploadIntervalInSec: 0,
+};
+
+// A success response sent when the SDK didn't need to actually do anything
+// But also successfully returned.
+export const UNSENT_SUCCESS_RESPONSE: Response = {
+  statusCode: 200,
+  status: Status.Success,
+  body: {
+    code: 200,
+    eventsIngested: 0,
+    payloadSizeBytes: 0,
+    serverUploadTime: 0,
+  },
 };

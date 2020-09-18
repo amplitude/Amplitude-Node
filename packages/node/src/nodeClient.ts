@@ -1,7 +1,7 @@
 import { Client, Event, NodeOptions, Status, Response, RetryClass } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
-import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
+import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS, UNSENT_SUCCESS_RESPONSE } from './constants';
 
 export class NodeClient implements Client<NodeOptions> {
   /** Project Api Key */
@@ -13,6 +13,7 @@ export class NodeClient implements Client<NodeOptions> {
   private _events: Array<Event> = [];
   private _transportWithRetry: RetryClass;
   private _flushTimer: NodeJS.Timeout | null = null;
+  private _flushListeners: Array<(repsonse: Response) => void> = [];
 
   /**
    * Initializes this client instance.
@@ -49,15 +50,19 @@ export class NodeClient implements Client<NodeOptions> {
       return { status: Status.Success, statusCode: 200 };
     }
     const eventsToSend = this._events.splice(0, arrayLength);
-    return this._transportWithRetry.sendEventsWithRetry(eventsToSend);
+    const flushListeners = this._flushListeners.splice(0, this._flushListeners.length);
+    const response = await this._transportWithRetry.sendEventsWithRetry(eventsToSend);
+    flushListeners.forEach(listener => listener(response));
+
+    return response;
   }
 
   /**
    * @inheritDoc
    */
-  public logEvent(event: Event): void {
+  public logEvent(event: Event): Promise<Response> {
     if (this._options.optOut === true) {
-      return;
+      return Promise.resolve(UNSENT_SUCCESS_RESPONSE);
     }
 
     this._annotateEvent(event);
@@ -66,14 +71,17 @@ export class NodeClient implements Client<NodeOptions> {
 
     if (this._events.length >= this._options.maxCachedEvents) {
       // # of events exceeds the limit, flush them.
-      this.flush();
+      return this.flush();
     } else {
       // Not ready to flush them and not timing yet, then set the timeout
-      if (this._flushTimer === null) {
-        this._flushTimer = setTimeout(() => {
-          this.flush();
-        }, this._options.uploadIntervalInSec * 1000);
-      }
+      return new Promise(resolve => {
+        if (this._flushTimer === null) {
+          this._flushListeners.push(resolve);
+          this._flushTimer = setTimeout(() => {
+            this.flush();
+          }, this._options.uploadIntervalInSec * 1000);
+        }
+      });
     }
   }
 
