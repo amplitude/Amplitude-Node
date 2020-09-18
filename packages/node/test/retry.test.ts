@@ -65,7 +65,27 @@ describe('retry mechanisms layer', () => {
     expect(transport.passCount).toBe(1);
   });
 
-  describe('fast-stop mechanisms for invalid payloads', () => {
+  describe('fast-stop mechanisms for payloads', () => {
+    it('will not allow a events exceeding daily quota to be retried', async () => {
+      const body: ResponseBody = {
+        code: 429,
+        error: 'NOT_A_REAL_ERROR',
+        epsThreshold: 0,
+        throttledEvents: [],
+        throttledDevices: {},
+        throttledUsers: {},
+        exceededDailyQuotaDevices: {},
+        exceededDailyQuotaUsers: { [FAILING_USER_ID]: 100 },
+      };
+      setupRetry(body);
+
+      const payload = [generateEvent(FAILING_USER_ID)];
+      const response = await retry.sendEventsWithRetry(payload);
+      expect(response.status).toBe(Status.RateLimit);
+      expect(response.statusCode).toBe(429);
+      // One response goes out matching the initial send
+      expect(transport.failCount).toBe(1);
+    });
     it('will not allow a single event that failed to be retried', async () => {
       const body: ResponseBody = {
         code: 400,
