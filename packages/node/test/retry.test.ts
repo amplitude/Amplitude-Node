@@ -67,7 +67,7 @@ describe('retry mechanisms layer', () => {
 
   describe('fast-stop mechanisms for payloads', () => {
     it('will not allow a events exceeding daily quota to be retried', async () => {
-      const body: ResponseBody = {
+      const body: Response = {
         status: Status.RateLimit,
         statusCode: 429,
         body: {
@@ -115,7 +115,6 @@ describe('retry mechanisms layer', () => {
         status: Status.Invalid,
         statusCode: 400,
         body: {
-          code: 400,
           error: 'NOT_A_REAL_ERROR',
           missingField: null,
           eventsWithInvalidFields: { MISSING_EVENT_FIELD: [0, 1] },

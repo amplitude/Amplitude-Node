@@ -1,4 +1,11 @@
-import { Payload, Response, Status, Transport, TransportOptions, mapJSONToResponse } from '@amplitude/types';
+import {
+  Payload,
+  Response,
+  Transport,
+  TransportOptions,
+  mapJSONToResponse,
+  mapHttpMessageToResponse,
+} from '@amplitude/types';
 
 import * as http from 'http';
 import * as https from 'https';
@@ -136,10 +143,6 @@ export class HTTPTransport implements Transport {
   protected async _sendWithModule(payload: Payload): Promise<Response> {
     return new Promise<Response>((resolve, reject) => {
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
-        const statusCode = res.statusCode === undefined ? 0 : res.statusCode;
-        const status = Status.fromHttpCode(statusCode);
-        const response: Response = { status, statusCode };
-
         res.setEncoding('utf8');
         let rawData = '';
         // Collect the body data from the response
@@ -156,7 +159,9 @@ export class HTTPTransport implements Transport {
               }
             } catch {}
           }
-          resolve(response);
+
+          // Fallback: get the response object directly from the incoming message
+          resolve(mapHttpMessageToResponse(res));
         });
       });
       req.on('error', reject);

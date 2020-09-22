@@ -1,4 +1,5 @@
 import { Status } from './status';
+import { IncomingMessage } from 'http';
 
 /** A response body for a request that returned 200 (successful). */
 export type SuccessBody = {
@@ -97,11 +98,21 @@ export const mapJSONToResponse = (json: any): Response | null => {
   }
 };
 
+export const mapHttpMessageToResponse = (httpRes: IncomingMessage): Response => {
+  const statusCode = httpRes.statusCode === undefined ? 0 : httpRes.statusCode;
+  const status = Status.fromHttpCode(statusCode);
+
+  return {
+    status,
+    statusCode,
+  };
+};
+
 /** JSDoc */
 export type Response =
   | {
       status: Status.Success;
-      statusCode: 200;
+      statusCode: number;
       body?: SuccessBody;
     }
   | {
@@ -111,12 +122,12 @@ export type Response =
     }
   | {
       status: Status.PayloadTooLarge;
-      statusCode: 413;
+      statusCode: number;
       body?: PayloadTooLargeBody;
     }
   | {
       status: Status.RateLimit;
-      statusCode: 429;
+      statusCode: number;
       body?: RateLimitBody;
     }
   | {
