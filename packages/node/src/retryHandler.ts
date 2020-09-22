@@ -117,13 +117,7 @@ export class RetryHandler {
     if (response.status === Status.RateLimit && response.body) {
       const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
       eventsToRetry = events.filter(({ user_id: userId, device_id: deviceId }) => {
-        if (userId && exceededDailyQuotaUsers[userId]) {
-          return false;
-        } else if (deviceId && exceededDailyQuotaDevices[deviceId]) {
-          return false;
-        } else {
-          return true;
-        }
+        return !(userId && exceededDailyQuotaUsers[userId]) && !(deviceId && exceededDailyQuotaDevices[deviceId]);
       });
     } else if (response.status === Status.Invalid) {
       if (response.body?.missingField || events.length === 1) {
@@ -200,6 +194,9 @@ export class RetryHandler {
         } else if (response.status === Status.PayloadTooLarge && !isLastTry) {
           eventCount = Math.max(eventCount >> 1, 1); // Cut the # by half (rounded down)
         } else if (response.status === Status.Invalid) {
+          if (eventCount === 1) {
+            break;
+          }
           // Invalid: Figure out which events need to go.
           // Collect invalid event indices and remove them.
           const invalidEventIndices = collectInvalidEventIndices(response);

@@ -116,7 +116,7 @@ export class HTTPTransport implements Transport {
             return requestObj.callback === queueCallback;
           });
 
-          if (callBackIndex > -1 && callBackIndex < this._requestQueue.length) {
+          if (callBackIndex > -1) {
             this._requestQueue.splice(callBackIndex, 1);
           }
 
