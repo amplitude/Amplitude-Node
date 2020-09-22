@@ -113,9 +113,9 @@ export class RetryHandler {
 
   private _onEventsError(events: ReadonlyArray<Event>, response: Response): void {
     let eventsToRetry: ReadonlyArray<Event> = events;
-    switch (response.body?.code ?? response.statusCode) {
-      case 429:
-        if (response.body?.code === 429) {
+    switch (response.status) {
+      case Status.RateLimit:
+        if (response.body) {
           const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
           eventsToRetry = events.filter(({ user_id: userId, device_id: deviceId }) => {
             if (userId && exceededDailyQuotaUsers[userId]) {
@@ -128,8 +128,8 @@ export class RetryHandler {
           });
         }
         break;
-      case 400:
-        if ((response.body?.code === 400 && response.body?.missingField) || events.length === 1) {
+      case Status.Invalid:
+        if (response.body?.missingField || events.length === 1) {
           // Return early if there's an issue with the entire payload
           // or if there's only one event and its invalid
           return;
@@ -138,7 +138,7 @@ export class RetryHandler {
           eventsToRetry = events.filter((_, index) => !invalidEventIndices.has(index));
         }
         break;
-      case 200:
+      case Status.Success:
         return; // In case _onEventsError was called with not a valid error
       default:
     }
@@ -184,16 +184,16 @@ export class RetryHandler {
         const eventsToRetry = eventsBuffer.slice(0, eventCount);
         const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
         let shouldEndRetry = false;
-        switch (response.body?.code ?? response.statusCode) {
-          case 429: // RateLimit: See if we hit the daily quota
-            if (response.body?.code === 429) {
+        switch (response.status) {
+          case Status.RateLimit: // RateLimit: See if we hit the daily quota
+            if (response.body) {
               const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
               if (exceededDailyQuotaDevices[deviceId] || exceededDailyQuotaUsers[userId]) {
                 shouldEndRetry = true; // This device/user may not be retried for a while. Just end and splice.
               }
             }
             break;
-          case 400: // Invalid: Figure out which events need to go.
+          case Status.Invalid: // Invalid: Figure out which events need to go.
             // Collect invalid event indices and remove them.
             const invalidEventIndices = collectInvalidEventIndices(response);
             // Reverse the indices so that splicing doesn't cause any indexing issues.
@@ -209,11 +209,11 @@ export class RetryHandler {
               shouldEndRetry = true;
             }
             break;
-          case 200: // Success! We sent the events
+          case Status.Success: // Success! We sent the events
             // End the retry loop
             shouldEndRetry = true;
             break;
-          case 413:
+          case Status.PayloadTooLarge:
           default:
         }
 

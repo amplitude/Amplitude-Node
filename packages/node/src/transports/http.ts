@@ -150,9 +150,9 @@ export class HTTPTransport implements Transport {
         res.on('end', () => {
           if (res.complete && rawData) {
             try {
-              const body = mapJSONToResponse(JSON.parse(rawData));
-              if (body !== null) {
-                response.body = body;
+              const responseWithBody = mapJSONToResponse(JSON.parse(rawData));
+              if (responseWithBody !== null) {
+                return resolve(responseWithBody);
               }
             } catch {}
           }
