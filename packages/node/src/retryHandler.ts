@@ -176,6 +176,9 @@ export class RetryHandler {
     const maxRetries = this._options.maxRetries;
 
     while (numRetries < maxRetries) {
+      numRetries += 1;
+      const isLastTry = numRetries === maxRetries;
+
       try {
         // Don't try any new events that came in, to prevent overwhelming the api servers
         const eventsToRetry = eventsBuffer.slice(0, eventCount);
@@ -189,12 +192,19 @@ export class RetryHandler {
               break; // This device/user may not be retried for a while. Just end and splice.
             }
           }
+
+          // Cut the # by half (rounded down)
+          if (!isLastTry) {
+            eventCount = Math.max(eventCount >> 1, 1);
+          }
+        } else if (response.status === Status.PayloadTooLarge && !isLastTry) {
+          eventCount = Math.max(eventCount >> 1, 1); // Cut the # by half (rounded down)
         } else if (response.status === Status.Invalid) {
           // Invalid: Figure out which events need to go.
           // Collect invalid event indices and remove them.
           const invalidEventIndices = collectInvalidEventIndices(response);
           // Reverse the indices so that splicing doesn't cause any indexing issues.
-          invalidEventIndices.reverse().forEach((index: number) => {
+          invalidEventIndices.reverse().forEach(index => {
             if (index < eventCount) {
               eventsBuffer.splice(index, 1);
             }
@@ -214,16 +224,11 @@ export class RetryHandler {
         // If we didn't get in, go and catch.
         throw new Error(response.status);
       } catch {
-        // Go on to next retry loop
-        numRetries += 1;
-        // If we haven't the retry limit
-        if (numRetries !== maxRetries) {
-          // Cut the # by half (rounded down)
-          eventCount = Math.max(eventCount >> 1, 1);
+        // If we haven't hit the retry limit
+        if (!isLastTry) {
           // Exponential backoff - sleep for BASE_RETRY_TIMEOUT * 2^(failed tries) ms before trying again
           await asyncSleep(BASE_RETRY_TIMEOUT << numRetries);
         }
-        // If we hit the limit, this while loop ends.
       }
     }
 
