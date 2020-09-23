@@ -32,6 +32,9 @@ type RequestQueueObject = {
   cancellingTimeout: NodeJS.Timeout | null;
 };
 
+// Automatially cancel requests that have been waiting for 10+ s
+const REQUEST_CANCEL_TIMEOUT = 10 * 1000;
+
 /** Base Transport class implementation */
 export class HTTPTransport implements Transport {
   /** The Agent used for corresponding transport */
@@ -58,8 +61,8 @@ export class HTTPTransport implements Transport {
     const call = () => this._sendWithModule(payload);
 
     // Queue up the call to send the payload.
-    // Wait 5 seconds for each request before it (default keep-alive)
-    return this._awaitUploadFinish(call, 5000 * this._requestQueue.length);
+    // Wait 10 seconds for each request in queue before removing it
+    return this._awaitUploadFinish(call, REQUEST_CANCEL_TIMEOUT);
   }
 
   /** Returns a build request option object used by request */
@@ -84,7 +87,7 @@ export class HTTPTransport implements Transport {
   // Awaits the finish of all requests that have been queued up before it
   // And will expire itself (reject the promise) after waiting limit ms
   // or never expire, if limit is not set
-  private _awaitUploadFinish(callback: () => Promise<Response>, limit: number = 0): Promise<Response> {
+  private _awaitUploadFinish(callback: () => Promise<Response>, limitInMs: number = 0): Promise<Response> {
     return new Promise((resolve, reject) => {
       const queueCallback = () => {
         this._uploadInProgress = true;
@@ -110,7 +113,7 @@ export class HTTPTransport implements Transport {
       this._requestQueue.push(requestObject);
 
       // If the limit exists, set a timeout to remove the callback and reject the promise
-      if (limit > 0) {
+      if (limitInMs > 0) {
         requestObject.cancellingTimeout = setTimeout(() => {
           const callBackIndex = this._requestQueue.findIndex(requestObj => {
             return requestObj.callback === queueCallback;
@@ -121,7 +124,7 @@ export class HTTPTransport implements Transport {
           }
 
           reject();
-        }, limit);
+        }, limitInMs);
       }
     });
   }
