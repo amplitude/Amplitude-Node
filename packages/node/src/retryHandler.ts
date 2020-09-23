@@ -1,9 +1,9 @@
-import { Event, Options, Transport, TransportOptions, Payload, Status, Response } from '@amplitude/types';
+import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
 import { HTTPTransport } from './transports';
 import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
 import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
 
-export class RetryHandler {
+export class RetryHandler implements RetryClass {
   protected readonly _apiKey: string;
 
   // A map of maps to event buffers for failed events
@@ -160,7 +160,7 @@ export class RetryHandler {
   private async _retryEventsOnce(userId: string, deviceId: string, eventsToRetry: ReadonlyArray<Event>) {
     const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
 
-    let shouldNotRetry = false;
+    let shouldRetry = true;
     let shouldReduceEventCount = false;
     let eventIndicesToRemove: Array<number> = [];
 
@@ -169,7 +169,7 @@ export class RetryHandler {
       if (response.body) {
         const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
         if (exceededDailyQuotaDevices[deviceId] || exceededDailyQuotaUsers[userId]) {
-          shouldNotRetry = true; // This device/user may not be retried for a while. Just give up.
+          shouldRetry = false; // This device/user may not be retried for a while. Just give up.
         }
       }
 
@@ -178,16 +178,16 @@ export class RetryHandler {
       shouldReduceEventCount = true;
     } else if (response.status === Status.Invalid) {
       if (eventsToRetry.length === 1) {
-        shouldNotRetry = true; // If there's only one event, just toss it.
+        shouldRetry = false; // If there's only one event, just toss it.
       } else {
         eventIndicesToRemove = collectInvalidEventIndices(response); // Figure out which events need to go.
       }
     } else if (response.status === Status.Success) {
       // Success! We sent the events
-      shouldNotRetry = true; // End the retry loop
+      shouldRetry = false; // End the retry loop
     }
 
-    return { shouldNotRetry, shouldReduceEventCount, eventIndicesToRemove };
+    return { shouldRetry, shouldReduceEventCount, eventIndicesToRemove };
   }
 
   private async _retryEventsOnLoop(userId: string, deviceId: string): Promise<void> {
@@ -209,7 +209,7 @@ export class RetryHandler {
       try {
         // Don't try any new events that came in, to prevent overwhelming the api servers
         const eventsToRetry = eventsBuffer.slice(0, eventCount);
-        const { shouldNotRetry, shouldReduceEventCount, eventIndicesToRemove } = await this._retryEventsOnce(
+        const { shouldRetry, shouldReduceEventCount, eventIndicesToRemove } = await this._retryEventsOnce(
           userId,
           deviceId,
           eventsToRetry,
@@ -235,15 +235,15 @@ export class RetryHandler {
           }
         }
 
+        if (!shouldRetry) {
+          break; // We ended!
+        }
+
         if (shouldReduceEventCount && !isLastTry) {
           eventCount = Math.max(eventCount >> 1, 1);
         }
 
-        if (shouldNotRetry) {
-          break;
-        } else {
-          throw new Error(); // If we didn't end, continue to catch block.
-        }
+        throw new Error(); // If we didn't end, continue to catch block.
       } catch {
         if (!isLastTry) {
           // If we haven't hit the retry limit, some Exponential backoff

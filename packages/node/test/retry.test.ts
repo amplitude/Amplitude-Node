@@ -1,6 +1,6 @@
 import { TestRetry, MOCK_MAX_RETRIES } from './mocks/retry';
 import { MockTransport } from './mocks/transport';
-import { Event, Status, Response } from '@amplitude/types';
+import { Event, Status, Response, RetryClass } from '@amplitude/types';
 import { asyncSleep } from '@amplitude/utils';
 
 const FAILING_USER_ID = 'data_monster';
@@ -14,7 +14,7 @@ const generateEvent = (userId: string): Event => {
   };
 };
 
-const generateRetryHandler = (body: Response | null = null) => {
+const generateRetryHandler = (body: Response | null = null): { transport: MockTransport; retry: RetryClass } => {
   const transport = new MockTransport(FAILING_USER_ID, body);
   const retry = new TestRetry(transport);
 
