@@ -1,4 +1,11 @@
-import { Payload, Response, Status, Transport, TransportOptions, mapJSONToResponse } from '@amplitude/types';
+import {
+  Payload,
+  Response,
+  Transport,
+  TransportOptions,
+  mapJSONToResponse,
+  mapHttpMessageToResponse,
+} from '@amplitude/types';
 
 import * as http from 'http';
 import * as https from 'https';
@@ -109,7 +116,7 @@ export class HTTPTransport implements Transport {
             return requestObj.callback === queueCallback;
           });
 
-          if (callBackIndex > -1 && callBackIndex < this._requestQueue.length) {
+          if (callBackIndex > -1) {
             this._requestQueue.splice(callBackIndex, 1);
           }
 
@@ -136,10 +143,6 @@ export class HTTPTransport implements Transport {
   protected async _sendWithModule(payload: Payload): Promise<Response> {
     return new Promise<Response>((resolve, reject) => {
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
-        const statusCode = res.statusCode === undefined ? 0 : res.statusCode;
-        const status = Status.fromHttpCode(statusCode);
-        const response: Response = { status, statusCode };
-
         res.setEncoding('utf8');
         let rawData = '';
         // Collect the body data from the response
@@ -150,13 +153,15 @@ export class HTTPTransport implements Transport {
         res.on('end', () => {
           if (res.complete && rawData) {
             try {
-              const body = mapJSONToResponse(JSON.parse(rawData));
-              if (body !== null) {
-                response.body = body;
+              const responseWithBody = mapJSONToResponse(JSON.parse(rawData));
+              if (responseWithBody !== null) {
+                return resolve(responseWithBody);
               }
             } catch {}
           }
-          resolve(response);
+
+          // Fallback: get the response object directly from the incoming message
+          resolve(mapHttpMessageToResponse(res));
         });
       });
       req.on('error', reject);
