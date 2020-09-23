@@ -14,14 +14,14 @@ const generateEvent = (userId: string): Event => {
   };
 };
 
+const generateRetryHandler = (body: Response | null = null) => {
+  const transport = new MockTransport(FAILING_USER_ID, body);
+  const retry = new TestRetry(transport);
+
+  return { transport, retry };
+};
+
 describe('retry mechanisms layer', () => {
-  const generateRetryHandler = (body: Response | null = null) => {
-    const transport = new MockTransport(FAILING_USER_ID, body);
-    const retry = new TestRetry(transport);
-
-    return { transport, retry };
-  };
-
   it('should not retry events that pass', async () => {
     const { transport, retry } = generateRetryHandler();
     const payload = [generateEvent(PASSING_USER_ID)];
