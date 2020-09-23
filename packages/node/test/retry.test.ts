@@ -15,19 +15,16 @@ const generateEvent = (userId: string): Event => {
 };
 
 describe('retry mechanisms layer', () => {
-  let transport = new MockTransport(FAILING_USER_ID, null);
-  let retry = new TestRetry(transport);
+  const generateRetryHandler = (body: Response | null = null) => {
+    const transport = new MockTransport(FAILING_USER_ID, body);
+    const retry = new TestRetry(transport);
 
-  const setupRetry = (body: Response | null = null) => {
-    transport = new MockTransport(FAILING_USER_ID, body);
-    retry = new TestRetry(transport);
+    return { transport, retry };
   };
 
-  beforeEach(() => setupRetry());
-
   it('should not retry events that pass', async () => {
+    const { transport, retry } = generateRetryHandler();
     const payload = [generateEvent(PASSING_USER_ID)];
-
     const response = await retry.sendEventsWithRetry(payload);
 
     expect(response.status).toBe(Status.Success);
@@ -37,7 +34,9 @@ describe('retry mechanisms layer', () => {
   });
 
   it('should retry events that fail', async () => {
+    const { transport, retry } = generateRetryHandler();
     const payload = [generateEvent(FAILING_USER_ID)];
+
     const response = await retry.sendEventsWithRetry(payload);
 
     // Sleep and wait for retries to end
@@ -50,6 +49,7 @@ describe('retry mechanisms layer', () => {
   });
 
   it('will not throttle user ids that are not throttled', async () => {
+    const { transport, retry } = generateRetryHandler();
     const payload = [generateEvent(FAILING_USER_ID), generateEvent(PASSING_USER_ID)];
     const response = await retry.sendEventsWithRetry(payload);
 
@@ -80,7 +80,7 @@ describe('retry mechanisms layer', () => {
           exceededDailyQuotaUsers: { [FAILING_USER_ID]: 100 },
         },
       };
-      setupRetry(body);
+      const { transport, retry } = generateRetryHandler(body);
 
       const payload = [generateEvent(FAILING_USER_ID)];
       const response = await retry.sendEventsWithRetry(payload);
@@ -100,7 +100,7 @@ describe('retry mechanisms layer', () => {
           eventsWithMissingFields: {},
         },
       };
-      setupRetry(body);
+      const { transport, retry } = generateRetryHandler(body);
 
       const payload = [generateEvent(FAILING_USER_ID)];
       const response = await retry.sendEventsWithRetry(payload);
@@ -121,8 +121,7 @@ describe('retry mechanisms layer', () => {
           eventsWithMissingFields: {},
         },
       };
-
-      setupRetry(body);
+      const { transport, retry } = generateRetryHandler(body);
 
       const payload = [generateEvent(FAILING_USER_ID), generateEvent(FAILING_USER_ID)];
       const response = await retry.sendEventsWithRetry(payload);
@@ -143,7 +142,7 @@ describe('retry mechanisms layer', () => {
           eventsWithMissingFields: {},
         },
       };
-      setupRetry(body);
+      const { transport, retry } = generateRetryHandler(body);
 
       const payload = [generateEvent(FAILING_USER_ID), generateEvent(PASSING_USER_ID)];
       const response = await retry.sendEventsWithRetry(payload);
