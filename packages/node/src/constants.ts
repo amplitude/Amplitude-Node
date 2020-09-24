@@ -1,13 +1,10 @@
-import { Options, LogLevel, Status, Response } from '@amplitude/types';
+import { Options, LogLevel } from '@amplitude/types';
 
+// constants related to this instance of the SDK
+export { version as SDK_VERSION } from '../package.json';
 export const SDK_NAME = 'amplitude-node';
-export const SDK_VERSION = '0.3.3';
 export const AMPLITUDE_SERVER_URL = 'https://api2.amplitude.com/2/httpapi';
 export const BASE_RETRY_TIMEOUT = 100;
-export const SKIPPED_RESPONSE: Response = {
-  status: Status.Skipped,
-  statusCode: 0,
-};
 
 // The overidable constants of the node SDK
 export const DEFAULT_OPTIONS: Options = {

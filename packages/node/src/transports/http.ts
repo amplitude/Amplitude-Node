@@ -1,4 +1,11 @@
-import { Payload, Response, Status, Transport, TransportOptions, mapJSONToResponse } from '@amplitude/types';
+import {
+  Payload,
+  Response,
+  Transport,
+  TransportOptions,
+  mapJSONToResponse,
+  mapHttpMessageToResponse,
+} from '@amplitude/types';
 
 import * as http from 'http';
 import * as https from 'https';
@@ -24,6 +31,9 @@ type RequestQueueObject = {
   callback: () => void;
   cancellingTimeout: NodeJS.Timeout | null;
 };
+
+// Automatially cancel requests that have been waiting for 10+ s
+const REQUEST_CANCEL_TIMEOUT = 10 * 1000;
 
 /** Base Transport class implementation */
 export class HTTPTransport implements Transport {
@@ -51,8 +61,8 @@ export class HTTPTransport implements Transport {
     const call = () => this._sendWithModule(payload);
 
     // Queue up the call to send the payload.
-    // Wait 5 seconds for each request before it (default keep-alive)
-    return this._awaitUploadFinish(call, 5000 * this._requestQueue.length);
+    // Wait 10 seconds for each request in queue before removing it
+    return this._awaitUploadFinish(call, REQUEST_CANCEL_TIMEOUT);
   }
 
   /** Returns a build request option object used by request */
@@ -77,7 +87,7 @@ export class HTTPTransport implements Transport {
   // Awaits the finish of all requests that have been queued up before it
   // And will expire itself (reject the promise) after waiting limit ms
   // or never expire, if limit is not set
-  private _awaitUploadFinish(callback: () => Promise<Response>, limit: number = 0): Promise<Response> {
+  private _awaitUploadFinish(callback: () => Promise<Response>, limitInMs: number = 0): Promise<Response> {
     return new Promise((resolve, reject) => {
       const queueCallback = () => {
         this._uploadInProgress = true;
@@ -103,18 +113,18 @@ export class HTTPTransport implements Transport {
       this._requestQueue.push(requestObject);
 
       // If the limit exists, set a timeout to remove the callback and reject the promise
-      if (limit > 0) {
+      if (limitInMs > 0) {
         requestObject.cancellingTimeout = setTimeout(() => {
           const callBackIndex = this._requestQueue.findIndex(requestObj => {
             return requestObj.callback === queueCallback;
           });
 
-          if (callBackIndex > -1 && callBackIndex < this._requestQueue.length) {
+          if (callBackIndex > -1) {
             this._requestQueue.splice(callBackIndex, 1);
           }
 
           reject();
-        }, limit);
+        }, limitInMs);
       }
     });
   }
@@ -136,10 +146,6 @@ export class HTTPTransport implements Transport {
   protected async _sendWithModule(payload: Payload): Promise<Response> {
     return new Promise<Response>((resolve, reject) => {
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
-        const statusCode = res.statusCode === undefined ? 0 : res.statusCode;
-        const status = Status.fromHttpCode(statusCode);
-        const response: Response = { status, statusCode };
-
         res.setEncoding('utf8');
         let rawData = '';
         // Collect the body data from the response
@@ -150,13 +156,15 @@ export class HTTPTransport implements Transport {
         res.on('end', () => {
           if (res.complete && rawData) {
             try {
-              const body = mapJSONToResponse(JSON.parse(rawData));
-              if (body !== null) {
-                response.body = body;
+              const responseWithBody = mapJSONToResponse(JSON.parse(rawData));
+              if (responseWithBody !== null) {
+                return resolve(responseWithBody);
               }
             } catch {}
           }
-          resolve(response);
+
+          // Fallback: get the response object directly from the incoming message
+          resolve(mapHttpMessageToResponse(res));
         });
       });
       req.on('error', reject);
