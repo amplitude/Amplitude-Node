@@ -139,6 +139,9 @@ export type Response =
       statusCode: number;
     };
 
+/** The Response to expect if a request might have been sent but it was skipped
+ *  e.g. no events to flush, user has opted out and nothing should be sent.
+ */
 export const SKIPPED_RESPONSE: Response = {
   status: Status.Skipped,
   statusCode: 0,
