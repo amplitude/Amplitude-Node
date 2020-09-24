@@ -24,9 +24,7 @@ jobs:
       run: yarn install --frozen-lockfile
 
     - name: Bootstrap
-      run: |
-        yarn run lerna bootstrap
+      run: yarn lerna bootstrap
 
     - name: Build
-      run: |
-        yarn run lerna run build
+      run: yarn lerna run build
