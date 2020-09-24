@@ -6,7 +6,6 @@
     "paths": {
       "@amplitude/*": ["*/src"]
     },
-    "resolveJsonModule": true,
-    "esModuleInterop": true
+    "resolveJsonModule": true
   }
 }
