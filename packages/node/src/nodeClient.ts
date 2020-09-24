@@ -1,7 +1,7 @@
-import * as https from 'https';
+import { Client, Event, Options, Status, Response, RetryClass } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
-import { Client, Event, Options } from '@amplitude/types';
-import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_PATH, DEFAULT_OPTIONS } from './constants';
+import { RetryHandler } from './retryHandler';
+import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -10,30 +10,46 @@ export class NodeClient implements Client<Options> {
   /** Options for the client. */
   protected readonly _options: Options;
 
+  private _events: Array<Event> = [];
+  private _transportWithRetry: RetryClass;
+  private _flushTimer: NodeJS.Timeout | null = null;
+
   /**
    * Initializes this client instance.
    *
    * @param apiKey API key for your project
    * @param options options for the client
    */
-  public constructor(apiKey: string, options: Partial<Options>) {
+  public constructor(apiKey: string, options: Partial<Options> = {}) {
     this._apiKey = apiKey;
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._transportWithRetry = this._options.retryClass || this._setupDefaultTransport();
     this._setUpLogging();
   }
 
   /**
    * @inheritDoc
    */
-  getOptions(): Options {
+  public getOptions(): Options {
     return this._options;
   }
 
   /**
    * @inheritDoc
    */
-  flush(): void {
-    throw new Error('Method not implemented.');
+  public async flush(): Promise<Response> {
+    // Clear the timeout
+    if (this._flushTimer !== null) {
+      clearTimeout(this._flushTimer);
+    }
+
+    // Check if there's 0 events, flush is not needed.
+    const arrayLength = this._events.length;
+    if (arrayLength === 0) {
+      return { status: Status.Success, statusCode: 200 };
+    }
+    const eventsToSend = this._events.splice(0, arrayLength);
+    return this._transportWithRetry.sendEventsWithRetry(eventsToSend);
   }
 
   /**
@@ -45,40 +61,30 @@ export class NodeClient implements Client<Options> {
     }
 
     this._annotateEvent(event);
+    // Add event to unsent events queue.
+    this._events.push(event);
 
-    const payload = JSON.stringify({
-      api_key: this._apiKey,
-      events: [event],
-    });
-
-    const requestOptions = {
-      hostname: this._options.serverUrl,
-      path: AMPLITUDE_API_PATH,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-
-    const req = https.request(requestOptions, res => {
-      res.on('data', _ => {
-        // Request finishes.
-        // We currently don't have error handling or retry, but we will add it soon.
-      });
-    });
-
-    req.on('error', error => {
-      console.info('[Amplitude|Error] Event is not submitted.', error);
-    });
-
-    req.write(payload);
-    req.end();
+    if (this._events.length >= this._options.maxCachedEvents) {
+      // # of events exceeds the limit, flush them.
+      this.flush();
+    } else {
+      // Not ready to flush them and not timing yet, then set the timeout
+      if (this._flushTimer === null) {
+        this._flushTimer = setTimeout(() => {
+          this.flush();
+        }, this._options.uploadIntervalInSec * 1000);
+      }
+    }
   }
 
   /** Add platform dependent field onto event. */
   private _annotateEvent(event: Event): void {
     event.library = `${SDK_NAME}/${SDK_VERSION}`;
     event.platform = 'Node.js';
+  }
+
+  private _setupDefaultTransport(): RetryHandler {
+    return new RetryHandler(this._apiKey, this._options);
   }
 
   private _setUpLogging(): void {

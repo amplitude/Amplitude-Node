@@ -37,3 +37,11 @@ export interface Event {
 
   groups?: { [key: string]: any };
 }
+
+/**
+ * Amplitude request payload definition.
+ */
+export interface Payload {
+  api_key: string;
+  events: ReadonlyArray<Event>;
+}
