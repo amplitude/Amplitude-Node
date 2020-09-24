@@ -1,5 +1,5 @@
 import { Options } from '@amplitude/types';
-import { NodeClient } from './nodeClient';
+import { NodeClient } from 'src/nodeClient';
 
 /**
  * Internal function to create a new SDK client instance. The client is

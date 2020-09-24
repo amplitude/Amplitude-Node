@@ -1,7 +1,7 @@
 import * as https from 'https';
 import { logger } from '@amplitude/utils';
 import { Client, Event, Options } from '@amplitude/types';
-import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_PATH, DEFAULT_OPTIONS } from './constants';
+import { SDK_NAME, SDK_VERSION, AMPLITUDE_API_PATH, DEFAULT_OPTIONS } from 'src/constants';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
