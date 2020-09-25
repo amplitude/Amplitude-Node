@@ -7,6 +7,11 @@ import { RetryClass } from './retry';
  */
 export interface Options {
   /**
+   * Whether or not the SDK should batch events.
+   */
+  batch: boolean;
+
+  /**
    * Whether or not the SDK should be started in debug mode.
    * This will enable the SDK to generate logs at WARN level or above, if the
    * logLevel is not specified.
@@ -46,6 +51,6 @@ export interface Options {
   /** If you're using a proxy server, set its url here. */
   serverUrl: string;
 
-  /** The events upload interval */
+  /** The events upload interval, if the SDK is batching events */
   uploadIntervalInSec: number;
 }

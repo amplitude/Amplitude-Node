@@ -1,7 +1,7 @@
 import { Client, Event, Options, Status, Response, RetryClass } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
-import { RetryHandler } from './retryHandler';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
+import { RetryHandler } from './retryHandler';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -64,7 +64,9 @@ export class NodeClient implements Client<Options> {
     // Add event to unsent events queue.
     this._events.push(event);
 
-    if (this._events.length >= this._options.maxCachedEvents) {
+    const shouldFlushImmediately = !this._options.batch || this._events.length >= this._options.maxCachedEvents;
+
+    if (shouldFlushImmediately) {
       // # of events exceeds the limit, flush them.
       this.flush();
     } else {

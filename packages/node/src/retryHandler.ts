@@ -1,7 +1,7 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
-import { HTTPTransport } from './transports';
-import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
 import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
+import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
+import { HTTPTransport } from './transports';
 
 export class RetryHandler implements RetryClass {
   protected readonly _apiKey: string;

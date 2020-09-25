@@ -2,10 +2,14 @@ import { Options, LogLevel } from '@amplitude/types';
 // constants related to this instance of the SDK
 export { version as SDK_VERSION } from '../package.json';
 export const SDK_NAME = 'amplitude-node';
+
 export const AMPLITUDE_SERVER_URL = 'https://api2.amplitude.com/2/httpapi';
 export const BASE_RETRY_TIMEOUT = 100;
+
+// The default options for the Node SDK
 export const DEFAULT_OPTIONS: Options = {
-  serverUrl: AMPLITUDE_SERVER_URL,
+  // By default, batch events.
+  batch: true,
   debug: false,
   // 2kb is a safe estimate for a medium size event object. This keeps the SDK's memory footprint roughly
   // under 32 MB.
@@ -15,6 +19,7 @@ export const DEFAULT_OPTIONS: Options = {
   optOut: false,
   // The client will instantiate the retry/transport classes if not defined
   retryClass: null,
+  serverUrl: AMPLITUDE_SERVER_URL,
   transportClass: null,
   // By default, events flush on the next event loop
   uploadIntervalInSec: 0,
