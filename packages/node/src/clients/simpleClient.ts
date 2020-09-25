@@ -1,9 +1,9 @@
 import { Client, Event, Options, Response, Transport, SKIPPED_RESPONSE } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
-import { setupTransportFromOptions } from './transports';
-import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
+import { setupTransportFromOptions } from '../transports';
+import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from '../constants';
 
-export class NodeClient implements Client<Options> {
+export class SimpleClient implements Client<Options> {
   /** Project Api Key */
   protected readonly _apiKey: string;
 
