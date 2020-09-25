@@ -8,6 +8,8 @@ import { RetryClass } from './retry';
 export interface Options {
   /**
    * Whether or not the SDK should batch events.
+   * Setting this to false is equivalent to setting maxCachedEvents
+   * to 1 or less.
    */
   batch: boolean;
 
@@ -27,7 +29,7 @@ export interface Options {
    */
   logLevel: LogLevel;
 
-  /** The maximum events in the buffer */
+  /** The maximum events in a buffer before the batch gets flushed */
   maxCachedEvents: number;
 
   /** The maximum number of times a server will attempt to retry  */
@@ -39,7 +41,7 @@ export interface Options {
   optOut: boolean;
 
   /**
-   * The class being used to handle event retrying.
+   * The class being used to handle event retrying. Uses the base retryHandler if null.
    */
   retryClass: RetryClass | null;
 
@@ -51,6 +53,6 @@ export interface Options {
   /** If you're using a proxy server, set its url here. */
   serverUrl: string;
 
-  /** The events upload interval, if the SDK is batching events */
+  /** The events upload interval, if the client is batching events */
   uploadIntervalInSec: number;
 }
