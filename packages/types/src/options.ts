@@ -22,29 +22,31 @@ export interface Options {
    */
   logLevel: LogLevel;
 
-  /** The maximum events in the buffer */
-  maxCachedEvents: number;
-
-  /** The maximum number of times a server will attempt to retry  */
-  maxRetries: number;
-
   /**
    * Whether you opt out from sending events.
    */
   optOut: boolean;
 
-  /**
-   * The class being used to handle event retrying.
-   */
-  retryClass: RetryClass | null;
+  /** If you're using a proxy server, set its url here. */
+  serverUrl: string;
 
   /**
    * The class being used to transport events.
    */
   transportClass: Transport | null;
+}
 
-  /** If you're using a proxy server, set its url here. */
-  serverUrl: string;
+export interface NodeOptions extends Options {
+  /**
+   * The class being used to handle event retrying.
+   */
+  retryClass: RetryClass | null;
+
+  /** The maximum events in the buffer */
+  maxCachedEvents: number;
+
+  /** The maximum number of times a server will attempt to retry  */
+  maxRetries: number;
 
   /** The events upload interval */
   uploadIntervalInSec: number;

@@ -1,5 +1,5 @@
-import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
-import { HTTPTransport } from './transports';
+import { Event, NodeOptions, Transport, Payload, Status, Response, RetryClass } from '@amplitude/types';
+import { setupTransportFromOptions } from './transports';
 import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
 import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
 
@@ -9,14 +9,14 @@ export class RetryHandler implements RetryClass {
   // A map of maps to event buffers for failed events
   // The first key is userId (or ''), and second is deviceId (or '')
   private _idToBuffer: Map<string, Map<string, Array<Event>>> = new Map<string, Map<string, Array<Event>>>();
-  private _options: Options;
+  private _options: NodeOptions;
   private _transport: Transport;
   private _eventsInRetry: number = 0;
 
-  public constructor(apiKey: string, options: Partial<Options>) {
+  public constructor(apiKey: string, options: Partial<NodeOptions>) {
     this._apiKey = apiKey;
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-    this._transport = this._options.transportClass || this._setupDefaultTransport();
+    this._transport = this._options.transportClass || setupTransportFromOptions(this._options);
   }
 
   /**
@@ -37,16 +37,6 @@ export class RetryHandler implements RetryClass {
     } finally {
       return response;
     }
-  }
-
-  private _setupDefaultTransport(): Transport {
-    const transportOptions: TransportOptions = {
-      serverUrl: this._options.serverUrl,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    return new HTTPTransport(transportOptions);
   }
 
   private _shouldRetryEvents(): boolean {
