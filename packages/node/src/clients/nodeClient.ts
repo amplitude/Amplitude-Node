@@ -55,7 +55,9 @@ export class NodeClient implements Client<NodeOptions> {
     this._responseListeners = [];
 
     try {
-      const eventsToSend = this._events.splice(0, arrayLength);
+      // Pull out and clear the events being stored for sending
+      const eventsToSend = this._events;
+      this._events = [];
       const response = await this._transportWithRetry.sendEventsWithRetry(eventsToSend);
       responseListeners.forEach(({ resolve }) => resolve(response));
       return response;
