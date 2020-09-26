@@ -3,6 +3,8 @@ import { logger } from '@amplitude/utils';
 import { RetryHandler } from '../retryHandler';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from '../constants';
 
+type PromiseCallback<T> = { resolve: (value: T) => void; reject: (err: Error) => void };
+
 export class NodeClient implements Client<NodeOptions> {
   /** Project Api Key */
   protected readonly _apiKey: string;
@@ -11,7 +13,7 @@ export class NodeClient implements Client<NodeOptions> {
   protected readonly _options: NodeOptions;
 
   private _events: Array<Event> = [];
-  private _responseListeners: Array<{ resolve: (response: Response) => void; reject: (err: Error) => void }> = [];
+  private _responseListeners: Array<PromiseCallback<Response>> = [];
   private _transportWithRetry: RetryClass;
   private _flushTimer: NodeJS.Timeout | null = null;
 
@@ -23,7 +25,7 @@ export class NodeClient implements Client<NodeOptions> {
    */
   public constructor(apiKey: string, options: Partial<NodeOptions> = {}) {
     this._apiKey = apiKey;
-    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._options = { ...DEFAULT_OPTIONS, ...options };
     this._transportWithRetry = this._options.retryClass || this._setupDefaultTransport();
     this._setUpLogging();
   }
@@ -39,9 +41,9 @@ export class NodeClient implements Client<NodeOptions> {
    * @inheritDoc
    */
   public async flush(): Promise<Response> {
-    // Clear the timeout
     if (this._flushTimer !== null) {
-      clearTimeout(this._flushTimer);
+      clearTimeout(this._flushTimer); // Clear the timeout
+      this._flushTimer = null; // and reset it.
     }
 
     // Check if there's 0 events, flush is not needed.
@@ -81,18 +83,20 @@ export class NodeClient implements Client<NodeOptions> {
       // Add event to unsent events queue.
       this._events.push(event);
       this._responseListeners.push({ resolve, reject });
-      if (this._events.length >= this._options.maxCachedEvents) {
-        // # of events exceeds the limit, flush them.
-        this.flush();
-      } else {
-        // Not ready to flush them and not timing yet, then set the timeout
-        if (this._flushTimer === null) {
-          this._flushTimer = setTimeout(() => {
-            this.flush();
-          }, this._options.uploadIntervalInSec * 1000);
-        }
-      }
+      this._setFlushIfNeeded();
     });
+  }
+
+  private _setFlushIfNeeded(): void {
+    if (this._events.length >= this._options.maxCachedEvents) {
+      this.flush(); // # of events exceeds the limit, flush them.
+    } else if (this._flushTimer === null) {
+      // Not ready to flush them and no timeout yet, then set the timeout
+      this._flushTimer = setTimeout(() => {
+        this.flush();
+      }, this._options.uploadIntervalInSec * 1000);
+    }
+    // Else, do nothing - the flush timer is already going
   }
 
   /** Add platform dependent field onto event. */

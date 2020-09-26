@@ -20,7 +20,7 @@ export class SimpleClient implements Client<Options> {
    */
   public constructor(apiKey: string, options: Partial<Options> = {}) {
     this._apiKey = apiKey;
-    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._options = { ...DEFAULT_OPTIONS, ...options };
     this._transport = this._options.transportClass || setupTransportFromOptions(this._options);
     this._setUpLogging();
   }
