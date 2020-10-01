@@ -1,7 +1,7 @@
-import { Client, Event, Options, Response, RetryClass } from '@amplitude/types';
+import { Client, Event, Options, Response, RetryClass, SKIPPED_RESPONSE } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
-import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS, SKIPPED_RESPONSE } from './constants';
+import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
