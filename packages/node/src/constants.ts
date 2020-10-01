@@ -1,8 +1,5 @@
 import { Options, LogLevel } from '@amplitude/types';
-// constants related to this instance of the SDK
-// TODO(Kelvin): Why did this break typescript compilation?
-// export { version as SDK_VERSION } from '../package.json';
-export const SDK_VERSION = '1.0.1';
+export { version as SDK_VERSION } from '../package.json';
 export const SDK_NAME = 'amplitude-node';
 export const AMPLITUDE_SERVER_URL = 'https://api2.amplitude.com/2/httpapi';
 export const BASE_RETRY_TIMEOUT = 100;
