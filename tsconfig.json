@@ -5,7 +5,6 @@
     "types": ["node"],
     "paths": {
       "@amplitude/*": ["*/src"]
-    },
-    "resolveJsonModule": true
+    }
   }
 }
