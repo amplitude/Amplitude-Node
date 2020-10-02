@@ -45,17 +45,17 @@ export class NodeClient implements Client<Options> {
     }
 
     // Check if there's 0 events, flush is not needed.
-    const arrayLength = this._events.length;
-    if (arrayLength === 0) {
+    if (this._events.length === 0) {
       return SKIPPED_RESPONSE;
     }
 
-    // Reset the response listeners and pull them out.
+    // Reset the events + response listeners and pull them out.
     const responseListeners = this._responseListeners;
     this._responseListeners = [];
+    const eventsToSend = this._events;
+    this._events = [];
 
     try {
-      const eventsToSend = this._events.splice(0, arrayLength);
       const response = await this._transportWithRetry.sendEventsWithRetry(eventsToSend);
       responseListeners.forEach(({ resolve }) => resolve(response));
       return response;

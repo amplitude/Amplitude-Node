@@ -4,7 +4,7 @@ export { version as SDK_VERSION } from '../package.json';
 export const SDK_NAME = 'amplitude-node';
 export const AMPLITUDE_SERVER_URL = 'https://api2.amplitude.com/2/httpapi';
 export const BASE_RETRY_TIMEOUT = 100;
-// The overidable constants of the node SDK
+// The overridable constants of the node SDK
 export const DEFAULT_OPTIONS: Options = {
   serverUrl: AMPLITUDE_SERVER_URL,
   debug: false,
