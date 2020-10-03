@@ -1,5 +1,6 @@
 import { Event } from './event';
 import { Options } from './options';
+import { Response } from './response';
 
 /**
  * User-Facing Amplitude SDK Client.
@@ -17,10 +18,10 @@ export interface Client<O extends Options = Options> {
    *
    * @param event The event to send to Amplitude.
    */
-  logEvent(event: Event): void;
+  logEvent(event: Event): Promise<Response>;
 
   /**
    * Flush and send all the events which haven't been sent.
    */
-  flush(): void;
+  flush(): Promise<Response>;
 }
