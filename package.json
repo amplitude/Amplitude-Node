@@ -11,6 +11,7 @@
     "lint": "lerna run --stream --concurrency 1 lint"
   },
   "workspaces": [
+    "packages/identity-manager",
     "packages/node",
     "packages/types",
     "packages/typescript",

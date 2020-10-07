@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "Utility functions for the Amplitude JavaScript SDK",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
-  "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/utils",
+  "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/identity-manager",
   "author": "Amplitude Inc",
   "license": "MIT",
   "engines": {
@@ -16,7 +16,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@amplitude/types": "^1.0.3"
+    "@amplitude/types": "^1.0.3",
+    "@amplitude/utils": "^1.0.3"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
