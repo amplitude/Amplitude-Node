@@ -1,4 +1,4 @@
-import { getGlobalAmplitudeNamespace, AMPLITUDE_DEFAULT_INSTANCE } from '@amplitude/utils';
+import { getGlobalAmplitudeNamespace, AMPLITUDE_DEFAULT_INSTANCE, logger } from '@amplitude/utils';
 import { Identity } from './identity';
 
 class IdentityManager {
@@ -12,6 +12,15 @@ class IdentityManager {
     }
 
     return identity;
+  }
+
+  /** Resets an instance's identity */
+  public resetInstance(instanceName: string = AMPLITUDE_DEFAULT_INSTANCE): void {
+    if (!this._instanceMap.has(instanceName)) {
+      logger.warn(`Did not find a identity to reset for ${instanceName}`);
+    } else {
+      this._instanceMap.delete(instanceName);
+    }
   }
 }
 
