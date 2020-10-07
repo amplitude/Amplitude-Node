@@ -5,7 +5,8 @@ export class Identity {
   private _userId: string | null = null;
 
   public initializeDeviceId(deviceId: string | null = null): string {
-    const deviceIdToUse: string = deviceId == null ? generateBase36Id() : deviceId;
+    const shouldUseGivenId = typeof deviceId === 'string' && deviceId.length > 0;
+    const deviceIdToUse: string = shouldUseGivenId ? generateBase36Id() : deviceId;
 
     if (this._deviceId == null) {
       this._deviceId = deviceIdToUse;
