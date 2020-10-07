@@ -1,3 +1,3 @@
 export { logger } from './logger';
-export { asyncSleep } from './misc';
+export { asyncSleep, getGlobalAmplitudeNamespace } from './misc';
 export { collectInvalidEventIndices } from './response';
