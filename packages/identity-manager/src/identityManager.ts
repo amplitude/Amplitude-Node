@@ -14,7 +14,11 @@ class IdentityManager {
     return identity;
   }
 
-  /** Resets an instance's identity */
+  /**
+   *  Resets an instance's identity.
+   *  Warning: Use only if you are sure that future events should not be attributed to the same user.
+   *  Previous user properties will be lost. New events will not appear in a new user stream.
+   */
   public resetInstance(instanceName: string = AMPLITUDE_DEFAULT_INSTANCE): void {
     if (!this._instanceMap.has(instanceName)) {
       logger.warn(`Did not find a identity to reset for ${instanceName}`);
