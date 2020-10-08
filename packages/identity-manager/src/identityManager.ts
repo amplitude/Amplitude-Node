@@ -6,10 +6,13 @@ import { DefaultIdentity } from './identity';
 class IdentityManager {
   private _instanceMap: Map<string, Identity> = new Map<string, Identity>();
 
-  public getInstance(instanceName: string = DEFAULT_IDENTITY_INSTANCE): Identity {
+  public getInstance(
+    instanceName: string = DEFAULT_IDENTITY_INSTANCE,
+    optionalFallbackIdentity: Identity | null = null,
+  ): Identity {
     let identity = this._instanceMap.get(instanceName);
     if (identity == undefined) {
-      identity = new DefaultIdentity();
+      identity = optionalFallbackIdentity !== null ? optionalFallbackIdentity : new DefaultIdentity();
       this._instanceMap.set(instanceName, identity);
     }
 
