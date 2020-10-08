@@ -5,7 +5,7 @@
   <br />
 </p>
 
-[![npm version](https://badge.fury.io/js/%40amplitude%2Fidentity-manager.svg)](https://badge.fury.io/js/%40amplitude%2Fidentity-manager)
+[![npm version](https://badge.fury.io/js/%40amplitude%2Fidentity.svg)](https://badge.fury.io/js/%40amplitude%2Fidentity)
 
 # General
 "Identity Manager for JS-based SDK's to help track device and user ID's"
