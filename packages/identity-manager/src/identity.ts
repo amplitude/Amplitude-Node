@@ -1,6 +1,7 @@
 import { logger, generateBase36Id } from '@amplitude/utils';
+import { Identity } from '@amplitude/types';
 
-export class Identity {
+export class DefaultIdentity implements Identity {
   private _deviceId: string | null = null;
   private _userId: string | null = null;
 

@@ -1,2 +1,2 @@
-export { Identity } from './identity';
+export { DefaultIdentity } from './identity';
 export { identityManager } from './identityManager';
