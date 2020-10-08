@@ -8,4 +8,4 @@
 [![npm version](https://badge.fury.io/js/%40amplitude%2Fidentity-manager.svg)](https://badge.fury.io/js/%40amplitude%2Fidentity-manager)
 
 # General
-Identity Manager for JS-based SDK's.
+"Identity Manager for JS-based SDK's to help track device and user ID's"
