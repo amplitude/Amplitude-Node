@@ -21,11 +21,18 @@ class IdentityManager {
    *  Warning: Use only if you are sure that future events should not be attributed to the same user.
    *  Previous user properties will be lost. New events will not appear in a the original user stream.
    */
-  public resetInstance(instanceName: string = DEFAULT_IDENTITY_INSTANCE): void {
+  public resetInstance(
+    instanceName: string = DEFAULT_IDENTITY_INSTANCE,
+    optionalNewIdentity: Identity | null = null,
+  ): void {
     if (!this._instanceMap.has(instanceName)) {
       logger.warn(`Did not find a identity to reset for ${instanceName}`);
     } else {
       this._instanceMap.delete(instanceName);
+    }
+
+    if (optionalNewIdentity !== null) {
+      this._instanceMap.set(instanceName, optionalNewIdentity);
     }
   }
 }
