@@ -1,5 +1,5 @@
-import { getGlobalAmplitudeNamespace, logger } from '@amplitude/utils';
-import { Identity, DEFAULT_IDENTITY_INSTANCE } from '@amplitude/types';
+import { getGlobalAmplitudeNamespace, generateBase36Id, logger } from '@amplitude/utils';
+import { Identity, IdentityListener, DEFAULT_IDENTITY_INSTANCE } from '@amplitude/types';
 
 import { DefaultIdentity } from './identity';
 
@@ -28,14 +28,22 @@ class IdentityManager {
     instanceName: string = DEFAULT_IDENTITY_INSTANCE,
     optionalNewIdentity: Identity | null = null,
   ): void {
-    if (!this._instanceMap.has(instanceName)) {
+    const oldIdentity = this._instanceMap.get(instanceName);
+    const oldListeners: Array<IdentityListener> = oldIdentity?.getIdentityListeners() || [];
+    if (!oldIdentity) {
       logger.warn(`Did not find a identity to reset for ${instanceName}`);
     } else {
       this._instanceMap.delete(instanceName);
     }
 
-    if (optionalNewIdentity !== null) {
-      this._instanceMap.set(instanceName, optionalNewIdentity);
+    const newIdentity = optionalNewIdentity !== null ? optionalNewIdentity : new DefaultIdentity();
+    this._instanceMap.set(instanceName, newIdentity);
+
+    if (oldListeners.length > 0) {
+      // Add the old listeners and proactively initialize the device ID
+      // So that the listeners know that the device ID has been reset
+      newIdentity.addIdentityListener(...oldListeners);
+      newIdentity.initializeDeviceId(generateBase36Id());
     }
   }
 }

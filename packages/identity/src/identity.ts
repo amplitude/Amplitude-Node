@@ -1,9 +1,10 @@
 import { logger, generateBase36Id } from '@amplitude/utils';
-import { Identity } from '@amplitude/types';
+import { Identity, IdentityListener } from '@amplitude/types';
 
 export class DefaultIdentity implements Identity {
   private _deviceId: string | null = null;
   private _userId: string | null = null;
+  private _identityListeners: Array<IdentityListener> = [];
 
   /**
    * Initializes a device ID for this instance (or takes the one passed in).
@@ -29,6 +30,7 @@ export class DefaultIdentity implements Identity {
       }
 
       this._deviceId = deviceIdToUse;
+      this._alertIdentityListeners();
     } else {
       logger.warn('Cannot set device ID twice for same identity. Skipping operation.');
     }
@@ -54,10 +56,34 @@ export class DefaultIdentity implements Identity {
       this._userId = String(userId);
     } else {
       logger.warn('User ID did not have correct type. Skipping operation.');
+      return;
     }
+
+    this._alertIdentityListeners();
   }
 
   public getUserId(): string | null {
     return this._userId;
+  }
+
+  private _alertIdentityListeners(): void {
+    if (this._deviceId == null) {
+      // If there was no device ID, create one and let
+      // initializeDeviceID re-alert this function
+      this.initializeDeviceId();
+    } else {
+      for (let listener of this._identityListeners) {
+        listener(this._deviceId, this._userId);
+      }
+    }
+  }
+
+  public addIdentityListener(...listeners: Array<IdentityListener>): void {
+    this._identityListeners.push(...listeners);
+  }
+
+  public getIdentityListeners(): Array<IdentityListener> {
+    // Return a copy of the listeners
+    return Array.from(this._identityListeners);
   }
 }
