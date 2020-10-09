@@ -1,4 +1,4 @@
-import { getGlobalAmplitudeNamespace, generateBase36Id, logger } from '@amplitude/utils';
+import { getGlobalAmplitudeNamespace, logger } from '@amplitude/utils';
 import { Identity, IdentityListener, DEFAULT_IDENTITY_INSTANCE } from '@amplitude/types';
 
 import { DefaultIdentity } from './identity';
@@ -43,7 +43,7 @@ class IdentityManager {
       // Add the old listeners and proactively initialize the device ID
       // So that the listeners know that the device ID has been reset
       newIdentity.addIdentityListener(...oldListeners);
-      newIdentity.initializeDeviceId(generateBase36Id());
+      newIdentity.initializeDeviceId(DefaultIdentity.generateDefaultId());
     }
   }
 }

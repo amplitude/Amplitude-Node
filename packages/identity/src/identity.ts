@@ -6,6 +6,10 @@ export class DefaultIdentity implements Identity {
   private _userId: string | null = null;
   private _identityListeners: Array<IdentityListener> = [];
 
+  public static generateDefaultId = () => {
+    return generateBase36Id();
+  };
+
   /**
    * Initializes a device ID for this instance (or takes the one passed in).
    *
@@ -26,7 +30,7 @@ export class DefaultIdentity implements Identity {
         // type safety - in case a number gets passed in.
         deviceIdToUse = String(deviceId);
       } else {
-        deviceIdToUse = generateBase36Id();
+        deviceIdToUse = DefaultIdentity.generateDefaultId();
       }
 
       this._deviceId = deviceIdToUse;
