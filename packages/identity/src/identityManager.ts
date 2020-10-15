@@ -36,14 +36,24 @@ class IdentityManager {
       this._instanceMap.delete(instanceName);
     }
 
-    const newIdentity = optionalNewIdentity !== null ? optionalNewIdentity : new DefaultIdentity();
+    let newIdentity;
+    if (optionalNewIdentity !== null) {
+      newIdentity = optionalNewIdentity;
+    } else {
+      newIdentity = new DefaultIdentity();
+      newIdentity.initializeDeviceId();
+    }
+
     this._instanceMap.set(instanceName, newIdentity);
 
     if (oldListeners.length > 0) {
-      // Add the old listeners and proactively initialize the device ID
-      // So that the listeners know that the device ID has been reset
+      // Actively call the old listeners for the new identity
+      for (let listener of oldListeners) {
+        listener(newIdentity.getDeviceId(), newIdentity.getUserId());
+      }
+
+      // Add the old listeners
       newIdentity.addIdentityListener(...oldListeners);
-      newIdentity.initializeDeviceId(DefaultIdentity.generateDefaultId());
     }
   }
 }
