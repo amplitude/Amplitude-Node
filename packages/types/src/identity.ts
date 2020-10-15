@@ -9,7 +9,7 @@ export type IdentityListener = (deviceId: string, userId: string | null) => any;
  */
 export interface Identity {
   /** Create a default and random device ID and set the identity's device ID */
-  initializeDeviceId(optionalInitialDeviceId: string | undefined): string;
+  initializeDeviceId(optionalInitialDeviceId?: string): string;
 
   /** Get the device ID of identity, if it exists */
   getDeviceId(): string | null;
