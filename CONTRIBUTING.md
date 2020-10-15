@@ -1,4 +1,4 @@
-# Contributing to the Amplitude SDK for JavaScript
+# Contributing to the Amplitude SDK for Node
 
 🎉 Thanks for your interest in contributing! 🎉
 
