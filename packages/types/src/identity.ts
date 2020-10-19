@@ -12,10 +12,10 @@ export interface Identity {
   initializeDeviceId(optionalInitialDeviceId?: string): string;
 
   /** Get the device ID of identity, if it exists */
-  getDeviceId(): string | null;
+  getDeviceId(): string;
 
   /** Set the User ID of this identity */
-  setUserId(newUserId: string): void;
+  setUserId(newUserId?: string | null): void;
 
   /** Get the User ID of the identity, if it exists */
   getUserId(): string | null;

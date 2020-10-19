@@ -21,23 +21,25 @@ export class DefaultIdentity implements Identity {
    */
   public initializeDeviceId(deviceId: string = ''): string {
     // Only try to set the device ID if the deviceID is not already set.
-    if (this._deviceId == null) {
-      let deviceIdToUse: string = '';
-
-      if (typeof deviceId === 'string' && deviceId.length > 0) {
-        deviceIdToUse = deviceId;
-      } else if (typeof deviceId === 'number') {
-        // type safety - in case a number gets passed in.
-        deviceIdToUse = String(deviceId);
-      } else {
-        deviceIdToUse = DefaultIdentity.generateDefaultId();
-      }
-
-      this._deviceId = deviceIdToUse;
-      this._alertIdentityListeners();
-    } else {
+    if (this._deviceId !== null) {
       logger.warn('Cannot set device ID twice for same identity. Skipping operation.');
+
+      return this._deviceId;
     }
+
+    let deviceIdToUse: string = '';
+
+    if (typeof deviceId === 'string' && deviceId.length > 0) {
+      deviceIdToUse = deviceId;
+    } else if (typeof deviceId === 'number') {
+      // type safety - in case a number gets passed in.
+      deviceIdToUse = String(deviceId);
+    } else {
+      deviceIdToUse = DefaultIdentity.generateDefaultId();
+    }
+
+    this._deviceId = deviceIdToUse;
+    this._alertIdentityListeners();
 
     return this._deviceId;
   }
@@ -52,12 +54,14 @@ export class DefaultIdentity implements Identity {
     }
   }
 
-  public setUserId(userId: string): void {
+  public setUserId(userId: string | null = null): void {
     if (typeof userId === 'string') {
       this._userId = userId;
     } else if (typeof userId === 'number') {
       // type safety - in case a number gets passed in
       this._userId = String(userId);
+    } else if (userId == null) {
+      this._userId = null;
     } else {
       logger.warn('User ID did not have correct type. Skipping operation.');
       return;
