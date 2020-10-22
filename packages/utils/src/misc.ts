@@ -15,7 +15,7 @@ const fallbackGlobalObject = {};
  *
  * @returns Global scope object
  */
-export function getGlobalObject(): any {
+export const getGlobalObject = (): any => {
   return isNodeEnv()
     ? global
     : typeof window !== 'undefined'
@@ -23,7 +23,14 @@ export function getGlobalObject(): any {
     : typeof self !== 'undefined'
     ? self
     : fallbackGlobalObject;
-}
+};
+
+export const getGlobalAmplitudeNamespace = (): any => {
+  const global = getGlobalObject();
+  global.__AMPLITUDE__ = global.__AMPLITUDE__ || {};
+
+  return global.__AMPLITUDE__;
+};
 
 /**
  * A promise-based way to sleep for x millseconds, then queue ourselves back to the
@@ -31,6 +38,6 @@ export function getGlobalObject(): any {
  *
  * @param milliseconds The number of milliseconds to wait for
  */
-export function asyncSleep(milliseconds: number): Promise<void> {
+export const asyncSleep = (milliseconds: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
+};

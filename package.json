@@ -12,6 +12,7 @@
     "test": "lerna run --stream --concurrency 1 test"
   },
   "workspaces": [
+    "packages/identity",
     "packages/node",
     "packages/types",
     "packages/typescript",

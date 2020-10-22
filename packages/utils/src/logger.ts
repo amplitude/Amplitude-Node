@@ -1,8 +1,8 @@
 import { LogLevel } from '@amplitude/types';
-import { getGlobalObject } from './misc';
+import { getGlobalAmplitudeNamespace } from './misc';
 
 // TODO: Type the global constant
-const global = getGlobalObject();
+const globalNamespace = getGlobalAmplitudeNamespace();
 
 /** Prefix for logging strings */
 const PREFIX = 'Amplitude Logger ';
@@ -53,7 +53,6 @@ class Logger {
 }
 
 // Ensure we only have a single logger instance, even if multiple versions of @amplitude/utils are being used
-global.__AMPLITUDE__ = global.__AMPLITUDE__ || {};
-const logger = (global.__AMPLITUDE__.logger as Logger) || (global.__AMPLITUDE__.logger = new Logger());
+const logger = (globalNamespace.logger as Logger) || (globalNamespace.logger = new Logger());
 
 export { logger };
