@@ -25,10 +25,10 @@ export const getGlobalObject = (): any => {
     : fallbackGlobalObject;
 };
 
-const global = getGlobalObject();
-global.__AMPLITUDE__ = global.__AMPLITUDE__ || {};
-
 export const getGlobalAmplitudeNamespace = (): any => {
+  const global = getGlobalObject();
+  global.__AMPLITUDE__ = global.__AMPLITUDE__ || {};
+
   return global.__AMPLITUDE__;
 };
 
