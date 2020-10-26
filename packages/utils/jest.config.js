@@ -1,4 +1,10 @@
+const baseConfig = require('../../jest.config.js');
+const package = require('./package');
+
 module.exports = {
-  preset: 'ts-jest',
+  ...baseConfig,
+  displayName: package.name,
+  name: package.name,
+  rootDir: '.',
   testEnvironment: 'node',
 };
