@@ -4,8 +4,8 @@
  * @returns Answer to given question
  */
 export function isNodeEnv(): boolean {
-  // tslint:disable:strict-type-predicates
-  return Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]';
+  return process?.versions?.node !== undefined;
+}
 }
 
 const fallbackGlobalObject = {};
