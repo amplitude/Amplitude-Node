@@ -1,11 +1,19 @@
 /**
- * Checks whether we're in the Node.js or Browser environment
+ * Checks whether we're in a Node.js environment
  *
  * @returns Answer to given question
  */
 export function isNodeEnv(): boolean {
   return process?.versions?.node !== undefined;
 }
+
+/**
+ * Checks whether we're in a browser environment
+ *
+ * @returns Answer to given question
+ */
+export function isBrowserEnv(): boolean {
+  return window?.document !== undefined;
 }
 
 const fallbackGlobalObject = {};
