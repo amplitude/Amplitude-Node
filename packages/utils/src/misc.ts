@@ -4,7 +4,7 @@
  * @returns Answer to given question
  */
 export function isNodeEnv(): boolean {
-  return process?.versions?.node !== undefined;
+  return typeof process === 'object' && process?.versions?.node !== undefined;
 }
 
 /**
@@ -13,7 +13,7 @@ export function isNodeEnv(): boolean {
  * @returns Answer to given question
  */
 export function isBrowserEnv(): boolean {
-  return window?.document !== undefined;
+  return typeof window === 'object' && window?.document !== undefined;
 }
 
 const fallbackGlobalObject = {};
