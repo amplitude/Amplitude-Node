@@ -49,3 +49,15 @@ export const getGlobalAmplitudeNamespace = (): any => {
 export const asyncSleep = (milliseconds: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
+
+/**
+ * Fixes browser edge case where Prototype.js injects Array.prototype.toJSON and breaks the built-in JSON.stringify()
+ *
+ */
+export const prototypeJsFix = (): void => {
+  // @ts-ignore: No community Prototype.js typing
+  if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON) {
+    // @ts-ignore: No community Prototype.js typing
+    delete Array.prototype.toJSON;
+  }
+};
