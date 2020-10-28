@@ -1,11 +1,19 @@
 /**
- * Checks whether we're in the Node.js or Browser environment
+ * Checks whether we're in a Node.js environment
  *
  * @returns Answer to given question
  */
 export function isNodeEnv(): boolean {
-  // tslint:disable:strict-type-predicates
-  return Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]';
+  return typeof process === 'object' && process?.versions?.node !== undefined;
+}
+
+/**
+ * Checks whether we're in a browser environment
+ *
+ * @returns Answer to given question
+ */
+export function isBrowserEnv(): boolean {
+  return typeof window === 'object' && window?.document !== undefined;
 }
 
 const fallbackGlobalObject = {};
