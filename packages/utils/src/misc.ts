@@ -53,11 +53,14 @@ export const asyncSleep = (milliseconds: number): Promise<void> => {
 /**
  * Fixes browser edge case where Prototype.js injects Array.prototype.toJSON and breaks the built-in JSON.stringify()
  *
+ * @returns true if Array.prototype.toJSON was deleted, false if not
  */
-export const prototypeJsFix = (): void => {
+export const prototypeJsFix = (): boolean => {
   // @ts-ignore: No community Prototype.js typing
-  if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON) {
+  if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON !== undefined) {
     // @ts-ignore: No community Prototype.js typing
     delete Array.prototype.toJSON;
+    return true;
   }
+  return false;
 };
