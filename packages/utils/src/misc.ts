@@ -56,11 +56,20 @@ export const asyncSleep = (milliseconds: number): Promise<void> => {
  * @returns true if Array.prototype.toJSON was deleted, false if not
  */
 export const prototypeJsFix = (): boolean => {
-  // @ts-ignore: No community Prototype.js typing
-  if (isBrowserEnv() && window.Prototype !== undefined && Array.prototype.toJSON !== undefined) {
-    // @ts-ignore: No community Prototype.js typing
-    delete Array.prototype.toJSON;
-    return true;
+  // Augment and cast built-ins to represent Prototype.js injection
+  interface Window {
+    Prototype?: Object;
+  }
+  interface ArrayConstructor {
+    prototype?: { toJSON?: Function };
+  }
+  if (isBrowserEnv()) {
+    const augmentedWindow = window as Window;
+    const augmentedArray = Array as ArrayConstructor;
+    if (augmentedWindow.Prototype !== undefined && augmentedArray.prototype?.toJSON !== undefined) {
+      delete augmentedArray.prototype.toJSON;
+      return true;
+    }
   }
   return false;
 };

@@ -1,7 +1,7 @@
 import { isBrowserEnv, isNodeEnv, prototypeJsFix } from '@amplitude/utils';
 import { JSDOM, DOMWindow } from 'jsdom';
 
-// Extend built-ins APIs for prototypeJsFix tests
+// Augment built-ins APIs for prototypeJsFix tests
 declare global {
   namespace NodeJS {
     interface Global {
