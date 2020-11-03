@@ -60,11 +60,11 @@ export class Identify {
   }
 
   public postInsert(property: string, value: ValidPropertyType): Identify {
-    this._safeSet(IdentifyOperation.PREINSERT, property, value);
+    this._safeSet(IdentifyOperation.POSTINSERT, property, value);
     return this;
   }
 
-  public preinsert(property: string, value: ValidPropertyType): Identify {
+  public preInsert(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.PREINSERT, property, value);
     return this;
   }
@@ -133,8 +133,9 @@ export class Identify {
             return false;
           }
         }
-      } else {
-        return !(typeof value === 'number' || typeof value === 'string');
+      } else if (!(typeof value === 'number' || typeof value === 'string')) {
+        Identify.warn(operation, 'invalid value type ', typeof value, '. Skipping operation');
+        return false;
       }
     }
 
