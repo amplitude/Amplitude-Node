@@ -18,5 +18,4 @@ export const DEFAULT_OPTIONS: Options = {
   transportClass: null,
   // By default, events flush on the next event loop
   uploadIntervalInSec: 0,
-  retry: ()
 };
