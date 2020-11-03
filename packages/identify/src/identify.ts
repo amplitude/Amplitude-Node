@@ -1,4 +1,11 @@
-import { SpecialEventType, IdentifyEvent, IdentifyOperation, IdentifyUserProperties } from '@amplitude/types';
+import {
+  SpecialEventType,
+  IdentifyEvent,
+  IdentifyOperation,
+  IdentifyUserProperties,
+  ValidPropertyType,
+} from '@amplitude/types';
+import { logger } from '@amplitude/utils';
 
 // A special value used by this class when a value is not needed by identify
 // Ex. for unset, we set $unset: { 'example_user_property': '-' }
@@ -8,6 +15,10 @@ export class Identify {
   private _hasClearAll: boolean = false;
   private _userPropertySet: Set<string> = new Set<string>();
   private _userProperties: IdentifyUserProperties = {};
+
+  static warn(operation: IdentifyOperation, ...msgs: any[]): void {
+    return logger.warn('On Identify operation ', operation, ': ', ...msgs);
+  }
 
   public toEvent(): IdentifyEvent {
     return {
@@ -28,37 +39,37 @@ export class Identify {
     return userPropertiesCopy;
   }
 
-  public set(property: string, value: string | number | Array<string | number>): Identify {
+  public set(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.SET, property, value);
     return this;
   }
 
-  public setOnce(property: string, value: string | number | Array<string | number>): Identify {
+  public setOnce(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.SET_ONCE, property, value);
     return this;
   }
 
-  public append(property: string, value: string | number | Array<string | number>): Identify {
+  public append(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.APPEND, property, value);
     return this;
   }
 
-  public prepend(property: string, value: string | number | Array<string | number>): Identify {
+  public prepend(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.PREPEND, property, value);
     return this;
   }
 
-  public postInsert(property: string, value: string | number | Array<string | number>): Identify {
+  public postInsert(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.PREINSERT, property, value);
     return this;
   }
 
-  public preinsert(property: string, value: string | number | Array<string | number>): Identify {
+  public preinsert(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.PREINSERT, property, value);
     return this;
   }
 
-  public remove(property: string, value: string | number | Array<string | number>): Identify {
+  public remove(property: string, value: ValidPropertyType): Identify {
     this._safeSet(IdentifyOperation.REMOVE, property, value);
     return this;
   }
@@ -95,10 +106,16 @@ export class Identify {
 
   private _validate(operation: IdentifyOperation, property: string, value: any): boolean {
     if (this._hasClearAll) {
+      Identify.warn(operation, 'clear all already set. Skipping operation');
       return false;
     }
 
+    if (typeof property !== 'string') {
+      Identify.warn(operation, 'expected string for property but got: ', typeof property, '. Skipping operation');
+    }
+
     if (this._userPropertySet.has(property)) {
+      Identify.warn(operation, 'property ', property, ' already used. Skipping operation');
       return false;
     }
 
@@ -112,6 +129,7 @@ export class Identify {
       if (Array.isArray(value)) {
         for (let valueElement of value) {
           if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
+            Identify.warn(operation, 'invalid array element type ', typeof valueElement, '. Skipping operation');
             return false;
           }
         }

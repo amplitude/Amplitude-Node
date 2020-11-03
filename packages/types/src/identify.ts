@@ -20,8 +20,10 @@ export enum IdentifyOperation {
   CLEAR_ALL = '$clearAll',
 }
 
+export type ValidPropertyType = number | string | Array<string | number>;
+
 type BaseOperationConfig = {
-  [key: string]: number | string | Array<string | number>;
+  [key: string]: ValidPropertyType;
 };
 
 export type IdentifyUserProperties = {
@@ -29,7 +31,7 @@ export type IdentifyUserProperties = {
   [IdentifyOperation.ADD]?: { [key: string]: number };
 
   // These don't actually read the key
-  [IdentifyOperation.UNSET]?: { [key: string]: any };
+  [IdentifyOperation.UNSET]?: BaseOperationConfig;
   [IdentifyOperation.CLEAR_ALL]?: any;
 
   // These operations can take numbers, strings, or arrays of both.
