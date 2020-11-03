@@ -1,0 +1,23 @@
+{
+  "name": "@amplitude/eslint-config-typescript",
+  "version": "1.0.3",
+  "description": "ESLint config for Amplitude Typescript projects",
+  "keywords": [
+    "eslint",
+    "amplitude"
+  ],
+  "author": "Amplitude Inc",
+  "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/eslint-config-typescript",
+  "license": "MIT",
+  "main": "index.js",
+  "publishConfig": {
+    "registry": "https://registry.yarnpkg.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amplitude/Amplitude-Node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/amplitude/Amplitude-Node/issues"
+  }
+}
