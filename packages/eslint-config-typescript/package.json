@@ -1,7 +1,7 @@
 {
   "name": "@amplitude/eslint-config-typescript",
   "version": "1.0.3",
-  "description": "eslint config for Amplitude Typescript projects",
+  "description": "ESLint config for Amplitude Typescript projects",
   "keywords": [
     "eslint",
     "amplitude"

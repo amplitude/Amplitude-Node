@@ -1,11 +1,7 @@
 # `@amplitude/eslint-config-typescript`
 
-eslint config for Amplitude Typescript projects
+ESLint config for Amplitude Typescript projects
 
 ## Usage
 
-```
-const eslintConfigTypescript = require('eslint-config-typescript');
-
-// TODO: DEMONSTRATE API
-```
+Please see ESLint's [shareable configs](https://eslint.org/docs/developer-guide/shareable-configs) page.
