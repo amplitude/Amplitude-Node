@@ -25,7 +25,7 @@ export interface Options {
   /** The maximum events in the buffer */
   maxCachedEvents: number;
 
-  /** The maximum number of times a server will attempt to retry sending events after failiure*/
+  /** The maximum number of times a server will attempt to retry sending events after failiure */
   maxRetries: number;
 
   /**
