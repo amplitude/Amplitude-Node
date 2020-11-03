@@ -15,7 +15,7 @@ const BASE_RESPONSE: Response = {
 };
 
 describe('response utils: collecting invalid responses', () => {
-  it('should not collect reponses off non-invalid reponses', () => {
+  it('should not collect responses from non-invalid responses', () => {
     // Type cast because this isn't actually allowed in our typing
     const response: Response = {
       ...BASE_RESPONSE,
@@ -26,7 +26,7 @@ describe('response utils: collecting invalid responses', () => {
     expect(invalidEvents).toStrictEqual([]);
   });
 
-  it('should collect responses off invalid fields', () => {
+  it('should collect responses from invalid fields', () => {
     const response: Response = {
       ...BASE_RESPONSE,
       body: {
@@ -39,7 +39,7 @@ describe('response utils: collecting invalid responses', () => {
     expect(invalidEvents).toStrictEqual([0, 1]);
   });
 
-  it('should collect responses off missing fields', () => {
+  it('should collect responses from missing fields', () => {
     const response: Response = {
       ...BASE_RESPONSE,
       body: {
