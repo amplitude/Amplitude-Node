@@ -1,5 +1,6 @@
 module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/build'],
+  presets: 'ts-jest',
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },

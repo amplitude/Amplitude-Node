@@ -1,4 +1,5 @@
 import { Response, Status } from '@amplitude/types';
+import { IncomingMessage } from 'http';
 
 /**
  * Collects the invalid event indices off a HTTP API v2 response
@@ -26,4 +27,88 @@ export const collectInvalidEventIndices = (response: Response): Array<number> =>
   }
 
   return Array.from(invalidEventIndices).sort();
+};
+
+/**
+ * Converts a http.IncomingMessage object into a Response object.
+ *
+ * @param httpRes The http response from the HTTP API.
+ * @returns Response a nicely typed and cased response object.
+ */
+export const mapHttpMessageToResponse = (httpRes: IncomingMessage): Response => {
+  const statusCode = httpRes.statusCode === undefined ? 0 : httpRes.statusCode;
+  const status = Status.fromHttpCode(statusCode);
+
+  return {
+    status,
+    statusCode,
+  };
+};
+
+/**
+ * Converts the response from the HTTP V2 API into a Response object.
+ * Should be used only if we are pointed towards the v2 api.
+ *
+ * @param responseJSON The response body from the HTTP V2 API, as a JSON blob
+ * @returns Response a nicely typed and cased response object.
+ */
+export const mapJSONToResponse = (responseJSON: any): Response | null => {
+  if (typeof responseJSON !== 'object') {
+    return null;
+  }
+
+  const status = Status.fromHttpCode(responseJSON.code);
+  const statusCode = responseJSON.code;
+
+  switch (status) {
+    case Status.Success:
+      return {
+        status,
+        statusCode,
+        body: {
+          eventsIngested: responseJSON.events_ingested,
+          payloadSizeBytes: responseJSON.payload_size_bytes,
+          serverUploadTime: responseJSON.server_upload_time,
+        },
+      };
+
+    case Status.Invalid:
+      return {
+        status,
+        statusCode,
+        body: {
+          error: responseJSON.error || '',
+          missingField: responseJSON.missing_field ?? null,
+          eventsWithInvalidFields: responseJSON.events_with_invalid_fields || {},
+          eventsWithMissingFields: responseJSON.events_with_missing_fields || {},
+        },
+      };
+    case Status.PayloadTooLarge:
+      return {
+        status,
+        statusCode,
+        body: {
+          error: responseJSON.error ?? '',
+        },
+      };
+    case Status.RateLimit:
+      return {
+        status,
+        statusCode,
+        body: {
+          error: responseJSON.error || '',
+          epsThreshold: responseJSON.eps_threshold,
+          throttledDevices: responseJSON.throttled_devices || {},
+          throttledUsers: responseJSON.throttled_users || {},
+          exceededDailyQuotaDevices: responseJSON.exceeded_daily_quota_devices || {},
+          exceededDailyQuotaUsers: responseJSON.exceeded_daily_quota_users || {},
+          throttledEvents: responseJSON.throttled_events || [],
+        },
+      };
+    default:
+      return {
+        status,
+        statusCode,
+      };
+  }
 };
