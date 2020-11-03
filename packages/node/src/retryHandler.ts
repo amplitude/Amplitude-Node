@@ -1,6 +1,6 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
 import { HTTPTransport } from './transports';
-import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_MS } from './constants';
+import { DEFAULT_OPTIONS } from './constants';
 import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
 
 interface RetryMetadata {
@@ -216,6 +216,7 @@ export class RetryHandler implements RetryClass {
     let eventCount = eventsBuffer.length;
 
     let numRetries = 0;
+    let currentRetryTimeout = this._options.baseRetryTimeout;
     const maxRetries = this._options.maxRetries;
 
     while (numRetries < maxRetries) {
@@ -263,7 +264,8 @@ export class RetryHandler implements RetryClass {
       } catch {
         if (!isLastTry) {
           // If we haven't hit the retry limit, some Exponential backoff
-          await asyncSleep(BASE_RETRY_TIMEOUT_MS << numRetries); // Sleep for BASE_RETRY_TIMEOUT_MS * 2^(failed tries) ms
+          await asyncSleep(currentRetryTimeout); // Sleep for currentRetryTimeout. Time doubles for every failed try
+          currentRetryTimeout *= 2;
         }
       }
     }
