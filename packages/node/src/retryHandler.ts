@@ -1,6 +1,6 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
 import { HTTPTransport } from './transports';
-import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
+import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_MS } from './constants';
 import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
 
 interface RetryMetadata {
@@ -263,7 +263,7 @@ export class RetryHandler implements RetryClass {
       } catch {
         if (!isLastTry) {
           // If we haven't hit the retry limit, some Exponential backoff
-          await asyncSleep(BASE_RETRY_TIMEOUT << numRetries); // Sleep for BASE_RETRY_TIMEOUT * 2^(failed tries) ms
+          await asyncSleep(BASE_RETRY_TIMEOUT_MS << numRetries); // Sleep for BASE_RETRY_TIMEOUT_MS * 2^(failed tries) ms
         }
       }
     }
