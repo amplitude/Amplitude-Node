@@ -16,7 +16,8 @@
     "packages/node",
     "packages/types",
     "packages/typescript",
-    "packages/utils"
+    "packages/utils",
+    "packages/eslint-config-typescript,"
   ],
   "devDependencies": {
     "eslint": "^7.0.0",
