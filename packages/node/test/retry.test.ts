@@ -1,4 +1,4 @@
-import { TestRetry, MOCK_MAX_RETRIES } from './mocks/retry';
+import { TestRetry, MOCK_RETRY_TIMEOUTS } from './mocks/retry';
 import { MockTransport } from './mocks/transport';
 import { Event, Status, Response, RetryClass } from '@amplitude/types';
 import { asyncSleep } from '@amplitude/utils';
@@ -44,8 +44,8 @@ describe('retry mechanisms layer', () => {
 
     expect(response.status).toBe(Status.RateLimit);
     expect(response.statusCode).toBe(429);
-    // One response goes out matching the initial send, MOCK_MAX_RETRIES for the retry layer
-    expect(transport.failCount).toBe(MOCK_MAX_RETRIES + 1);
+    // One response goes out matching the initial send, MOCK_RETRY_TIMEOUTS for the retry layer
+    expect(transport.failCount).toBe(MOCK_RETRY_TIMEOUTS.length + 1);
   });
 
   it('will not throttle user ids that are not throttled', async () => {
@@ -60,7 +60,7 @@ describe('retry mechanisms layer', () => {
     expect(response.status).toBe(Status.RateLimit);
     expect(response.statusCode).toBe(429);
     // One response goes out matching the initial send
-    expect(transport.failCount).toBe(MOCK_MAX_RETRIES + 1);
+    expect(transport.failCount).toBe(MOCK_RETRY_TIMEOUTS.length + 1);
     // One response goes out for the passing event not getting 'throttled'
     expect(transport.passCount).toBe(1);
   });

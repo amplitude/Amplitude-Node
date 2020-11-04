@@ -9,10 +9,9 @@ export const DEFAULT_OPTIONS: Options = {
   // 2kb is a safe estimate for a medium size event object. This keeps the SDK's memory footprint roughly
   // under 32 MB.
   maxCachedEvents: 16000,
-  maxRetries: 10,
-  baseRetryTimeout: 100,
   logLevel: LogLevel.None,
   optOut: false,
+  retryTimeouts: [100, 100, 200, 200, 400, 400, 800, 800, 1600, 1600, 3200, 3200],
   // The client will instantiate the retry/transport classes if not defined
   retryClass: null,
   transportClass: null,

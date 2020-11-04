@@ -56,7 +56,7 @@ export class RetryHandler implements RetryClass {
   }
 
   private _shouldRetryEvents(): boolean {
-    if (typeof this._options.maxRetries !== 'number' || this._options.maxRetries <= 0) {
+    if (this._options.retryTimeouts.length === 0) {
       return false;
     }
 
@@ -215,58 +215,41 @@ export class RetryHandler implements RetryClass {
 
     let eventCount = eventsBuffer.length;
 
-    let numRetries = 0;
-    let currentRetryTimeout = this._options.baseRetryTimeout;
-    const maxRetries = this._options.maxRetries;
+    for (let numRetries = 0; numRetries < this._options.retryTimeouts.length; numRetries++) {
+      const sleepDuration = this._options.retryTimeouts[numRetries];
+      await asyncSleep(sleepDuration);
+      const isLastTry = numRetries === this._options.retryTimeouts.length;
+      const eventsToRetry = eventsBuffer.slice(0, eventCount);
+      const { shouldRetry, shouldReduceEventCount, eventIndicesToRemove } = await this._retryEventsOnce(
+        userId,
+        deviceId,
+        eventsToRetry,
+      );
 
-    while (numRetries < maxRetries) {
-      numRetries += 1;
-      const isLastTry = numRetries === maxRetries;
+      if (eventIndicesToRemove.length > 0) {
+        let numEventsRemoved = 0;
+        // Reverse the indices so that splicing doesn't cause any indexing issues.
+        Array.from(eventIndicesToRemove)
+          .reverse()
+          .forEach(index => {
+            if (index < eventCount) {
+              eventsBuffer.splice(index, 1);
+              numEventsRemoved += 1;
+            }
+          });
 
-      try {
-        // Don't try any new events that came in, to prevent overwhelming the api servers
-        const eventsToRetry = eventsBuffer.slice(0, eventCount);
-        const { shouldRetry, shouldReduceEventCount, eventIndicesToRemove } = await this._retryEventsOnce(
-          userId,
-          deviceId,
-          eventsToRetry,
-        );
-
-        // Collect invalid event indices and remove them.
-        if (eventIndicesToRemove.length > 0) {
-          let numEventsRemoved = 0;
-          // Reverse the indices so that splicing doesn't cause any indexing issues.
-          Array.from(eventIndicesToRemove)
-            .reverse()
-            .forEach(index => {
-              if (index < eventCount) {
-                eventsBuffer.splice(index, 1);
-                numEventsRemoved += 1;
-              }
-            });
-
-          eventCount -= numEventsRemoved;
-          this._eventsInRetry -= eventCount;
-          if (eventCount < 1) {
-            break; // If we managed to remove all the events, break off early.
-          }
+        eventCount -= numEventsRemoved;
+        this._eventsInRetry -= eventCount;
+        if (eventCount < 1) {
+          break; // If we managed to remove all the events, break off early.
         }
+      }
+      if (!shouldRetry) {
+        break; // We ended!
+      }
 
-        if (!shouldRetry) {
-          break; // We ended!
-        }
-
-        if (shouldReduceEventCount && !isLastTry) {
-          eventCount = Math.max(eventCount >> 1, 1);
-        }
-
-        throw new Error(); // If we didn't end, continue to catch block.
-      } catch {
-        if (!isLastTry) {
-          // If we haven't hit the retry limit, some Exponential backoff
-          await asyncSleep(currentRetryTimeout); // Sleep for currentRetryTimeout. Time doubles for every failed try
-          currentRetryTimeout *= 2;
-        }
+      if (shouldReduceEventCount && !isLastTry) {
+        eventCount = Math.max(eventCount >> 1, 1);
       }
     }
 

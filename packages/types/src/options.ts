@@ -25,15 +25,12 @@ export interface Options {
   /** The maximum events in the buffer */
   maxCachedEvents: number;
 
-  /** The maximum number of times a server will attempt to retry sending events after failiure */
-  maxRetries: number;
-
   /**
-   * Base milliseconds failed events sending should wait until retrying.
-   * Each subsequent failed event sending will current the wait time by 2.
-   * (Example: 100ms -> 200ms -> 400ms -> 800ms -> ...)
+   *
+   * Determines # of retries for sending failed events and how long each retry to wait for (ms)
+   * An empty array means no retries
    */
-  baseRetryTimeout: number;
+  retryTimeouts: number[];
 
   /**
    * Whether you opt out from sending events.
