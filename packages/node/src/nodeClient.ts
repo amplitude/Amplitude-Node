@@ -42,6 +42,7 @@ export class NodeClient implements Client<Options> {
     // Clear the timeout
     if (this._flushTimer !== null) {
       clearTimeout(this._flushTimer);
+      this._flushTimer = null;
     }
 
     // Check if there's 0 events, flush is not needed.
