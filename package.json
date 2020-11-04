@@ -12,12 +12,12 @@
     "test": "lerna run --stream --concurrency 1 test"
   },
   "workspaces": [
+    "packages/eslint-config-typescript",
     "packages/identity",
     "packages/node",
     "packages/types",
     "packages/typescript",
-    "packages/utils",
-    "packages/eslint-config-typescript,"
+    "packages/utils"
   ],
   "devDependencies": {
     "eslint": "^7.0.0",
