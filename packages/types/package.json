@@ -37,7 +37,7 @@
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
     "fix:eslint": "eslint --fix 'src/**/*.ts'",
     "link:yarn": "yarn link",
-    "test": "jest --passWithNoTests"
+    "test": "echo 'Types directory has no logic and therefore no tests, skipping tests'"
   },
   "sideEffects": false
 }

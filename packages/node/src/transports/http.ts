@@ -1,11 +1,5 @@
-import {
-  Payload,
-  Response,
-  Transport,
-  TransportOptions,
-  mapJSONToResponse,
-  mapHttpMessageToResponse,
-} from '@amplitude/types';
+import { Payload, Response, Transport, TransportOptions } from '@amplitude/types';
+import { mapJSONToResponse, mapHttpMessageToResponse } from '@amplitude/utils';
 
 import * as http from 'http';
 import * as https from 'https';

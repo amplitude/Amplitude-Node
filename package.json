@@ -9,7 +9,7 @@
     "fix": "lerna run --stream --concurrency 1 fix",
     "link:yarn": "lerna run --stream --concurrency 1 link:yarn",
     "lint": "lerna run --stream --concurrency 1 lint",
-    "test": "lerna run --stream --concurrency 1 test"
+    "test": "lerna run test --stream --concurrency 9999"
   },
   "workspaces": [
     "packages/eslint-config-typescript",
@@ -21,7 +21,9 @@
   ],
   "devDependencies": {
     "eslint": "^7.0.0",
+    "jest": "^26.5.3",
     "lerna": "^3.20.2",
-    "prettier": "^1.17.0"
+    "prettier": "^1.17.0",
+    "ts-jest": "^26.2.0"
   }
 }
