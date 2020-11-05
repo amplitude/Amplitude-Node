@@ -9,6 +9,7 @@
     "fix": "lerna run --stream --concurrency 1 fix",
     "link:yarn": "lerna run --stream --concurrency 1 link:yarn",
     "lint": "lerna run --stream --concurrency 1 lint",
+    "prepare": "yarn build",
     "test": "lerna run test --stream --concurrency 9999"
   },
   "workspaces": [
