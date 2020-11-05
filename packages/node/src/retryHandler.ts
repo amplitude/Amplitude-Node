@@ -208,7 +208,7 @@ export class RetryHandler implements RetryClass {
 
   private async _retryEventsOnLoop(userId: string, deviceId: string): Promise<void> {
     const eventsBuffer = this._getRetryBuffer(userId, deviceId);
-    if (eventsBuffer === null || eventsBuffer.length > 0) {
+    if (eventsBuffer === null || eventsBuffer.length === 0) {
       this._cleanUpBuffer(userId, deviceId);
       return;
     }
