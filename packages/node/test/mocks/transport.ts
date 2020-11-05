@@ -15,8 +15,8 @@ export class TestTransport extends HTTPTransport {
     });
   }
 
-  public sendDummyPayload(): Promise<Response> {
-    return this.sendPayload({
+  public async sendDummyPayload(): Promise<Response> {
+    return await this.sendPayload({
       api_key: 'NOT_A_REAL_API_KEY',
       events: [],
     });
@@ -41,18 +41,18 @@ const DEFAULT_RESPONSE_BODY: Response = {
 // but does not actually send data. Used to support tests for *other* clases
 // (e.g. retry handler)
 export class MockTransport implements Transport {
-  private _failingId: string;
-  private _response: Response;
+  private readonly _failingId: string;
+  private readonly _response: Response;
   // The number of payloads that got failed
-  public failCount: number = 0;
+  public failCount = 0;
   // The number of payloads that "passed" to the server
-  public passCount: number = 0;
+  public passCount = 0;
   public constructor(failingId: string, response: Response | null) {
     this._failingId = failingId;
     this._response = response ?? DEFAULT_RESPONSE_BODY;
   }
 
-  public sendPayload(payload: Payload): Promise<Response> {
+  public async sendPayload(payload: Payload): Promise<Response> {
     const isMatch = payload.events.some(event => event.user_id === this._failingId);
     if (isMatch) {
       this.failCount += 1;

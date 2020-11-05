@@ -53,6 +53,10 @@ class Logger {
 }
 
 // Ensure we only have a single logger instance, even if multiple versions of @amplitude/utils are being used
-const logger = (globalNamespace.logger as Logger) || (globalNamespace.logger = new Logger());
+let logger: Logger = globalNamespace.logger as Logger;
+if (logger === undefined) {
+  logger = new Logger();
+  globalNamespace.logger = logger;
+}
 
 export { logger };

@@ -24,18 +24,22 @@ const fallbackGlobalObject = {};
  * @returns Global scope object
  */
 export const getGlobalObject = (): any => {
-  return isNodeEnv()
-    ? global
-    : typeof window !== 'undefined'
-    ? window
-    : typeof self !== 'undefined'
-    ? self
-    : fallbackGlobalObject;
+  if (isNodeEnv()) {
+    return global;
+  } else if (typeof window !== 'undefined') {
+    return window;
+  } else if (typeof self !== 'undefined') {
+    return self;
+  } else {
+    return fallbackGlobalObject;
+  }
 };
 
 export const getGlobalAmplitudeNamespace = (): any => {
   const global = getGlobalObject();
-  global.__AMPLITUDE__ = global.__AMPLITUDE__ || {};
+  if (global.__AMPLITUDE__ === undefined) {
+    global.__AMPLITUDE__ = {};
+  }
 
   return global.__AMPLITUDE__;
 };
@@ -46,8 +50,8 @@ export const getGlobalAmplitudeNamespace = (): any => {
  *
  * @param milliseconds The number of milliseconds to wait for
  */
-export const asyncSleep = (milliseconds: number): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
+export const asyncSleep = async (milliseconds: number): Promise<void> => {
+  return await new Promise(resolve => setTimeout(resolve, milliseconds));
 };
 
 /**
@@ -58,7 +62,7 @@ export const asyncSleep = (milliseconds: number): Promise<void> => {
 export const prototypeJsFix = (): boolean => {
   // Augment and cast built-ins to represent Prototype.js injection
   interface Window {
-    Prototype?: Object;
+    Prototype?: Record<string, any>;
   }
   interface ArrayConstructor {
     prototype?: { toJSON?: Function };

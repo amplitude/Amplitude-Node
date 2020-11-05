@@ -8,9 +8,9 @@ import { IncomingMessage } from 'http';
  * @param response A Response from sending an event payload
  * @returns An concatenated array of indices
  */
-export const collectInvalidEventIndices = (response: Response): Array<number> => {
+export const collectInvalidEventIndices = (response: Response): number[] => {
   const invalidEventIndices = new Set<number>();
-  if (response.status === Status.Invalid && response.body) {
+  if (response.status === Status.Invalid && response.body !== undefined) {
     const { eventsWithInvalidFields, eventsWithMissingFields } = response.body;
     Object.keys(eventsWithInvalidFields).forEach((field: string) => {
       const eventIndices = eventsWithInvalidFields[field] ?? [];
@@ -26,7 +26,7 @@ export const collectInvalidEventIndices = (response: Response): Array<number> =>
     });
   }
 
-  return Array.from(invalidEventIndices).sort();
+  return Array.from(invalidEventIndices).sort((numberOne, numberTwo) => numberOne - numberTwo);
 };
 
 /**

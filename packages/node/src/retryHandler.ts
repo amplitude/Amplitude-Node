@@ -3,6 +3,12 @@ import { HTTPTransport } from './transports';
 import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT } from './constants';
 import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
 
+interface RetryMetadata {
+  shouldRetry: boolean;
+  shouldReduceEventCount: boolean;
+  eventIndicesToRemove: number[];
+}
+
 export class RetryHandler implements RetryClass {
   protected readonly _apiKey: string;
 
@@ -117,14 +123,17 @@ export class RetryHandler implements RetryClass {
     if (response.status === Status.RateLimit && response.body !== undefined) {
       const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
       eventsToRetry = events.filter(({ user_id: userId, device_id: deviceId }) => {
-        return !(userId && exceededDailyQuotaUsers[userId]) && !(deviceId && exceededDailyQuotaDevices[deviceId]);
+        return (
+          !(userId !== undefined && userId in exceededDailyQuotaUsers) &&
+          !(deviceId !== undefined && deviceId in exceededDailyQuotaDevices)
+        );
       });
     } else if (response.status === Status.Invalid) {
       if (typeof response.body?.missingField === 'string' || events.length === 1) {
         // Return early if there's an issue with the entire payload
         // or if there's only one event and its invalid
         return;
-      } else if (response.body) {
+      } else if (response.body !== undefined) {
         const invalidEventIndices = new Set<number>(collectInvalidEventIndices(response));
         eventsToRetry = events.filter((_, index) => !invalidEventIndices.has(index));
       }
@@ -136,15 +145,15 @@ export class RetryHandler implements RetryClass {
 
     eventsToRetry.forEach((event: Event) => {
       const { user_id: userId = '', device_id: deviceId = '' } = event;
-      if (userId || deviceId) {
+      if (userId.length > 0 || deviceId.length > 0) {
         let deviceToBufferMap = this._idToBuffer.get(userId);
-        if (!deviceToBufferMap) {
+        if (deviceToBufferMap === undefined) {
           deviceToBufferMap = new Map<string, Event[]>();
           this._idToBuffer.set(userId, deviceToBufferMap);
         }
 
         let retryBuffer = deviceToBufferMap.get(deviceId);
-        if (!retryBuffer) {
+        if (retryBuffer === undefined) {
           retryBuffer = [];
           deviceToBufferMap.set(deviceId, retryBuffer);
           // In the next event loop, start retrying these events
@@ -160,7 +169,11 @@ export class RetryHandler implements RetryClass {
     });
   }
 
-  private async _retryEventsOnce(userId: string, deviceId: string, eventsToRetry: readonly Event[]) {
+  private async _retryEventsOnce(
+    userId: string,
+    deviceId: string,
+    eventsToRetry: readonly Event[],
+  ): Promise<RetryMetadata> {
     const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
 
     let shouldRetry = true;
@@ -169,9 +182,9 @@ export class RetryHandler implements RetryClass {
 
     if (response.status === Status.RateLimit) {
       // RateLimit: See if we hit the daily quota
-      if (response.body) {
+      if (response.body !== undefined) {
         const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
-        if (exceededDailyQuotaDevices[deviceId] || exceededDailyQuotaUsers[userId]) {
+        if (deviceId in exceededDailyQuotaDevices || userId in exceededDailyQuotaUsers) {
           shouldRetry = false; // This device/user may not be retried for a while. Just give up.
         }
       }
