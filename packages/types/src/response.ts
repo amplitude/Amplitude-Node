@@ -1,35 +1,35 @@
 import { Status } from './status';
 
 /** A response body for a request that returned 200 (successful). */
-export type SuccessBody = {
+export interface SuccessBody {
   eventsIngested: number;
   payloadSizeBytes: number;
   serverUploadTime: number;
-};
+}
 
 /** A response body for a request that returned 413 (invalid request). */
-export type InvalidRequestBody = {
+export interface InvalidRequestBody {
   error: string;
   missingField: string | null;
-  eventsWithInvalidFields: { [eventField: string]: Array<number> };
-  eventsWithMissingFields: { [eventField: string]: Array<number> };
-};
+  eventsWithInvalidFields: { [eventField: string]: number[] };
+  eventsWithMissingFields: { [eventField: string]: number[] };
+}
 
 /** A response body for a request that returned 413 (payload too large). */
-export type PayloadTooLargeBody = {
+export interface PayloadTooLargeBody {
   error: string;
-};
+}
 
 /** A response body for a request that returned 429 (rate limit). */
-export type RateLimitBody = {
+export interface RateLimitBody {
   error: string;
   epsThreshold: number;
   throttledDevices: { [deviceId: string]: number };
   throttledUsers: { [userId: string]: number };
   exceededDailyQuotaDevices: { [deviceId: string]: number };
   exceededDailyQuotaUsers: { [userId: string]: number };
-  throttledEvents: Array<number>;
-};
+  throttledEvents: number[];
+}
 
 export type StatusWithResponseBody = Status.Invalid | Status.PayloadTooLarge | Status.RateLimit | Status.Success;
 
@@ -39,29 +39,29 @@ export type ResponseBody = SuccessBody | InvalidRequestBody | PayloadTooLargeBod
 /** JSDoc */
 export type Response =
   | {
-      status: Status.Success;
-      statusCode: number;
-      body?: SuccessBody;
-    }
+    status: Status.Success;
+    statusCode: number;
+    body?: SuccessBody;
+  }
   | {
-      status: Status.Invalid;
-      statusCode: number;
-      body?: InvalidRequestBody;
-    }
+    status: Status.Invalid;
+    statusCode: number;
+    body?: InvalidRequestBody;
+  }
   | {
-      status: Status.PayloadTooLarge;
-      statusCode: number;
-      body?: PayloadTooLargeBody;
-    }
+    status: Status.PayloadTooLarge;
+    statusCode: number;
+    body?: PayloadTooLargeBody;
+  }
   | {
-      status: Status.RateLimit;
-      statusCode: number;
-      body?: RateLimitBody;
-    }
+    status: Status.RateLimit;
+    statusCode: number;
+    body?: RateLimitBody;
+  }
   | {
-      status: Exclude<Status, StatusWithResponseBody>;
-      statusCode: number;
-    };
+    status: Exclude<Status, StatusWithResponseBody>;
+    statusCode: number;
+  };
 
 /** The Response to expect if a request might have been sent but it was skipped
  *  e.g. no events to flush, user has opted out and nothing should be sent.

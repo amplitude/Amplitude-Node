@@ -8,5 +8,5 @@ export interface RetryClass {
    *
    * @param events The events that should be sent to Amplitude.
    */
-  sendEventsWithRetry(events: ReadonlyArray<Event>): Promise<Response>;
+  sendEventsWithRetry(events: readonly Event[]): Promise<Response>;
 }

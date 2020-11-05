@@ -39,5 +39,8 @@
     "link:yarn": "yarn link",
     "test": "echo 'Types directory has no logic and therefore no tests, skipping tests'"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "@amplitude/eslint-config-typescript": "^1.0.4"
+  }
 }

@@ -43,5 +43,5 @@ export interface Event {
  */
 export interface Payload {
   api_key: string;
-  events: ReadonlyArray<Event>;
+  events: readonly Event[];
 }
