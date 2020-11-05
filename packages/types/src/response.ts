@@ -39,29 +39,29 @@ export type ResponseBody = SuccessBody | InvalidRequestBody | PayloadTooLargeBod
 /** JSDoc */
 export type Response =
   | {
-    status: Status.Success;
-    statusCode: number;
-    body?: SuccessBody;
-  }
+      status: Status.Success;
+      statusCode: number;
+      body?: SuccessBody;
+    }
   | {
-    status: Status.Invalid;
-    statusCode: number;
-    body?: InvalidRequestBody;
-  }
+      status: Status.Invalid;
+      statusCode: number;
+      body?: InvalidRequestBody;
+    }
   | {
-    status: Status.PayloadTooLarge;
-    statusCode: number;
-    body?: PayloadTooLargeBody;
-  }
+      status: Status.PayloadTooLarge;
+      statusCode: number;
+      body?: PayloadTooLargeBody;
+    }
   | {
-    status: Status.RateLimit;
-    statusCode: number;
-    body?: RateLimitBody;
-  }
+      status: Status.RateLimit;
+      statusCode: number;
+      body?: RateLimitBody;
+    }
   | {
-    status: Exclude<Status, StatusWithResponseBody>;
-    statusCode: number;
-  };
+      status: Exclude<Status, StatusWithResponseBody>;
+      statusCode: number;
+    };
 
 /** The Response to expect if a request might have been sent but it was skipped
  *  e.g. no events to flush, user has opted out and nothing should be sent.

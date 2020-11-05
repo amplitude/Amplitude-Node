@@ -15,36 +15,3 @@ export enum Status {
   /** A server-side error ocurred during submission. */
   Failed = 'failed',
 }
-// tslint:disable:completed-docs
-// tslint:disable:no-unnecessary-qualifier no-namespace
-export namespace Status {
-  /**
-   * Converts a HTTP status code into a {@link Status}.
-   *
-   * @param code The HTTP response status code.
-   * @returns The send status or {@link Status.Unknown}.
-   */
-  export function fromHttpCode(code: number): Status {
-    if (code >= 200 && code < 300) {
-      return Status.Success;
-    }
-
-    if (code === 429) {
-      return Status.RateLimit;
-    }
-
-    if (code === 413) {
-      return Status.PayloadTooLarge;
-    }
-
-    if (code >= 400 && code < 500) {
-      return Status.Invalid;
-    }
-
-    if (code >= 500) {
-      return Status.Failed;
-    }
-
-    return Status.Unknown;
-  }
-}
