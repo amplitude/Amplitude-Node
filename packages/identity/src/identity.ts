@@ -4,9 +4,9 @@ import { Identity, IdentityListener } from '@amplitude/types';
 export class DefaultIdentity implements Identity {
   private _deviceId: string | null = null;
   private _userId: string | null = null;
-  private _identityListeners: Array<IdentityListener> = [];
+  private readonly _identityListeners: IdentityListener[] = [];
 
-  public static generateDefaultId = () => {
+  public static generateDefaultId = (): string => {
     return generateBase36Id();
   };
 
@@ -19,7 +19,7 @@ export class DefaultIdentity implements Identity {
    * @param   {string} deviceId An optional parameter to set the device ID to use.
    * @returns {string}          The device ID that will be used for this instance going forward.
    */
-  public initializeDeviceId(deviceId: string = ''): string {
+  public initializeDeviceId(deviceId = ''): string {
     // Only try to set the device ID if the deviceID is not already set.
     if (this._deviceId !== null) {
       logger.warn('Cannot set device ID twice for same identity. Skipping operation.');
@@ -27,7 +27,7 @@ export class DefaultIdentity implements Identity {
       return this._deviceId;
     }
 
-    let deviceIdToUse: string = '';
+    let deviceIdToUse = '';
 
     if (typeof deviceId === 'string' && deviceId.length > 0) {
       deviceIdToUse = deviceId;
@@ -80,17 +80,17 @@ export class DefaultIdentity implements Identity {
       // initializeDeviceID re-alert this function
       this.initializeDeviceId();
     } else {
-      for (let listener of this._identityListeners) {
+      for (const listener of this._identityListeners) {
         listener(this._deviceId, this._userId);
       }
     }
   }
 
-  public addIdentityListener(...listeners: Array<IdentityListener>): void {
+  public addIdentityListener(...listeners: IdentityListener[]): void {
     this._identityListeners.push(...listeners);
   }
 
-  public getIdentityListeners(): Array<IdentityListener> {
+  public getIdentityListeners(): IdentityListener[] {
     // Return a copy of the listeners
     return Array.from(this._identityListeners);
   }

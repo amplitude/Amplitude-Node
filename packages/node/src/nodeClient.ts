@@ -10,9 +10,9 @@ export class NodeClient implements Client<Options> {
   /** Options for the client. */
   protected readonly _options: Options;
 
-  private _events: Array<Event> = [];
+  private _events: Event[] = [];
   private _responseListeners: Array<{ resolve: (response: Response) => void; reject: (err: Error) => void }> = [];
-  private _transportWithRetry: RetryClass;
+  private readonly _transportWithRetry: RetryClass;
   private _flushTimer: NodeJS.Timeout | null = null;
 
   /**
@@ -24,7 +24,7 @@ export class NodeClient implements Client<Options> {
   public constructor(apiKey: string, options: Partial<Options> = {}) {
     this._apiKey = apiKey;
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-    this._transportWithRetry = this._options.retryClass || this._setupDefaultTransport();
+    this._transportWithRetry = this._options.retryClass ?? this._setupDefaultTransport();
     this._setUpLogging();
   }
 
@@ -69,24 +69,26 @@ export class NodeClient implements Client<Options> {
   /**
    * @inheritDoc
    */
-  public logEvent(event: Event): Promise<Response> {
-    if (this._options.optOut === true) {
-      return Promise.resolve(SKIPPED_RESPONSE);
+  public async logEvent(event: Event): Promise<Response> {
+    if (this._options.optOut) {
+      return await Promise.resolve(SKIPPED_RESPONSE);
     }
 
     this._annotateEvent(event);
 
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       // Add event to unsent events queue.
       this._events.push(event);
       this._responseListeners.push({ resolve, reject });
       if (this._events.length >= this._options.maxCachedEvents) {
         // # of events exceeds the limit, flush them.
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.flush();
       } else {
         // Not ready to flush them and not timing yet, then set the timeout
         if (this._flushTimer === null) {
           this._flushTimer = setTimeout(() => {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             this.flush();
           }, this._options.uploadIntervalInSec * 1000);
         }
@@ -105,8 +107,8 @@ export class NodeClient implements Client<Options> {
   }
 
   private _setUpLogging(): void {
-    if (this._options.debug || this._options.logLevel) {
-      if (this._options.logLevel) {
+    if (this._options.debug || this._options.logLevel > 0) {
+      if (this._options.logLevel > 0) {
         logger.enable(this._options.logLevel);
       } else {
         logger.enable();

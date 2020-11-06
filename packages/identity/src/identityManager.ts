@@ -4,14 +4,14 @@ import { Identity, IdentityListener, DEFAULT_IDENTITY_INSTANCE } from '@amplitud
 import { DefaultIdentity } from './identity';
 
 class IdentityManager {
-  private _instanceMap: Map<string, Identity> = new Map<string, Identity>();
+  private readonly _instanceMap: Map<string, Identity> = new Map<string, Identity>();
 
   public getInstance(
     instanceName: string = DEFAULT_IDENTITY_INSTANCE,
     optionalFallbackIdentity: Identity | null = null,
   ): Identity {
     let identity = this._instanceMap.get(instanceName);
-    if (identity == undefined) {
+    if (identity === undefined) {
       identity = optionalFallbackIdentity !== null ? optionalFallbackIdentity : new DefaultIdentity();
       this._instanceMap.set(instanceName, identity);
     }
@@ -29,8 +29,8 @@ class IdentityManager {
     optionalNewIdentity: Identity | null = null,
   ): void {
     const oldIdentity = this._instanceMap.get(instanceName);
-    const oldListeners: Array<IdentityListener> = oldIdentity?.getIdentityListeners() || [];
-    if (!oldIdentity) {
+    const oldListeners: IdentityListener[] = oldIdentity?.getIdentityListeners() ?? [];
+    if (oldIdentity === undefined) {
       logger.warn(`Did not find a identity to reset for ${instanceName}`);
     } else {
       this._instanceMap.delete(instanceName);
@@ -48,7 +48,7 @@ class IdentityManager {
 
     if (oldListeners.length > 0) {
       // Actively call the old listeners for the new identity
-      for (let listener of oldListeners) {
+      for (const listener of oldListeners) {
         listener(newIdentity.getDeviceId(), newIdentity.getUserId());
       }
 
@@ -61,7 +61,7 @@ class IdentityManager {
 const globalNamespace = getGlobalAmplitudeNamespace();
 
 let identityManager: IdentityManager = globalNamespace.identityManager as IdentityManager;
-if (!identityManager) {
+if (identityManager === undefined) {
   identityManager = new IdentityManager();
   globalNamespace.identityManager = identityManager;
 }

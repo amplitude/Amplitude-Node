@@ -1,5 +1,6 @@
 import { Response, Status } from '@amplitude/types';
 import { IncomingMessage } from 'http';
+import { mapHttpCodeToStatus } from './status';
 
 /**
  * Collects the invalid event indices off a HTTP API v2 response
@@ -8,9 +9,9 @@ import { IncomingMessage } from 'http';
  * @param response A Response from sending an event payload
  * @returns An concatenated array of indices
  */
-export const collectInvalidEventIndices = (response: Response): Array<number> => {
+export const collectInvalidEventIndices = (response: Response): number[] => {
   const invalidEventIndices = new Set<number>();
-  if (response.status === Status.Invalid && response.body) {
+  if (response.status === Status.Invalid && response.body !== undefined) {
     const { eventsWithInvalidFields, eventsWithMissingFields } = response.body;
     Object.keys(eventsWithInvalidFields).forEach((field: string) => {
       const eventIndices = eventsWithInvalidFields[field] ?? [];
@@ -26,7 +27,7 @@ export const collectInvalidEventIndices = (response: Response): Array<number> =>
     });
   }
 
-  return Array.from(invalidEventIndices).sort();
+  return Array.from(invalidEventIndices).sort((numberOne, numberTwo) => numberOne - numberTwo);
 };
 
 /**
@@ -37,7 +38,7 @@ export const collectInvalidEventIndices = (response: Response): Array<number> =>
  */
 export const mapHttpMessageToResponse = (httpRes: IncomingMessage): Response => {
   const statusCode = httpRes.statusCode === undefined ? 0 : httpRes.statusCode;
-  const status = Status.fromHttpCode(statusCode);
+  const status = mapHttpCodeToStatus(statusCode);
 
   return {
     status,
@@ -57,7 +58,7 @@ export const mapJSONToResponse = (responseJSON: any): Response | null => {
     return null;
   }
 
-  const status = Status.fromHttpCode(responseJSON.code);
+  const status = mapHttpCodeToStatus(responseJSON.code);
   const statusCode = responseJSON.code;
 
   switch (status) {
@@ -77,10 +78,10 @@ export const mapJSONToResponse = (responseJSON: any): Response | null => {
         status,
         statusCode,
         body: {
-          error: responseJSON.error || '',
+          error: responseJSON.error ?? '',
           missingField: responseJSON.missing_field ?? null,
-          eventsWithInvalidFields: responseJSON.events_with_invalid_fields || {},
-          eventsWithMissingFields: responseJSON.events_with_missing_fields || {},
+          eventsWithInvalidFields: responseJSON.events_with_invalid_fields ?? {},
+          eventsWithMissingFields: responseJSON.events_with_missing_fields ?? {},
         },
       };
     case Status.PayloadTooLarge:
@@ -96,13 +97,13 @@ export const mapJSONToResponse = (responseJSON: any): Response | null => {
         status,
         statusCode,
         body: {
-          error: responseJSON.error || '',
+          error: responseJSON.error ?? '',
           epsThreshold: responseJSON.eps_threshold,
-          throttledDevices: responseJSON.throttled_devices || {},
-          throttledUsers: responseJSON.throttled_users || {},
-          exceededDailyQuotaDevices: responseJSON.exceeded_daily_quota_devices || {},
-          exceededDailyQuotaUsers: responseJSON.exceeded_daily_quota_users || {},
-          throttledEvents: responseJSON.throttled_events || [],
+          throttledDevices: responseJSON.throttled_devices ?? {},
+          throttledUsers: responseJSON.throttled_users ?? {},
+          exceededDailyQuotaDevices: responseJSON.exceeded_daily_quota_devices ?? {},
+          exceededDailyQuotaUsers: responseJSON.exceeded_daily_quota_users ?? {},
+          throttledEvents: responseJSON.throttled_events ?? [],
         },
       };
     default:

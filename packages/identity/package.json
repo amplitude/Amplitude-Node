@@ -16,6 +16,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@amplitude/eslint-config-typescript": "^1.0.4",
     "@amplitude/types": "^1.0.4",
     "@amplitude/utils": "^1.0.4"
   },

@@ -20,6 +20,6 @@ export interface Identity {
   /** Get the User ID of the identity, if it exists */
   getUserId(): string | null;
 
-  addIdentityListener(...listeners: Array<IdentityListener>): any;
-  getIdentityListeners(): Array<IdentityListener>;
+  addIdentityListener(...listeners: IdentityListener[]): any;
+  getIdentityListeners(): IdentityListener[];
 }

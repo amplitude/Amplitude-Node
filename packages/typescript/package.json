@@ -11,6 +11,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@amplitude/eslint-config-typescript": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
     "@typescript-eslint/parser": "^2.30.0",
     "eslint-config-standard": "^14.1.1",

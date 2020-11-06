@@ -3,7 +3,7 @@ import { AMPLITUDE_SERVER_URL } from '../src/constants';
 import { Status } from '@amplitude/types';
 import * as nock from 'nock';
 
-const anyMatch = () => true;
+const anyMatch = (): boolean => true;
 describe('http transport layer', () => {
   // After each test, remove any remaining mocks.
   afterEach(() => nock.cleanAll());

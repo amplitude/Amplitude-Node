@@ -11,7 +11,7 @@
   "license": "MIT",
   "main": "index.js",
   "publishConfig": {
-    "registry": "https://registry.yarnpkg.com"
+    "access": "public"
   },
   "repository": {
     "type": "git",
