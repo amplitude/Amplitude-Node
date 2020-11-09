@@ -18,7 +18,8 @@
   "dependencies": {
     "@amplitude/eslint-config-typescript": "^1.0.4",
     "@amplitude/types": "^1.0.4",
-    "@amplitude/utils": "^1.0.4"
+    "@amplitude/utils": "^1.0.4",
+    "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",
