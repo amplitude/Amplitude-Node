@@ -1,12 +1,25 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
 import { HTTPTransport } from './transports';
-import { DEFAULT_OPTIONS } from './constants';
-import { asyncSleep, collectInvalidEventIndices } from '@amplitude/utils';
+import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_DEPRECATED } from './constants';
+import { asyncSleep, collectInvalidEventIndices, logger } from '@amplitude/utils';
 
 interface RetryMetadata {
   shouldRetry: boolean;
   shouldReduceEventCount: boolean;
   eventIndicesToRemove: number[];
+}
+
+/**
+ * Converts deprecated maxRetries option to retryTimeouts
+ */
+function convertMaxRetries(maxRetries: number): number[] {
+  const retryTimeouts = [];
+  let currentTimeout = BASE_RETRY_TIMEOUT_DEPRECATED;
+  for (let i = 0; i < maxRetries; i++) {
+    retryTimeouts.push(currentTimeout);
+    currentTimeout *= 2;
+  }
+  return retryTimeouts;
 }
 
 export class RetryHandler implements RetryClass {
@@ -15,7 +28,7 @@ export class RetryHandler implements RetryClass {
   // A map of maps to event buffers for failed events
   // The first key is userId (or ''), and second is deviceId (or '')
   private readonly _idToBuffer: Map<string, Map<string, Event[]>> = new Map<string, Map<string, Event[]>>();
-  private readonly _options: Options;
+  protected readonly _options: Options;
   private readonly _transport: Transport;
   private _eventsInRetry = 0;
 
@@ -23,6 +36,13 @@ export class RetryHandler implements RetryClass {
     this._apiKey = apiKey;
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._transport = this._options.transportClass ?? this._setupDefaultTransport();
+    if (this._options.maxRetries !== undefined) {
+      logger.warn(
+        'DEPRECATED: Please use retryTimeouts. It will be converted to retryTimeouts with exponential wait times (i.e. 100ms -> 200ms -> 400ms -> ...)',
+      );
+      this._options.retryTimeouts = convertMaxRetries(this._options.maxRetries);
+      delete this._options.maxRetries;
+    }
   }
 
   /**

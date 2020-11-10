@@ -26,7 +26,12 @@ export interface Options {
   maxCachedEvents: number;
 
   /**
-   *
+   * The maximum number of times a server will attempt to retry
+   * @deprecated Please use retryTimeouts. It will be converted to retryTimeouts with exponential wait times (e.g. 100ms -> 200ms -> 400ms -> ...)'
+   */
+  maxRetries?: number;
+
+  /**
    * Determines # of retries for sending failed events and how long each retry to wait for (ms)
    * An empty array means no retries
    */
