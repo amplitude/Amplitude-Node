@@ -1,6 +1,6 @@
 import { TestRetry, MOCK_RETRY_TIMEOUTS } from './mocks/retry';
 import { MockTransport } from './mocks/transport';
-import { Event, Status, Response, RetryClass } from '@amplitude/types';
+import { Event, Status, Response, Options } from '@amplitude/types';
 import { asyncSleep } from '@amplitude/utils';
 
 const FAILING_USER_ID = 'data_monster';
@@ -14,9 +14,12 @@ const generateEvent = (userId: string): Event => {
   };
 };
 
-const generateRetryHandler = (body: Response | null = null): { transport: MockTransport; retry: RetryClass } => {
+const generateRetryHandler = (
+  body: Response | null = null,
+  options?: Partial<Options>,
+): { transport: MockTransport; retry: TestRetry } => {
   const transport = new MockTransport(FAILING_USER_ID, body);
-  const retry = new TestRetry(transport);
+  const retry = new TestRetry(transport, options);
 
   return { transport, retry };
 };
@@ -63,6 +66,16 @@ describe('retry mechanisms layer', () => {
     expect(transport.failCount).toBe(MOCK_RETRY_TIMEOUTS.length + 1);
     // One response goes out for the passing event not getting 'throttled'
     expect(transport.passCount).toBe(1);
+  });
+
+  it('will convert deprecated options.maxRetries to options.retryTimeouts', async () => {
+    const { retry } = generateRetryHandler(null, { maxRetries: 3 });
+    const payload = [generateEvent(FAILING_USER_ID), generateEvent(PASSING_USER_ID)];
+    await retry.sendEventsWithRetry(payload);
+    // Sleep and wait for retries to end
+    await asyncSleep(1000);
+    expect(retry.getOptions().maxRetries).toBeUndefined();
+    expect(retry.getOptions().retryTimeouts).toEqual([100, 200, 400]);
   });
 
   describe('fast-stop mechanisms for payloads', () => {
