@@ -24,8 +24,8 @@ export class NodeClient implements Client<Options> {
   public constructor(apiKey: string, options: Partial<Options> = {}) {
     this._apiKey = apiKey;
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-    this._transportWithRetry = this._options.retryClass ?? this._setupDefaultTransport();
     this._setUpLogging();
+    this._transportWithRetry = this._options.retryClass ?? this._setupDefaultTransport();
   }
 
   /**
