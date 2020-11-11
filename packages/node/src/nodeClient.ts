@@ -1,5 +1,5 @@
 import { Client, Event, Options, Response, RetryClass, SKIPPED_RESPONSE } from '@amplitude/types';
-import { logger } from '@amplitude/utils';
+import { logger, isNodeEnv } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
 
@@ -26,6 +26,11 @@ export class NodeClient implements Client<Options> {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._setUpLogging();
     this._transportWithRetry = this._options.retryClass ?? this._setupDefaultTransport();
+    if (!isNodeEnv()) {
+      logger.warn(
+        '@amplitude/node initialized in a non-node environment and will not work. If you are planning to add Amplitude to a browser environment, please use amplitude-js',
+      );
+    }
   }
 
   /**
