@@ -70,10 +70,6 @@ describe('retry mechanisms layer', () => {
 
   it('will convert deprecated options.maxRetries to options.retryTimeouts', async () => {
     const { retry } = generateRetryHandler(null, { maxRetries: 3 });
-    const payload = [generateEvent(FAILING_USER_ID), generateEvent(PASSING_USER_ID)];
-    await retry.sendEventsWithRetry(payload);
-    // Sleep and wait for retries to end
-    await asyncSleep(1000);
     expect(retry.getOptions().maxRetries).toBeUndefined();
     expect(retry.getOptions().retryTimeouts).toEqual([100, 200, 400]);
   });
