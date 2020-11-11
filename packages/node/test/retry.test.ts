@@ -1,7 +1,8 @@
 import { TestRetry, MOCK_RETRY_TIMEOUTS } from './mocks/retry';
 import { MockTransport } from './mocks/transport';
 import { Event, Status, Response, Options } from '@amplitude/types';
-import { asyncSleep } from '@amplitude/utils';
+import { asyncSleep, logger } from '@amplitude/utils';
+import { BASE_RETRY_TIMEOUT_DEPRECATED_WARNING } from '../src/constants';
 
 const FAILING_USER_ID = 'data_monster';
 const PASSING_USER_ID = 'node_monster';
@@ -68,10 +69,13 @@ describe('retry mechanisms layer', () => {
     expect(transport.passCount).toBe(1);
   });
 
-  it('will convert deprecated options.maxRetries to options.retryTimeouts', async () => {
+  it('will convert deprecated options.maxRetries to options.retryTimeouts', () => {
+    const loggerSpy = jest.spyOn(logger, 'warn');
     const { retry } = generateRetryHandler(null, { maxRetries: 3 });
+    expect(loggerSpy).toHaveBeenCalledWith(BASE_RETRY_TIMEOUT_DEPRECATED_WARNING);
     expect(retry.getOptions().maxRetries).toBeUndefined();
     expect(retry.getOptions().retryTimeouts).toEqual([100, 200, 400]);
+    loggerSpy.mockRestore();
   });
 
   describe('fast-stop mechanisms for payloads', () => {

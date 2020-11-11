@@ -1,6 +1,6 @@
 import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
 import { HTTPTransport } from './transports';
-import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_DEPRECATED } from './constants';
+import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_DEPRECATED, BASE_RETRY_TIMEOUT_DEPRECATED_WARNING } from './constants';
 import { asyncSleep, collectInvalidEventIndices, logger } from '@amplitude/utils';
 
 interface RetryMetadata {
@@ -37,9 +37,7 @@ export class RetryHandler implements RetryClass {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._transport = this._options.transportClass ?? this._setupDefaultTransport();
     if (this._options.maxRetries !== undefined) {
-      logger.warn(
-        'DEPRECATED: Please use retryTimeouts. It will be converted to retryTimeouts with exponential wait times (i.e. 100ms -> 200ms -> 400ms -> ...)',
-      );
+      logger.warn(BASE_RETRY_TIMEOUT_DEPRECATED_WARNING);
       this._options.retryTimeouts = convertMaxRetries(this._options.maxRetries);
       delete this._options.maxRetries;
     }
