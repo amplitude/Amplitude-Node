@@ -80,7 +80,7 @@ export class NodeClient implements Client<Options> {
     }
 
     if (!isValidEvent(event)) {
-      logger.warn('Found invalid event. Skipping operations');
+      logger.warn('Found invalid event - skipping logEvent action.');
       return await Promise.resolve(SKIPPED_RESPONSE);
     }
 
