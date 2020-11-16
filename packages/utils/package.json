@@ -16,11 +16,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@amplitude/eslint-config-typescript": "^1.1.0",
     "@amplitude/types": "^1.1.0",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
+    "@amplitude/eslint-config-typescript": "^1.1.0",
     "@types/jest": "^26.0.14",
     "@types/jsdom": "^16.2.5",
     "eslint": "^7.0.0",
