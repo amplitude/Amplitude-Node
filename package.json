@@ -12,6 +12,13 @@
     "prepare": "yarn build",
     "test": "lerna run test --stream --concurrency 9999"
   },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add",
+      "jest --bail --findRelatedTests"
+    ]
+  },
   "workspaces": [
     "packages/eslint-config-typescript",
     "packages/identity",

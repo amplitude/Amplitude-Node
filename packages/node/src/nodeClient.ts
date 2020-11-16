@@ -1,5 +1,5 @@
 import { Client, Event, Options, Response, RetryClass, SKIPPED_RESPONSE } from '@amplitude/types';
-import { logger, isNodeEnv } from '@amplitude/utils';
+import { logger, isNodeEnv, isValidEvent } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
 
@@ -76,6 +76,11 @@ export class NodeClient implements Client<Options> {
    */
   public async logEvent(event: Event): Promise<Response> {
     if (this._options.optOut) {
+      return await Promise.resolve(SKIPPED_RESPONSE);
+    }
+
+    if (!isValidEvent(event)) {
+      logger.warn('Found invalid event. Skipping operations');
       return await Promise.resolve(SKIPPED_RESPONSE);
     }
 
