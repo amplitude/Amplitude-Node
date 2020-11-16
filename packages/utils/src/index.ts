@@ -3,3 +3,4 @@ export { logger } from './logger';
 export { asyncSleep, getGlobalAmplitudeNamespace, isBrowserEnv, isNodeEnv, prototypeJsFix } from './misc';
 export { collectInvalidEventIndices, mapHttpMessageToResponse, mapJSONToResponse } from './response';
 export { mapHttpCodeToStatus } from './status';
+export { isValidEvent } from './validate';

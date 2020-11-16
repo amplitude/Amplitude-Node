@@ -88,6 +88,7 @@ export class RetryHandler implements RetryClass {
     const prunedEvents: Event[] = [];
     events.forEach(event => {
       const { user_id: userId = '', device_id: deviceId = '' } = event;
+      // We can ignore events with neither. They would fail anyways when sent as event.
       if (userId.length > 0 || deviceId.length > 0) {
         const retryBuffer = this._getRetryBuffer(userId, deviceId);
         if (retryBuffer !== null) {

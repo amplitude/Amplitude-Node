@@ -3,9 +3,10 @@ import { JSDOM, DOMWindow } from 'jsdom';
 
 // Augment built-ins APIs for prototypeJsFix tests
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface Global {
-      window: { Prototype?: Object } & DOMWindow;
+      window: { Prototype?: Record<string, any> } & DOMWindow;
     }
   }
   interface Array<T> {
@@ -19,12 +20,12 @@ const dom = new JSDOM();
 // Used to restore Node global object after tests that use browser env
 const processPlaceholder = global.process;
 
-function setupBrowserTest() {
+function setupBrowserTest(): void {
   global.window = dom.window;
   delete global.process;
 }
 
-function cleanupBrowserTest() {
+function cleanupBrowserTest(): void {
   delete global.window;
   global.process = processPlaceholder;
 }
@@ -57,6 +58,7 @@ describe('prototypeJsFix', () => {
   it('should delete Array.prototype.toJSON if Prototype.js injects Array.prototype.toJSON', () => {
     setupBrowserTest();
     global.window.Prototype = {};
+    // eslint-disable-next-line no-extend-native
     Array.prototype.toJSON = jest.fn();
     expect(Array.prototype.toJSON).toBeTruthy();
     expect(prototypeJsFix()).toBe(true);
