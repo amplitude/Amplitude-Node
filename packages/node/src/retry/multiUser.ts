@@ -1,16 +1,6 @@
-import {
-  Event,
-  Options,
-  Transport,
-  TransportOptions,
-  Payload,
-  PayloadOptions,
-  Status,
-  Response,
-  RetryClass,
-} from '@amplitude/types';
-import { HTTPTransport } from './transports';
-import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_DEPRECATED, BASE_RETRY_TIMEOUT_DEPRECATED_WARNING } from './constants';
+import { Event, Options, Transport, Payload, PayloadOptions, Status, Response, RetryClass } from '@amplitude/types';
+import { setupDefaultTransport } from '../transports';
+import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_DEPRECATED, BASE_RETRY_TIMEOUT_DEPRECATED_WARNING } from '../constants';
 import { asyncSleep, collectInvalidEventIndices, logger } from '@amplitude/utils';
 
 interface RetryMetadata {
@@ -45,7 +35,7 @@ export class RetryHandler implements RetryClass {
   public constructor(apiKey: string, options: Partial<Options>) {
     this._apiKey = apiKey;
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-    this._transport = this._options.transportClass ?? this._setupDefaultTransport();
+    this._transport = this._options.transportClass ?? setupDefaultTransport(this._options);
     if (this._options.maxRetries !== undefined) {
       logger.warn(BASE_RETRY_TIMEOUT_DEPRECATED_WARNING);
       this._options.retryTimeouts = convertMaxRetries(this._options.maxRetries);
@@ -71,16 +61,6 @@ export class RetryHandler implements RetryClass {
     }
 
     return response;
-  }
-
-  private _setupDefaultTransport(): Transport {
-    const transportOptions: TransportOptions = {
-      serverUrl: this._options.serverUrl,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-    return new HTTPTransport(transportOptions);
   }
 
   private _shouldRetryEvents(): boolean {
