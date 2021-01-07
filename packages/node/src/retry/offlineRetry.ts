@@ -19,7 +19,7 @@ export class OfflineRetryHandler implements RetryClass {
   private _eventsToRetry: Event[] = [];
   private readonly _requestQueue: AsyncQueue = new AsyncQueue();
 
-  public constructor(apiKey: string, options: Partial<Options>) {
+  public constructor(apiKey: string, options: Partial<Options> = {}) {
     this._apiKey = apiKey;
     this._options = { ...DEFAULT_OPTIONS, ...options };
     this._transport = this._options.transportClass ?? setupDefaultTransport(this._options);

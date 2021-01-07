@@ -25,7 +25,7 @@ const generateRetryHandler = (
   return { transport, retry };
 };
 
-describe('retry mechanisms layer', () => {
+describe('default retry mechanisms', () => {
   it('should not retry events that pass', async () => {
     const { transport, retry } = generateRetryHandler();
     const payload = [generateEvent(PASSING_USER_ID)];
