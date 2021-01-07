@@ -1,5 +1,8 @@
 interface QueueObject {
-  callback: () => void;
+  // The callback used to start the promise
+  startPromise: () => void;
+  // If the promise is meant to expire after some time, this is the associated Timeout
+  // Meant to be canceled if the promise is started.
   cancellingTimeout: NodeJS.Timeout | null;
 }
 
@@ -17,7 +20,7 @@ export class AsyncQueue {
   public async addToQueue<T = any>(promiseGenerator: () => Promise<T>, limitInMs = 0): Promise<T> {
     return await new Promise((resolve, reject) => {
       // The callback that will start the promise resolution
-      const queueCallback = (): void => {
+      const startPromise = (): void => {
         this._promiseInProgress = true;
         try {
           const promise = promiseGenerator();
@@ -32,11 +35,11 @@ export class AsyncQueue {
       // If there is no promise in progress
       // Return immediately
       if (!this._promiseInProgress) {
-        return queueCallback();
+        return startPromise();
       }
 
       const queueObject: QueueObject = {
-        callback: queueCallback,
+        startPromise,
         cancellingTimeout: null,
       };
       this._promiseQueue.push(queueObject);
@@ -63,13 +66,13 @@ export class AsyncQueue {
   // Notify the oldest awaiting promise that the queue is ready to process another promise
   private _notifyUploadFinish(): void {
     this._promiseInProgress = false;
-    const oldestRequest = this._promiseQueue.shift();
-    if (oldestRequest !== undefined) {
-      if (oldestRequest.cancellingTimeout !== null) {
+    const oldestPromise = this._promiseQueue.shift();
+    if (oldestPromise !== undefined) {
+      if (oldestPromise.cancellingTimeout !== null) {
         // Clear the timeout where we try to remove the callback and reject the promise.
-        clearTimeout(oldestRequest.cancellingTimeout);
+        clearTimeout(oldestPromise.cancellingTimeout);
       }
-      oldestRequest.callback();
+      oldestPromise.startPromise();
     }
   }
 }
