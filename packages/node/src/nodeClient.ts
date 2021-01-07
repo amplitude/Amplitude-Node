@@ -1,7 +1,7 @@
 import { Identify } from '@amplitude/identify';
 import { Client, Event, Options, Response, RetryClass, SKIPPED_RESPONSE } from '@amplitude/types';
 import { logger, isNodeEnv, isValidEvent } from '@amplitude/utils';
-import { RetryHandler } from './retry/multiUser';
+import { RetryHandler } from './retry/defaultRetry';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
 
 export class NodeClient implements Client<Options> {

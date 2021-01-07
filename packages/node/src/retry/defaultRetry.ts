@@ -34,7 +34,7 @@ export class RetryHandler implements RetryClass {
 
   public constructor(apiKey: string, options: Partial<Options>) {
     this._apiKey = apiKey;
-    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._options = { ...DEFAULT_OPTIONS, ...options };
     this._transport = this._options.transportClass ?? setupDefaultTransport(this._options);
     if (this._options.maxRetries !== undefined) {
       logger.warn(BASE_RETRY_TIMEOUT_DEPRECATED_WARNING);
