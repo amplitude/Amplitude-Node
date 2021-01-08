@@ -44,4 +44,7 @@ export interface Event {
 export interface Payload {
   api_key: string;
   events: readonly Event[];
+  options?: {
+    min_id_length: number;
+  };
 }

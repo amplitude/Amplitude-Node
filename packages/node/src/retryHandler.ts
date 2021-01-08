@@ -104,10 +104,18 @@ export class RetryHandler implements RetryClass {
   }
 
   private _getPayload(events: readonly Event[]): Payload {
-    return {
+    const payload = {
       api_key: this._apiKey,
       events,
     };
+
+    if (this._options.minIdLength !== null) {
+      payload.options = {
+        min_id_length: this._options.minIdLength,
+      };
+    }
+
+    return payload;
   }
 
   private _getRetryBuffer(userId: string, deviceId: string): Event[] | null {
