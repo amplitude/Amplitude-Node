@@ -62,5 +62,5 @@ export interface Options {
    * Optional parameter allowing users to set minimum permitted length for user_id & device_id fields
    * As described here: https://developers.amplitude.com/docs/http-api-v2#schemaRequestOptions
    */
-  minIdLength: number | null;
+  minIdLength?: number | null;
 }
