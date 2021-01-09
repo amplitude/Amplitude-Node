@@ -1,4 +1,14 @@
-import { Event, Options, Transport, TransportOptions, Payload, Status, Response, RetryClass } from '@amplitude/types';
+import {
+  Event,
+  Options,
+  Transport,
+  TransportOptions,
+  Payload,
+  PayloadOptions,
+  Status,
+  Response,
+  RetryClass,
+} from '@amplitude/types';
 import { HTTPTransport } from './transports';
 import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_DEPRECATED, BASE_RETRY_TIMEOUT_DEPRECATED_WARNING } from './constants';
 import { asyncSleep, collectInvalidEventIndices, logger } from '@amplitude/utils';
@@ -103,7 +113,7 @@ export class RetryHandler implements RetryClass {
     return prunedEvents;
   }
 
-  private _getPayloadOptions(): Partial<Payload> {
+  private _getPayloadOptions(): PayloadOptions {
     if (typeof this._options.minIdLength === 'number') {
       return {
         options: {

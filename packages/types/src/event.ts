@@ -39,12 +39,19 @@ export interface Event {
 }
 
 /**
- * Amplitude request payload definition.
+ * Amplitude request payload options.
  */
-export interface Payload {
-  api_key: string;
-  events: readonly Event[];
+
+export interface PayloadOptions {
   options?: {
     min_id_length?: number;
   };
+}
+
+/**
+ * Amplitude request payload definition.
+ */
+export interface Payload extends PayloadOptions {
+  api_key: string;
+  events: readonly Event[];
 }
