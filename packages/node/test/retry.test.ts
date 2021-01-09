@@ -78,6 +78,23 @@ describe('retry mechanisms layer', () => {
     loggerSpy.mockRestore();
   });
 
+  it('will include the payload options key containing min_length_id if options.minLengthId is provided', () => {
+    const minIdLength = 5;
+    const { retry } = generateRetryHandler(undefined, { minIdLength });
+    const payload = retry.getPayload([generateEvent(PASSING_USER_ID)]);
+    expect(Object.keys(payload)).toEqual(['api_key', 'events', 'options']);
+    expect(payload.options).toEqual({ min_id_length: minIdLength });
+  });
+
+  it('will NOT include the payload options key if options.minLengthId is null or undefined', () => {
+    for (const minIdLength of [null, undefined]) {
+      const { retry } = generateRetryHandler(undefined, { minIdLength });
+      const payload = retry.getPayload([generateEvent(PASSING_USER_ID)]);
+      expect(Object.keys(payload)).not.toContain('options');
+      expect(payload.options).toBeUndefined();
+    }
+  });
+
   describe('fast-stop mechanisms for payloads', () => {
     it('will not allow a events exceeding daily quota to be retried', async () => {
       const body: Response = {

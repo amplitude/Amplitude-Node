@@ -19,6 +19,7 @@ export class TestTransport extends HTTPTransport {
     return await this.sendPayload({
       api_key: 'NOT_A_REAL_API_KEY',
       events: [],
+      options: {},
     });
   }
 }
