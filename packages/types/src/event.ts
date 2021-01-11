@@ -43,9 +43,7 @@ export interface Event {
  */
 
 export interface PayloadOptions {
-  options?: {
-    min_id_length?: number;
-  };
+  min_id_length?: number;
 }
 
 /**
@@ -54,4 +52,5 @@ export interface PayloadOptions {
 export interface Payload extends PayloadOptions {
   api_key: string;
   events: readonly Event[];
+  options?: PayloadOptions;
 }

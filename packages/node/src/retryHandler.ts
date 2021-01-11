@@ -113,7 +113,7 @@ export class RetryHandler implements RetryClass {
     return prunedEvents;
   }
 
-  private _getPayloadOptions(): PayloadOptions {
+  private _getPayloadOptions(): { options?: PayloadOptions } {
     if (typeof this._options.minIdLength === 'number') {
       return {
         options: {
