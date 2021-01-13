@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/types",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Types for all Amplitude JavaScript SDKs",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/types",

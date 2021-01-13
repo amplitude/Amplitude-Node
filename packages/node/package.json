@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/node",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Offical Amplitude SDK for Node.js",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node",
@@ -16,8 +16,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@amplitude/types": "^1.1.1",
-    "@amplitude/utils": "^1.1.1",
+    "@amplitude/types": "^1.2.0",
+    "@amplitude/utils": "^1.2.0",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
