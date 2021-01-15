@@ -16,11 +16,11 @@ Please visit our :100:[Developer Center](https://developers.amplitude.com/docs/n
 ## Node and JS SDK's
 
 There might be confusion about the use case and motivations for building the Node SDK when we have a JS SDK.
-The [Amplitude-Javascript](https://github.com/amplitude/Amplitude-JavaScript) SDK is meant to be run in browser environments  and on client devices, resulting in very different designs and assumptions.
-For example, the Javascript contains functionality that interfaces specifically with Web API's (e.g. `referrer` and UTM attribution information, `navigator.language`), and that it can store metadata in API's such as cookies and localStorage.
+The [Amplitude-Javascript](https://github.com/amplitude/Amplitude-JavaScript) SDK is meant to be run in browser environments and on client devices, resulting in very different designs and assumptions.
+For example, the Javascript SDK contains functionality that interfaces specifically with Web APIs (e.g. `referrer` and UTM attribution information, `navigator.language`), and that it can store metadata in API's such as cookies and localStorage.
 It also makes other assumptions, such as that there is only one active "identity" sending events at a time.
 
-In contrast, the Node SDK is meant to be run in a Node environment, and kept as flexible and modular as possible as to accomodate the various different use cases it may be used in.
+In contrast, the Node SDK is meant to be run in a Node environment, and kept as flexible and modular as possible as to accommodate the various different use cases it may be used in.
 It makes fewer assumption on how many users it is processing and what is available.
 Though we primarily foresee the Node SDK being used in server
 environments, we would love to hear how you plan to use it!
