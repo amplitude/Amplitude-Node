@@ -7,7 +7,7 @@
     "amplitude"
   ],
   "author": "Amplitude Inc",
-  "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/eslint-config-typescript",
+  "homepage": "https://github.com/amplitude/Amplitude-Node/tree/main/packages/eslint-config-typescript",
   "license": "MIT",
   "main": "index.js",
   "publishConfig": {
