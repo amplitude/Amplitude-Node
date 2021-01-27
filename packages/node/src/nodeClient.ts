@@ -1,3 +1,4 @@
+import { Identify } from '@amplitude/identify';
 import { Client, Event, Options, Response, RetryClass, SKIPPED_RESPONSE } from '@amplitude/types';
 import { logger, isNodeEnv, isValidEvent } from '@amplitude/utils';
 import { RetryHandler } from './retryHandler';
@@ -104,6 +105,16 @@ export class NodeClient implements Client<Options> {
         }
       }
     });
+  }
+
+  public async identify(userId: string, deviceId: string, identify: Identify): Promise<Response> {
+    if (!(identify instanceof Identify)) {
+      logger.warn('Invalid Identify object. Skipping operation.');
+      return await Promise.resolve(SKIPPED_RESPONSE);
+    }
+
+    const identifyEvent = identify.identifyUser(userId, deviceId);
+    return await this.logEvent(identifyEvent);
   }
 
   /** Add platform dependent field onto event. */

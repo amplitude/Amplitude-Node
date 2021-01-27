@@ -1,31 +1,42 @@
-import { IdentifyOperation, IdentifyUserProperties, ValidPropertyType } from '@amplitude/types';
+import {
+  IdentifyEvent,
+  IdentifyOperation,
+  IdentifyUserProperties,
+  ValidPropertyType,
+  SpecialEventType,
+} from '@amplitude/types';
 import { logger } from '@amplitude/utils';
 
-import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS, GROUP_IDENTIFY_OPERATIONS } from './constants';
+import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS } from './constants';
+
+// A specific helper for the identify field
+const identifyWarn = (operation: IdentifyOperation, ...msgs: any[]): void => {
+  return logger.warn('On Identify operation ', operation, ': ', ...msgs);
+};
 
 export class Identify {
-  private _hasClearAll = false;
-  private readonly _propertySet: Set<string> = new Set<string>();
-  private _properties: IdentifyUserProperties = {};
+  // The set of operations that have been added to this identify
+  protected readonly _propertySet: Set<string> = new Set<string>();
+  protected _properties: IdentifyUserProperties = {};
 
-  static warn(operation: IdentifyOperation, ...msgs: any[]): void {
-    return logger.warn('On Identify operation ', operation, ': ', ...msgs);
+  /** Create a user identify event out of this identify */
+  public identifyUser(userId: string, deviceId: string | null = null): IdentifyEvent {
+    const identifyEvent: IdentifyEvent = {
+      event_type: SpecialEventType.IDENTIFY,
+      user_properties: this.getUserProperties(),
+      user_id: userId,
+    };
+
+    if (deviceId !== null && deviceId.length > 0) {
+      identifyEvent.device_id = deviceId;
+    }
+
+    return identifyEvent;
   }
 
   public getUserProperties(): IdentifyUserProperties {
     const userPropertiesCopy: IdentifyUserProperties = {};
     for (const field of USER_IDENTIFY_OPERATIONS) {
-      if (field in this._properties) {
-        userPropertiesCopy[field] = { ...this._properties[field] };
-      }
-    }
-
-    return userPropertiesCopy;
-  }
-
-  public getGroupProperties(): IdentifyUserProperties {
-    const userPropertiesCopy: IdentifyUserProperties = {};
-    for (const field of GROUP_IDENTIFY_OPERATIONS) {
       if (field in this._properties) {
         userPropertiesCopy[field] = { ...this._properties[field] };
       }
@@ -80,7 +91,7 @@ export class Identify {
   }
 
   public clearAll(): Identify {
-    this._hasClearAll = true;
+    this._propertySet.add(IdentifyOperation.CLEAR_ALL);
     this._properties[IdentifyOperation.CLEAR_ALL] = UNSET_VALUE;
 
     return this;
@@ -100,17 +111,17 @@ export class Identify {
   }
 
   private _validate(operation: IdentifyOperation, property: string, value: any): boolean {
-    if (this._hasClearAll) {
-      Identify.warn(operation, 'clear all already set. Skipping operation');
+    if (this._propertySet.has(IdentifyOperation.CLEAR_ALL)) {
+      identifyWarn(operation, 'clear all already set. Skipping operation');
       return false;
     }
 
     if (typeof property !== 'string') {
-      Identify.warn(operation, 'expected string for property but got: ', typeof property, '. Skipping operation');
+      identifyWarn(operation, 'expected string for property but got: ', typeof property, '. Skipping operation');
     }
 
     if (this._propertySet.has(property)) {
-      Identify.warn(operation, 'property ', property, ' already used. Skipping operation');
+      identifyWarn(operation, 'property ', property, ' already used. Skipping operation');
       return false;
     }
 
@@ -124,12 +135,12 @@ export class Identify {
       if (Array.isArray(value)) {
         for (const valueElement of value) {
           if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
-            Identify.warn(operation, 'invalid array element type ', typeof valueElement, '. Skipping operation');
+            identifyWarn(operation, 'invalid array element type ', typeof valueElement, '. Skipping operation');
             return false;
           }
         }
       } else if (!(typeof value === 'number' || typeof value === 'string')) {
-        Identify.warn(operation, 'invalid value type ', typeof value, '. Skipping operation');
+        identifyWarn(operation, 'invalid value type ', typeof value, '. Skipping operation');
         return false;
       }
     }
