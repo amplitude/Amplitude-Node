@@ -145,6 +145,16 @@ describe('Identify API', () => {
     expect(event.user_properties).toStrictEqual(expectedProperties);
   });
 
+  it('should not allow non-string property names', () => {
+    const identify = new Identify();
+    // this should be ignored
+    identify.set(3 as any, 'PROPERTY_VALUE');
+    const event = identify.identifyUser(USER_ID, DEVICE_ID);
+    const expectedProperties = {};
+
+    expect(event.user_properties).toStrictEqual(expectedProperties);
+  });
+
   it('should not set any new properties after clear all', () => {
     const identify = new Identify();
     identify.clearAll().set('PROPERTY_NAME', 'PROPERTY_VALUE');
