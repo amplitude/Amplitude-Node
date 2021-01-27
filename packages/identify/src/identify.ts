@@ -24,7 +24,7 @@ export class Identify {
   public identifyUser(userId: string, deviceId: string | null = null): IdentifyEvent {
     const identifyEvent: IdentifyEvent = {
       event_type: SpecialEventType.IDENTIFY,
-      groups: this.getGroups(),
+      groups: { ...this._groups },
       user_properties: this.getUserProperties(),
       user_id: userId,
     };
@@ -45,14 +45,6 @@ export class Identify {
     }
 
     return userPropertiesCopy;
-  }
-
-  protected getGroups(): { [groupName: string]: string } | undefined {
-    if (Object.keys(this._groups).length > 0) {
-      return { ...this._groups };
-    } else {
-      return undefined;
-    }
   }
 
   public setGroup(groupName: string, groupValue: string): Identify {
@@ -110,6 +102,8 @@ export class Identify {
   }
 
   public clearAll(): Identify {
+    // When clear all happens, all properties are unset. Reset the entire object.
+    this._properties = {};
     this._properties[IdentifyOperation.CLEAR_ALL] = UNSET_VALUE;
 
     return this;
