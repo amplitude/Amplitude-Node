@@ -144,6 +144,7 @@ export class Identify {
 
     if (typeof property !== 'string') {
       identifyWarn(operation, 'expected string for property but got: ', typeof property, '. Skipping operation');
+      return false;
     }
 
     if (this._propertySet.has(property)) {
