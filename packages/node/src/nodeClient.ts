@@ -107,6 +107,15 @@ export class NodeClient implements Client<Options> {
     });
   }
 
+  /**
+   * Sends an identify request for a specific user and device ID, given an identify event.
+   * Functionally similar to calling logEvent on an event created by the identify object
+   *
+   * @param userId the user ID that user properties are being attached to
+   * @param deviceId the device ID that user properties are being attached to.
+   * @param identify the Identify instance containing user property information
+   * @returns a Promise containing metadata about the success of sending this identify to the Amplitude API
+   */
   public async identify(userId: string, deviceId: string, identify: Identify): Promise<Response> {
     if (!(identify instanceof Identify)) {
       logger.warn('Invalid Identify object. Skipping operation.');

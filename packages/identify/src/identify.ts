@@ -18,11 +18,13 @@ export class Identify {
   // The set of operations that have been added to this identify
   protected readonly _propertySet: Set<string> = new Set<string>();
   protected _properties: IdentifyUserProperties = {};
+  protected _groups: { [groupName: string]: string } = {};
 
   /** Create a user identify event out of this identify */
   public identifyUser(userId: string, deviceId: string | null = null): IdentifyEvent {
     const identifyEvent: IdentifyEvent = {
       event_type: SpecialEventType.IDENTIFY,
+      groups: this.getGroups(),
       user_properties: this.getUserProperties(),
       user_id: userId,
     };
@@ -34,15 +36,32 @@ export class Identify {
     return identifyEvent;
   }
 
-  public getUserProperties(): IdentifyUserProperties {
+  protected getUserProperties(): IdentifyUserProperties {
     const userPropertiesCopy: IdentifyUserProperties = {};
     for (const field of USER_IDENTIFY_OPERATIONS) {
       if (field in this._properties) {
-        userPropertiesCopy[field] = { ...this._properties[field] };
+        userPropertiesCopy[field] = this._properties[field];
       }
     }
 
     return userPropertiesCopy;
+  }
+
+  protected getGroups(): { [groupName: string]: string } | undefined {
+    if (Object.keys(this._groups).length > 0) {
+      return { ...this._groups };
+    } else {
+      return undefined;
+    }
+  }
+
+  public setGroup(groupName: string, groupValue: string): Identify {
+    const isSuccessfulSet = this._safeSet(IdentifyOperation.SET, groupName, groupValue);
+    if (isSuccessfulSet) {
+      this._groups[groupName] = groupValue;
+    }
+
+    return this;
   }
 
   public set(property: string, value: ValidPropertyType): Identify {
@@ -86,19 +105,23 @@ export class Identify {
   }
 
   public unset(property: string): Identify {
-    this._safeSet(IdentifyOperation.ADD, property, UNSET_VALUE);
+    this._safeSet(IdentifyOperation.UNSET, property, UNSET_VALUE);
     return this;
   }
 
   public clearAll(): Identify {
-    this._propertySet.add(IdentifyOperation.CLEAR_ALL);
     this._properties[IdentifyOperation.CLEAR_ALL] = UNSET_VALUE;
 
     return this;
   }
 
-  private _safeSet(operation: IdentifyOperation, property: string, value: any): void {
+  // Returns whether or not this set actually worked.
+  private _safeSet(operation: IdentifyOperation, property: string, value: any): boolean {
     if (this._validate(operation, property, value)) {
+      if (!(operation in this._properties)) {
+        this._properties[operation] = {};
+      }
+
       let userPropertyMap: any = this._properties[operation];
       if (userPropertyMap === undefined) {
         userPropertyMap = {};
@@ -107,11 +130,14 @@ export class Identify {
 
       userPropertyMap[property] = value;
       this._propertySet.add(property);
+      return true;
     }
+
+    return false;
   }
 
   private _validate(operation: IdentifyOperation, property: string, value: any): boolean {
-    if (this._propertySet.has(IdentifyOperation.CLEAR_ALL)) {
+    if (this._properties[IdentifyOperation.CLEAR_ALL] !== undefined) {
       identifyWarn(operation, 'clear all already set. Skipping operation');
       return false;
     }
@@ -123,10 +149,6 @@ export class Identify {
     if (this._propertySet.has(property)) {
       identifyWarn(operation, 'property ', property, ' already used. Skipping operation');
       return false;
-    }
-
-    if (!(operation in this._properties)) {
-      this._properties[operation] = {};
     }
 
     if (operation === IdentifyOperation.ADD) {
