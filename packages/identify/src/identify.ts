@@ -1,38 +1,33 @@
-import {
-  SpecialEventType,
-  IdentifyEvent,
-  IdentifyOperation,
-  IdentifyUserProperties,
-  ValidPropertyType,
-} from '@amplitude/types';
+import { IdentifyOperation, IdentifyUserProperties, ValidPropertyType } from '@amplitude/types';
 import { logger } from '@amplitude/utils';
 
-// A special value used by this class when a value is not needed by identify
-// Ex. for unset, we set $unset: { 'example_user_property': '-' }
-export const UNSET_VALUE = '-';
+import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS, GROUP_IDENTIFY_OPERATIONS } from './constants';
 
 export class Identify {
-  private _hasClearAll: boolean = false;
-  private _userPropertySet: Set<string> = new Set<string>();
-  private _userProperties: IdentifyUserProperties = {};
+  private _hasClearAll = false;
+  private readonly _propertySet: Set<string> = new Set<string>();
+  private _properties: IdentifyUserProperties = {};
 
   static warn(operation: IdentifyOperation, ...msgs: any[]): void {
     return logger.warn('On Identify operation ', operation, ': ', ...msgs);
   }
 
-  public toEvent(): IdentifyEvent {
-    return {
-      event_type: SpecialEventType.IDENTIFY,
-      user_properties: this._userProperties,
-    };
-  }
-
   public getUserProperties(): IdentifyUserProperties {
     const userPropertiesCopy: IdentifyUserProperties = {};
-    const fields: Array<IdentifyOperation> = Object.keys(this._userProperties) as any;
-    for (let field of fields) {
-      if (field in this._userProperties) {
-        userPropertiesCopy[field] = { ...this._userProperties[field] };
+    for (const field of USER_IDENTIFY_OPERATIONS) {
+      if (field in this._properties) {
+        userPropertiesCopy[field] = { ...this._properties[field] };
+      }
+    }
+
+    return userPropertiesCopy;
+  }
+
+  public getGroupProperties(): IdentifyUserProperties {
+    const userPropertiesCopy: IdentifyUserProperties = {};
+    for (const field of GROUP_IDENTIFY_OPERATIONS) {
+      if (field in this._properties) {
+        userPropertiesCopy[field] = { ...this._properties[field] };
       }
     }
 
@@ -86,21 +81,21 @@ export class Identify {
 
   public clearAll(): Identify {
     this._hasClearAll = true;
-    this._userProperties[IdentifyOperation.CLEAR_ALL] = UNSET_VALUE;
+    this._properties[IdentifyOperation.CLEAR_ALL] = UNSET_VALUE;
 
     return this;
   }
 
   private _safeSet(operation: IdentifyOperation, property: string, value: any): void {
     if (this._validate(operation, property, value)) {
-      let userPropertyMap: any = this._userProperties[operation];
-      if (!userPropertyMap) {
+      let userPropertyMap: any = this._properties[operation];
+      if (userPropertyMap === undefined) {
         userPropertyMap = {};
-        this._userProperties[operation] = userPropertyMap;
+        this._properties[operation] = userPropertyMap;
       }
 
       userPropertyMap[property] = value;
-      this._userPropertySet.add(property);
+      this._propertySet.add(property);
     }
   }
 
@@ -114,20 +109,20 @@ export class Identify {
       Identify.warn(operation, 'expected string for property but got: ', typeof property, '. Skipping operation');
     }
 
-    if (this._userPropertySet.has(property)) {
+    if (this._propertySet.has(property)) {
       Identify.warn(operation, 'property ', property, ' already used. Skipping operation');
       return false;
     }
 
-    if (!(operation in this._userProperties)) {
-      this._userProperties[operation] = {};
+    if (!(operation in this._properties)) {
+      this._properties[operation] = {};
     }
 
     if (operation === IdentifyOperation.ADD) {
       return typeof value === 'number';
     } else if (operation !== IdentifyOperation.UNSET && operation !== IdentifyOperation.REMOVE) {
       if (Array.isArray(value)) {
-        for (let valueElement of value) {
+        for (const valueElement of value) {
           if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
             Identify.warn(operation, 'invalid array element type ', typeof valueElement, '. Skipping operation');
             return false;

@@ -1,3 +1,4 @@
+import { Event } from './event';
 import { Response } from './response';
 
 /**
@@ -5,7 +6,7 @@ import { Response } from './response';
  */
 export interface Payload {
   api_key: string;
-  events: ReadonlyArray<Event>;
+  events: readonly Event[];
 }
 
 /** Transport used sending data to Amplitude */

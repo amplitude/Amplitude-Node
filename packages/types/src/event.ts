@@ -1,6 +1,7 @@
-import { BaseEvent } from './base-event';
+import { BaseEvent } from './baseEvent';
 import { IdentifyEvent } from './identify';
 
+export type Event = BaseEvent | IdentifyEvent;
 
 /**
  * Amplitude request payload options.
@@ -18,5 +19,3 @@ export interface Payload extends PayloadOptions {
   events: readonly Event[];
   options?: PayloadOptions;
 }
-
-export type Event = BaseEvent | IdentifyEvent;

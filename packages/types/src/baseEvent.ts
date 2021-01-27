@@ -4,6 +4,7 @@
  */
 export enum SpecialEventType {
   IDENTIFY = '$identify',
+  GROUP_IDENTIFY = '$groupidentify',
 }
 
 /**

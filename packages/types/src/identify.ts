@@ -1,4 +1,4 @@
-import { BaseEvent, SpecialEventType } from './base-event';
+import { BaseEvent, SpecialEventType } from './baseEvent';
 
 export enum IdentifyOperation {
   // Base Operations to set values
@@ -22,16 +22,17 @@ export enum IdentifyOperation {
 
 export type ValidPropertyType = number | string | Array<string | number>;
 
-type BaseOperationConfig = {
+interface BaseOperationConfig {
   [key: string]: ValidPropertyType;
-};
+}
 
-export type IdentifyUserProperties = {
+export interface IdentifyUserProperties {
   // Add operations can only take numbers
   [IdentifyOperation.ADD]?: { [key: string]: number };
 
-  // These don't actually read the key
+  // This reads the keys of the passed object, but the values are not used
   [IdentifyOperation.UNSET]?: BaseOperationConfig;
+  // This option does not read the key as it unsets all user properties
   [IdentifyOperation.CLEAR_ALL]?: any;
 
   // These operations can take numbers, strings, or arrays of both.
@@ -42,10 +43,10 @@ export type IdentifyUserProperties = {
   [IdentifyOperation.POSTINSERT]?: BaseOperationConfig;
   [IdentifyOperation.PREINSERT]?: BaseOperationConfig;
   [IdentifyOperation.REMOVE]?: BaseOperationConfig;
-};
+}
 
 export interface IdentifyEvent extends BaseEvent {
-  event_type: SpecialEventType.IDENTIFY;
+  event_type: SpecialEventType.IDENTIFY | SpecialEventType.GROUP_IDENTIFY;
   user_properties:
     | IdentifyUserProperties
     | {

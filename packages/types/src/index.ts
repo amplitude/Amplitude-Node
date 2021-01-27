@@ -1,4 +1,4 @@
-export { BaseEvent, SpecialEventType } from './base-event';
+export { BaseEvent, SpecialEventType } from './baseEvent';
 export { Client } from './client';
 export { Event, PayloadOptions } from './event';
 export { IdentifyEvent, IdentifyOperation, IdentifyUserProperties, ValidPropertyType } from './identify';
