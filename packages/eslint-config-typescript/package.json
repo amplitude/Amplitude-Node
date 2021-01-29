@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/eslint-config-typescript",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "description": "ESLint config for Amplitude Typescript projects",
   "keywords": [
     "eslint",
@@ -19,6 +19,5 @@
   },
   "bugs": {
     "url": "https://github.com/amplitude/Amplitude-Node/issues"
-  },
-  "dependencies": {}
+  }
 }
