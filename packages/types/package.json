@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/types",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Types for all Amplitude JavaScript SDKs",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/main/packages/types",
@@ -40,6 +40,5 @@
     "link:yarn": "yarn link",
     "test": "echo 'Types directory has no logic and therefore no tests, skipping tests'"
   },
-  "sideEffects": false,
-  "dependencies": {}
+  "sideEffects": false
 }
