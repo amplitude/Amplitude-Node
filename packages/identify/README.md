@@ -5,7 +5,7 @@
   <br />
 </p>
 
-[![npm version](https://badge.fury.io/js/%40amplitude%2Fidentity.svg)](https://badge.fury.io/js/%40amplitude%2Fidentify)
+[![npm version](https://badge.fury.io/js/%40amplitude%2Fidentify.svg)](https://badge.fury.io/js/%40amplitude%2Fidentify)
 
 # General
 
@@ -25,8 +25,8 @@ identify
   .unset('needs_to_activate')
 ```
 
-Then, this can be used with the Node SDK to send an identify call. Because identify calls are special events, there
-are two different ways to accomplish this:
+Then, this can be used with the Node SDK to send an identify call.
+Because identify calls are special events, there are two different ways to accomplish this:
 
 ```
 import Amplitude from '@amplitude/node';
@@ -44,15 +44,17 @@ client.logEvent(identifyEvent);
 
 This is **not** compatible with the Amplitude Javascript SDK (`amplitude-js`).
 This package should not be used with that SDK, and the identify API provided there should **not** be used with the Node SDK.
-There areplans to consolidate these differences.
+There are plans to consolidate these incompatibilities
+.
 ## Group Identify
 
-This identify supports the `setGroup` function. Any identify operation calls made on this object will **also** be treated
-as a group identify call. Certain operations will not be transferred to the group properties (see the docs on the [Group Identify API](https://developers.amplitude.com/docs/group-identify-api) to see which properties are supported here)
+This identify supports the `setGroup` function.
+Any identify operation calls made on this object will **also** be treated as a group identify call.
+Certain operations will not be transferred to the group properties (see the docs on the [Group Identify API](https://developers.amplitude.com/docs/group-identify-api) to see which properties are supported here).
 
 ## Clear All
 
 Clear all will clear all user properties from the user and device on all events going forward.
 **Use this carefully** and make sure this is something you want to do instead of creating a new user/device id.
 When clear all is used on the identify builder, all other operations are canceled and no new operations can be added.
-This is because clear all must be sent as its own identify object to reduce confusion.
+This is because clear all must be sent as its own identify object.

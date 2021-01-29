@@ -112,10 +112,6 @@ export class Identify {
   // Returns whether or not this set actually worked.
   private _safeSet(operation: IdentifyOperation, property: string, value: any): boolean {
     if (this._validate(operation, property, value)) {
-      if (!(operation in this._properties)) {
-        this._properties[operation] = {};
-      }
-
       let userPropertyMap: any = this._properties[operation];
       if (userPropertyMap === undefined) {
         userPropertyMap = {};
