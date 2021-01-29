@@ -20,7 +20,5 @@
   "bugs": {
     "url": "https://github.com/amplitude/Amplitude-Node/issues"
   },
-  "dependencies": {
-    "@amplitude/identify": "^1.0.3"
-  }
+  "dependencies": {}
 }
