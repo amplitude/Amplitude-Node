@@ -41,7 +41,5 @@
     "test": "echo 'Types directory has no logic and therefore no tests, skipping tests'"
   },
   "sideEffects": false,
-  "dependencies": {
-    "@amplitude/eslint-config-typescript": "^1.3.0"
-  }
+  "dependencies": {}
 }
