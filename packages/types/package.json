@@ -42,6 +42,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@amplitude/eslint-config-typescript": "^1.1.0"
+    "@amplitude/eslint-config-typescript": "^1.1.0",
+    "@amplitude/identify": "^1.0.3"
   }
 }

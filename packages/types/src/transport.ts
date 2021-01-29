@@ -1,5 +1,13 @@
-import { Payload } from './event';
+import { Event } from './event';
 import { Response } from './response';
+
+/**
+ * Amplitude request payload definition.
+ */
+export interface Payload {
+  api_key: string;
+  events: readonly Event[];
+}
 
 /** Transport used sending data to Amplitude */
 export interface Transport {
