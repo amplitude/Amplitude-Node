@@ -26,7 +26,7 @@ describe('Identify API', () => {
     expect(event.user_properties).toStrictEqual(expectedProperties);
   });
 
-  it('should see user property when using set', () => {
+  it('should see user property when using set once', () => {
     const identify = new Identify();
     identify.setOnce('PROPERTY_NAME', 'PROPERTY_VALUE');
     const event = identify.identifyUser(USER_ID, DEVICE_ID);
