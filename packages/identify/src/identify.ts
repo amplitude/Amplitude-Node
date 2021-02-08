@@ -5,7 +5,7 @@ import {
   ValidPropertyType,
   SpecialEventType,
 } from '@amplitude/types';
-import { logger } from '@amplitude/utils';
+import { logger, generateBase36Id } from '@amplitude/utils';
 
 import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS } from './constants';
 
@@ -32,6 +32,17 @@ export class Identify {
     if (deviceId !== null && deviceId.length > 0) {
       identifyEvent.device_id = deviceId;
     }
+
+    return identifyEvent;
+  }
+
+  public identifyGroup(groupName: string, groupValue: string): IdentifyEvent {
+    const identifyEvent: IdentifyEvent = {
+      event_type: SpecialEventType.GROUP_IDENTIFY,
+      groups: { [groupName]: groupValue },
+      user_properties: this.getUserProperties(),
+      device_id: generateBase36Id(), // Generate a throw-away, non-colliding ID
+    };
 
     return identifyEvent;
   }
