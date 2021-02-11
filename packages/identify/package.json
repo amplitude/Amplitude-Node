@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/identify",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Utility functions to build and interact with the Identify API",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/master/packages/identify",
