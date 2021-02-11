@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/node",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Offical Amplitude SDK for Node.js",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node",
