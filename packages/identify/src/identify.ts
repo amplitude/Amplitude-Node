@@ -5,9 +5,9 @@ import {
   ValidPropertyType,
   SpecialEventType,
 } from '@amplitude/types';
-import { logger } from '@amplitude/utils';
+import { logger, generateBase36Id } from '@amplitude/utils';
 
-import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS } from './constants';
+import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS, GROUP_IDENTIFY_OPERATIONS } from './constants';
 
 // A specific helper for the identify field
 const identifyWarn = (operation: IdentifyOperation, ...msgs: any[]): void => {
@@ -36,9 +36,31 @@ export class Identify {
     return identifyEvent;
   }
 
+  public identifyGroup(groupName: string, groupValue: string): IdentifyEvent {
+    const identifyEvent: IdentifyEvent = {
+      event_type: SpecialEventType.GROUP_IDENTIFY,
+      groups: { [groupName]: groupValue },
+      user_properties: this.getGroupUserProperties(),
+      device_id: generateBase36Id(), // Generate a throw-away, non-colliding ID
+    };
+
+    return identifyEvent;
+  }
+
   protected getUserProperties(): IdentifyUserProperties {
     const userPropertiesCopy: IdentifyUserProperties = {};
     for (const field of USER_IDENTIFY_OPERATIONS) {
+      if (field in this._properties) {
+        userPropertiesCopy[field] = this._properties[field];
+      }
+    }
+
+    return userPropertiesCopy;
+  }
+
+  protected getGroupUserProperties(): IdentifyUserProperties {
+    const userPropertiesCopy: IdentifyUserProperties = {};
+    for (const field of GROUP_IDENTIFY_OPERATIONS) {
       if (field in this._properties) {
         userPropertiesCopy[field] = this._properties[field];
       }

@@ -4,6 +4,8 @@ import { Identify } from '../src/identify';
 
 const USER_ID = 'MOCK_USER_ID';
 const DEVICE_ID = 'MOCK_DEVICE_ID';
+const GROUP_NAME = 'MOCK_GROUP_NAME';
+const GROUP_VALUE = 'MOCK_GROUP_VALUE';
 
 describe('Identify API', () => {
   it('should create an identify event with the correct top-level fields', () => {
@@ -13,6 +15,16 @@ describe('Identify API', () => {
     expect(event.device_id).toBe(DEVICE_ID);
     expect(event.user_id).toBe(USER_ID);
     expect(event.event_type).toBe(SpecialEventType.IDENTIFY);
+  });
+
+  it('should create a group identify event with the correct top-level fields', () => {
+    const identify = new Identify();
+    const event = identify.identifyGroup(GROUP_NAME, GROUP_VALUE);
+
+    expect(event.device_id !== undefined).toBe(true);
+    expect(event.user_id).toBe(undefined);
+    expect(event.event_type).toBe(SpecialEventType.GROUP_IDENTIFY);
+    expect(event.groups).toStrictEqual({ [GROUP_NAME]: GROUP_VALUE });
   });
   it('should see user property when using set', () => {
     const identify = new Identify();
@@ -188,5 +200,15 @@ describe('Identify API', () => {
     const expectedProperties = {};
 
     expect(event.user_properties).toStrictEqual(expectedProperties);
+  });
+
+  it('should ignore group identify properties that are not supported', () => {
+    const identify = new Identify();
+    identify.remove('PROPERTY_NAME', 'PROPERTY_VALUE');
+    identify.postInsert('PROPERTY_NAME', 'PROPERTY_VALUE');
+    identify.preInsert('PROPERTY_NAME', 'PROPERTY_VALUE');
+    const event = identify.identifyGroup(GROUP_NAME, GROUP_VALUE);
+
+    expect(event.user_properties).toStrictEqual({});
   });
 });
