@@ -52,6 +52,9 @@ This identify supports the `setGroup` function.
 Any identify operation calls made on this object will **also** be treated as a group identify call.
 Certain operations will not be transferred to the group properties (see the docs on the [Group Identify API](https://developers.amplitude.com/docs/group-identify-api) to see which properties are supported here).
 
+To not associate a user with the group identify, you can also use the `identifyGroup` function to send `$groupIdentify`
+events for a group.
+
 ## Clear All
 
 Clear all will clear all user properties from the user and device on all events going forward.
