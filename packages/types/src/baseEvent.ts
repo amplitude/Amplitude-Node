@@ -57,6 +57,7 @@ export interface BaseEvent {
 
   event_id?: number;
   session_id?: number;
+  insert_id?: string;
 
   groups?: { [key: string]: any };
 }
