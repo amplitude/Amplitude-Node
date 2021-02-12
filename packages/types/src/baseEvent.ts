@@ -24,12 +24,26 @@ export interface BaseEvent {
   city?: string;
   location_lat?: number;
   location_lng?: number;
+
+  app_version?: string;
+  version_name?: string;
+  library?: string;
+  platform?: string;
+  os_name?: string;
+  os_version?: string;
+  device_brand?: string;
+  device_manufacturer?: string;
+  device_model?: string;
+  carrier?: string;
+
+  idfa?: string;
+  idfv?: string;
+  adid?: string;
+  android_id?: string;
+
   // ** The current Designated Market Area of the user. */
   dma?: string;
   language?: string;
-  platform?: string;
-  version_name?: string;
-  library?: string;
   ip?: string;
   uuid?: string;
   event_properties?: { [key: string]: any };
