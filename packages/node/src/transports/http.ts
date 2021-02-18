@@ -1,5 +1,5 @@
-import { Payload, Response, Transport, TransportOptions } from '@amplitude/types';
-import { mapJSONToResponse, mapHttpMessageToResponse } from '@amplitude/utils';
+import { Options, Payload, Response, Transport, TransportOptions } from '@amplitude/types';
+import { AsyncQueue, mapJSONToResponse, mapHttpMessageToResponse } from '@amplitude/utils';
 
 import * as http from 'http';
 import * as https from 'https';
@@ -21,11 +21,6 @@ export interface HTTPRequest {
   ): http.ClientRequest;
 }
 
-interface RequestQueueObject {
-  callback: () => void;
-  cancellingTimeout: NodeJS.Timeout | null;
-}
-
 // Automatially cancel requests that have been waiting for 10+ s
 const REQUEST_CANCEL_TIMEOUT = 10 * 1000;
 
@@ -35,7 +30,7 @@ export class HTTPTransport implements Transport {
   public module: HTTPRequest;
 
   protected _uploadInProgress = false;
-  protected _requestQueue: RequestQueueObject[] = [];
+  protected _requestQueue: AsyncQueue = new AsyncQueue();
 
   /** Create instance and set this.dsn */
   public constructor(public options: TransportOptions) {
@@ -56,7 +51,7 @@ export class HTTPTransport implements Transport {
 
     // Queue up the call to send the payload.
     // Wait 10 seconds for each request in queue before removing it
-    return await this._awaitUploadFinish(call, REQUEST_CANCEL_TIMEOUT);
+    return await this._requestQueue.addToQueue(call, REQUEST_CANCEL_TIMEOUT);
   }
 
   /** Returns a build request option object used by request */
@@ -76,64 +71,6 @@ export class HTTPTransport implements Transport {
     };
 
     return options;
-  }
-
-  // Awaits the finish of all requests that have been queued up before it
-  // And will expire itself (reject the promise) after waiting limit ms
-  // or never expire, if limit is not set
-  private async _awaitUploadFinish(callback: () => Promise<Response>, limitInMs = 0): Promise<Response> {
-    return await new Promise((resolve, reject) => {
-      const queueCallback = (): void => {
-        this._uploadInProgress = true;
-        try {
-          resolve(callback());
-        } catch (e) {
-          reject(e);
-        } finally {
-          this._notifyUploadFinish();
-        }
-      };
-
-      // If there is no upload in progress
-      // Return immediately
-      if (!this._uploadInProgress) {
-        return queueCallback();
-      }
-
-      const requestObject: RequestQueueObject = {
-        callback: queueCallback,
-        cancellingTimeout: null,
-      };
-      this._requestQueue.push(requestObject);
-
-      // If the limit exists, set a timeout to remove the callback and reject the promise
-      if (limitInMs > 0) {
-        requestObject.cancellingTimeout = setTimeout(() => {
-          const callBackIndex = this._requestQueue.findIndex(requestObj => {
-            return requestObj.callback === queueCallback;
-          });
-
-          if (callBackIndex > -1) {
-            this._requestQueue.splice(callBackIndex, 1);
-          }
-
-          reject(new Error(''));
-        }, limitInMs);
-      }
-    });
-  }
-
-  // Notify the oldest awaiting send that the transport is ready for another request
-  private _notifyUploadFinish(): void {
-    this._uploadInProgress = false;
-    const oldestRequest = this._requestQueue.shift();
-    if (oldestRequest !== undefined) {
-      if (oldestRequest.cancellingTimeout !== null) {
-        // Clear the timeout where we try to remove the callback and reject the promise.
-        clearTimeout(oldestRequest.cancellingTimeout);
-      }
-      oldestRequest.callback();
-    }
   }
 
   /** JSDoc */
@@ -168,3 +105,13 @@ export class HTTPTransport implements Transport {
     });
   }
 }
+
+export const setupDefaultTransport = (options: Options): Transport => {
+  const transportOptions: TransportOptions = {
+    serverUrl: options.serverUrl,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+  return new HTTPTransport(transportOptions);
+};
