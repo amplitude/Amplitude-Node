@@ -1,6 +1,6 @@
 interface QueueObject {
   // The callback used to start the promise
-  startPromise: () => void;
+  startPromise: () => Promise<void>;
   // If the promise is meant to expire after some time, this is the associated Timeout
   // Meant to be canceled if the promise is started.
   cancellingTimeout: NodeJS.Timeout | null;
@@ -20,13 +20,13 @@ export class AsyncQueue {
   public async addToQueue<T = any>(promiseGenerator: () => Promise<T>, limitInMs = 0): Promise<T> {
     return await new Promise((resolve, reject) => {
       // The callback that will start the promise resolution
-      const startPromise = (): void => {
+      const startPromise = async (): Promise<void> => {
         this._promiseInProgress = true;
         try {
-          const promise = promiseGenerator();
-          promise.then(resolve, reject);
-        } catch (e) {
-          reject(e);
+          const resp = await promiseGenerator();
+          resolve(resp);
+        } catch (err) {
+          reject(err);
         } finally {
           this._notifyUploadFinish();
         }
@@ -35,7 +35,9 @@ export class AsyncQueue {
       // If there is no promise in progress
       // Return immediately
       if (!this._promiseInProgress) {
-        return startPromise();
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        startPromise();
+        return;
       }
 
       const queueObject: QueueObject = {
@@ -46,21 +48,16 @@ export class AsyncQueue {
 
       // If the limit exists, set a timeout to remove the callback and reject the promise
       if (limitInMs > 0) {
-        this._addQueueTimeout(queueObject, limitInMs, reject);
+        queueObject.cancellingTimeout = setTimeout(() => {
+          const callBackIndex = this._promiseQueue.indexOf(queueObject);
+
+          if (callBackIndex > -1) {
+            this._promiseQueue.splice(callBackIndex, 1);
+            reject(new Error());
+          }
+        }, limitInMs);
       }
     });
-  }
-
-  private _addQueueTimeout(queueObject: QueueObject, limitInMs: number, callback: (error: Error) => void): void {
-    queueObject.cancellingTimeout = setTimeout(() => {
-      const callBackIndex = this._promiseQueue.indexOf(queueObject);
-
-      if (callBackIndex > -1) {
-        this._promiseQueue.splice(callBackIndex, 1);
-      }
-
-      callback(new Error());
-    }, limitInMs);
   }
 
   // Notify the oldest awaiting promise that the queue is ready to process another promise
@@ -72,6 +69,7 @@ export class AsyncQueue {
         // Clear the timeout where we try to remove the callback and reject the promise.
         clearTimeout(oldestPromise.cancellingTimeout);
       }
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       oldestPromise.startPromise();
     }
   }
