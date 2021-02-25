@@ -41,7 +41,7 @@
     "lint:eslint": "eslint '{src,test}/**/*.ts'",
     "fix": "run-s fix:eslint fix:prettier",
     "fix:prettier": "prettier --write \"{src,test}/**/*.ts\"",
-    "fix:eslint": "eslint --fix '{src,test}/**/*.ts'",
+    "fix:eslint": "yarn lint:eslint --fix",
     "link:yarn": "yarn link",
     "test": "jest"
   },
