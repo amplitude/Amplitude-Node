@@ -41,6 +41,7 @@ export class OfflineRetryHandler extends BaseRetryHandler {
     return {
       api_key: this._apiKey,
       events: this._eventsToRetry.concat(events),
+      ...this._getPayloadOptions(),
     };
   }
 
