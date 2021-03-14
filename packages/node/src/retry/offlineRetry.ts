@@ -1,28 +1,18 @@
-import { Event, Options, Transport, Payload, Status, Response, RetryClass } from '@amplitude/types';
+import { Event, Options, Payload, Status, Response } from '@amplitude/types';
 import { AsyncQueue, collectInvalidEventIndices } from '@amplitude/utils';
-
-import { DEFAULT_OPTIONS } from '../constants';
-import { setupDefaultTransport } from '../transports';
+import { BaseRetryHandler } from './baseRetry';
 
 /**
  * A retry handler made specifically to handle a strategy where
  * the server network connection is not always available. (e.g. executing node code on a client device).
  * Instead of retrying events on a loop, this will save untried events
  */
-export class OfflineRetryHandler implements RetryClass {
-  protected readonly _apiKey: string;
-
-  // A map of maps to event buffers for failed events
-  // The first key is userId (or ''), and second is deviceId (or '')
-  protected readonly _options: Options;
-  private readonly _transport: Transport;
+export class OfflineRetryHandler extends BaseRetryHandler {
   private _eventsToRetry: Event[] = [];
   private readonly _requestQueue: AsyncQueue = new AsyncQueue();
 
   public constructor(apiKey: string, options: Partial<Options> = {}) {
-    this._apiKey = apiKey;
-    this._options = { ...DEFAULT_OPTIONS, ...options };
-    this._transport = this._options.transportClass ?? setupDefaultTransport(this._options);
+    super(apiKey, options);
   }
 
   /**
@@ -47,10 +37,10 @@ export class OfflineRetryHandler implements RetryClass {
     });
   }
 
-  private _getPayload(events: readonly Event[]): Payload {
+  protected _getPayload(events: readonly Event[]): Payload {
     return {
       api_key: this._apiKey,
-      events: [...this._eventsToRetry, ...events],
+      events: this._eventsToRetry.concat(events),
     };
   }
 

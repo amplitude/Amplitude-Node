@@ -1,7 +1,8 @@
-import { Event, Options, Transport, Payload, PayloadOptions, Status, Response, RetryClass } from '@amplitude/types';
-import { setupDefaultTransport } from '../transports';
-import { DEFAULT_OPTIONS, BASE_RETRY_TIMEOUT_DEPRECATED, BASE_RETRY_TIMEOUT_DEPRECATED_WARNING } from '../constants';
+import { Event, Options, Status, Response } from '@amplitude/types';
+import { BASE_RETRY_TIMEOUT_DEPRECATED, BASE_RETRY_TIMEOUT_DEPRECATED_WARNING } from '../constants';
 import { asyncSleep, collectInvalidEventIndices, logger } from '@amplitude/utils';
+
+import { BaseRetryHandler } from './baseRetry';
 
 interface RetryMetadata {
   shouldRetry: boolean;
@@ -22,20 +23,14 @@ function convertMaxRetries(maxRetries: number): number[] {
   return retryTimeouts;
 }
 
-export class RetryHandler implements RetryClass {
-  protected readonly _apiKey: string;
-
+export class RetryHandler extends BaseRetryHandler {
   // A map of maps to event buffers for failed events
   // The first key is userId (or ''), and second is deviceId (or '')
   private readonly _idToBuffer: Map<string, Map<string, Event[]>> = new Map<string, Map<string, Event[]>>();
-  protected readonly _options: Options;
-  private readonly _transport: Transport;
   private _eventsInRetry = 0;
 
   public constructor(apiKey: string, options: Partial<Options> = {}) {
-    this._apiKey = apiKey;
-    this._options = { ...DEFAULT_OPTIONS, ...options };
-    this._transport = this._options.transportClass ?? setupDefaultTransport(this._options);
+    super(apiKey, options);
     if (this._options.maxRetries !== undefined) {
       logger.warn(BASE_RETRY_TIMEOUT_DEPRECATED_WARNING);
       this._options.retryTimeouts = convertMaxRetries(this._options.maxRetries);
@@ -91,25 +86,6 @@ export class RetryHandler implements RetryClass {
     });
 
     return prunedEvents;
-  }
-
-  protected _getPayloadOptions(): { options?: PayloadOptions } {
-    if (typeof this._options.minIdLength === 'number') {
-      return {
-        options: {
-          min_id_length: this._options.minIdLength,
-        },
-      };
-    }
-    return {};
-  }
-
-  protected _getPayload(events: readonly Event[]): Payload {
-    return {
-      api_key: this._apiKey,
-      events,
-      ...this._getPayloadOptions(),
-    };
   }
 
   private _getRetryBuffer(userId: string, deviceId: string): Event[] | null {

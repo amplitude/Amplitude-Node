@@ -6,6 +6,6 @@ export { Identity, IdentityListener, DEFAULT_IDENTITY_INSTANCE } from './identit
 export { LogLevel } from './logger';
 export { Options } from './options';
 export { Response, ResponseBody, SKIPPED_RESPONSE } from './response';
-export { RetryClass } from './retry';
+export { RetryClass, Retry } from './retry';
 export { Status } from './status';
 export { Transport, TransportOptions, Payload, PayloadOptions } from './transport';
