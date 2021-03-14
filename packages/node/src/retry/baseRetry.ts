@@ -19,10 +19,6 @@ export class BaseRetryHandler implements Retry {
   public async sendEventsWithRetry(events: readonly Event[]): Promise<Response> {
     let response: Response = { status: Status.Unknown, statusCode: 0 };
     response = await this._transport.sendPayload(this._getPayload(events));
-    if (response.status !== Status.Success) {
-      throw new Error(response.status);
-    }
-
     return response;
   }
 
