@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/utils",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Utility functions for the Amplitude JavaScript SDK",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/main/packages/utils",
