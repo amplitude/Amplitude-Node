@@ -1,6 +1,6 @@
 import { LogLevel } from './logger';
 import { Transport } from './transport';
-import { RetryClass } from './retry';
+import { Retry } from './retry';
 
 /**
  * Options that you can choose to configure against the client.
@@ -45,7 +45,7 @@ export interface Options {
   /**
    * The class being used to handle event retrying.
    */
-  retryClass: RetryClass | null;
+  retryClass: Retry | null;
 
   /**
    * The class being used to transport events.
