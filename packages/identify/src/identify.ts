@@ -7,7 +7,7 @@ import {
 } from '@amplitude/types';
 import { logger, generateBase36Id } from '@amplitude/utils';
 
-import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS, GROUP_IDENTIFY_OPERATIONS } from './constants';
+import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS, GROUP_IDENTIFY_OPERATIONS, MAX_PROPERTY_KEYS } from './constants';
 
 // A specific helper for the identify field
 const identifyWarn = (operation: IdentifyOperation, ...msgs: any[]): void => {
@@ -148,6 +148,40 @@ export class Identify {
     return false;
   }
 
+  private _validateProperties(operation: IdentifyOperation, value: any) {
+    if (Array.isArray(value)) {
+      for (const valueElement of value) {
+        if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
+          identifyWarn(operation, 'invalid array element type ', typeof valueElement, '. Skipping operation');
+          return false;
+        }
+      }
+    } else if (typeof value === 'object') {
+      return this._validateObject(operation, value);
+    } else if (!(typeof value === 'number' || typeof value === 'string')) {
+      identifyWarn(operation, 'invalid value type ', typeof value, '. Skipping operation');
+      return false;
+    }
+    return true;
+  }
+
+  private _validateObject(operation: IdentifyOperation, properties: { [key: string]: any }): boolean {
+    let isValidateObject = true;
+    if (Object.keys(properties).length > MAX_PROPERTY_KEYS) {
+      identifyWarn(operation, 'too many properties. Skipping operation');
+      return false;
+    }
+    for (let key in properties) {
+      if (typeof key !== 'string') {
+        identifyWarn(operation, 'invalid properties format. Skipping operation');
+        return false;
+      }
+      let value = properties[key];
+      isValidateObject = isValidateObject && this._validateProperties(operation, value);
+    }
+    return isValidateObject;
+  }
+
   private _validate(operation: IdentifyOperation, property: string, value: any): boolean {
     if (this._properties[IdentifyOperation.CLEAR_ALL] !== undefined) {
       identifyWarn(operation, 'clear all already set. Skipping operation');
@@ -167,19 +201,8 @@ export class Identify {
     if (operation === IdentifyOperation.ADD) {
       return typeof value === 'number';
     } else if (operation !== IdentifyOperation.UNSET && operation !== IdentifyOperation.REMOVE) {
-      if (Array.isArray(value)) {
-        for (const valueElement of value) {
-          if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
-            identifyWarn(operation, 'invalid array element type ', typeof valueElement, '. Skipping operation');
-            return false;
-          }
-        }
-      } else if (!(typeof value === 'number' || typeof value === 'string')) {
-        identifyWarn(operation, 'invalid value type ', typeof value, '. Skipping operation');
-        return false;
-      }
+      return this._validateProperties(operation, value);
     }
-
     return true;
   }
 }
