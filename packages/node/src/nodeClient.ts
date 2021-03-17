@@ -129,7 +129,6 @@ export class NodeClient implements Client<Options> {
   /** Add platform dependent field onto event. */
   private _annotateEvent(event: Event): void {
     event.library = `${SDK_NAME}/${SDK_VERSION}`;
-    event.platform = event.platform ?? 'Node.js';
   }
 
   private _setupDefaultTransport(): RetryHandler {

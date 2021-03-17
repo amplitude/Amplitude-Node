@@ -28,6 +28,11 @@ export interface BaseEvent {
   app_version?: string;
   version_name?: string;
   library?: string;
+
+  /** Optional
+   * Warning: updating any one of these fields will reset the other fields to null on the backend, unless the
+   * other fields are also set. See https://developers.amplitude.com/docs/http-api-v2 (Footnote 2) for more info
+   */
   platform?: string;
   os_name?: string;
   os_version?: string;
