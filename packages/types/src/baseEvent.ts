@@ -19,15 +19,18 @@ export interface BaseEvent {
 
   // Optional
   time?: number;
-  country?: string;
-  region?: string;
-  city?: string;
   location_lat?: number;
   location_lng?: number;
 
   app_version?: string;
   version_name?: string;
   library?: string;
+
+  /** Optional
+   * Warning: updating any one of the following seven fields will reset the other fields
+   * to null on the backend, unless the other fields are also set.
+   * See https://developers.amplitude.com/docs/http-api-v2 (Footnote 2) for more info
+   */
   platform?: string;
   os_name?: string;
   os_version?: string;
@@ -36,13 +39,21 @@ export interface BaseEvent {
   device_model?: string;
   carrier?: string;
 
+  /** Optional
+   * Warning: updating any one of the following four fields will reset the other fields
+   * to null on the backend, unless the other fields are also set.
+   * See https://developers.amplitude.com/docs/http-api-v2 (Footnote 3) for more info
+   */
+  country?: string;
+  region?: string;
+  city?: string;
+  dma?: string; // ** The current Designated Market Area of the user. */
+
   idfa?: string;
   idfv?: string;
   adid?: string;
   android_id?: string;
 
-  // ** The current Designated Market Area of the user. */
-  dma?: string;
   language?: string;
   ip?: string;
   uuid?: string;
