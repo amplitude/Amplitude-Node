@@ -12,8 +12,8 @@ export enum IdentifyOperation {
   REMOVE = '$remove',
 
   // Operations around appending values *if* they aren't present
-  PREINSERT = '$preinsert',
-  POSTINSERT = '$postinsert',
+  PREINSERT = '$preInsert',
+  POSTINSERT = '$postInsert',
 
   // Operations around removing properties/values
   UNSET = '$unset',
