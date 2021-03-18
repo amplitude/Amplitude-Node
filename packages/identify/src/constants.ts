@@ -27,5 +27,3 @@ export const GROUP_IDENTIFY_OPERATIONS = [
   IdentifyOperation.PREPEND,
   IdentifyOperation.UNSET,
 ];
-
-export const MAX_PROPERTY_KEYS = 1000;
