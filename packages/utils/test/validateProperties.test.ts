@@ -4,7 +4,7 @@ describe('isValidateProperties', () => {
     const validProperties = {
       keyForString: 'stringValue',
       keyForNumber: 123,
-      keyForArray: ['test', 456],
+      keyForArray: ['test', 456, { arrayObjKey1: 'arrayObjValue1' }],
       keyForObj: {
         objKey1: 'objValue1',
         objKey2: 'objValue2',
@@ -13,13 +13,18 @@ describe('isValidateProperties', () => {
     expect(isValidProperties('property', validProperties)).toBe(true);
   });
 
-  it('should fail on invalid properties', () => {
+  it('should fail on invalid properties with function as value', () => {
     const testFunc = () => {
       return 'test';
     };
     const inValidProperties = {
       keyForFunct: testFunc,
     };
+    expect(isValidProperties('property', inValidProperties)).toBe(false);
+  });
+
+  it('should fail on invalid properties with array nested in array', () => {
+    const inValidProperties = ['item1', 123, ['subItem1', 'subItem2']];
     expect(isValidProperties('property', inValidProperties)).toBe(false);
   });
 

@@ -21,7 +21,11 @@ const isValidProperties = (property: string, value: any): boolean => {
   if (typeof property != 'string') return false;
   if (Array.isArray(value)) {
     for (const valueElement of value) {
-      if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
+      if (Array.isArray(valueElement)) {
+        return false;
+      } else if (typeof valueElement === 'object') {
+        return _isValidObject(value);
+      } else if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
         logger.warn('invalid array element type ', typeof valueElement);
         return false;
       }
