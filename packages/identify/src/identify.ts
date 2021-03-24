@@ -5,7 +5,7 @@ import {
   ValidPropertyType,
   SpecialEventType,
 } from '@amplitude/types';
-import { logger, generateBase36Id } from '@amplitude/utils';
+import { logger, generateBase36Id, isValidProperties } from '@amplitude/utils';
 
 import { UNSET_VALUE, USER_IDENTIFY_OPERATIONS, GROUP_IDENTIFY_OPERATIONS } from './constants';
 
@@ -154,11 +154,6 @@ export class Identify {
       return false;
     }
 
-    if (typeof property !== 'string') {
-      identifyWarn(operation, 'expected string for property but got: ', typeof property, '. Skipping operation');
-      return false;
-    }
-
     if (this._propertySet.has(property)) {
       identifyWarn(operation, 'property ', property, ' already used. Skipping operation');
       return false;
@@ -167,19 +162,8 @@ export class Identify {
     if (operation === IdentifyOperation.ADD) {
       return typeof value === 'number';
     } else if (operation !== IdentifyOperation.UNSET && operation !== IdentifyOperation.REMOVE) {
-      if (Array.isArray(value)) {
-        for (const valueElement of value) {
-          if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
-            identifyWarn(operation, 'invalid array element type ', typeof valueElement, '. Skipping operation');
-            return false;
-          }
-        }
-      } else if (!(typeof value === 'number' || typeof value === 'string')) {
-        identifyWarn(operation, 'invalid value type ', typeof value, '. Skipping operation');
-        return false;
-      }
+      return isValidProperties(property, value);
     }
-
     return true;
   }
 }

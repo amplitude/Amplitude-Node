@@ -5,3 +5,4 @@ export { AsyncQueue } from './queue';
 export { collectInvalidEventIndices, mapHttpMessageToResponse, mapJSONToResponse } from './response';
 export { mapHttpCodeToStatus } from './status';
 export { isValidEvent } from './validate';
+export { isValidProperties } from './validateProperties';
