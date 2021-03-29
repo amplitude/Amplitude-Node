@@ -54,4 +54,25 @@ describe('isValidEvent', () => {
 
     expect(isValidEvent(invalidEvent)).toBe(false);
   });
+
+  it('should pass on valid events and object for event properties', () => {
+    const validEvent: Event = {
+      event_type: 'VALID_BUT_FAKE_EVENT_TYPE',
+      device_id: 'VALID_BUT_FAKE_DEVICE_ID',
+      event_properties: {fake_but_valid_key: "fake_but_valid_value"},
+    };
+
+    expect(isValidEvent(validEvent)).toBe(true);
+  });
+
+  it('should fail on valid events with invalid event properties', () => {
+    const invalidEvent: Event = {
+      event_type: 'VALID_BUT_FAKE_EVENT_TYPE',
+      device_id: 'VALID_BUT_FAKE_DEVICE_ID',
+      event_properties: 3,
+    } as any;
+
+    expect(isValidEvent(invalidEvent)).toBe(false);
+  });
+
 });
