@@ -31,7 +31,5 @@
     "prettier": "^1.17.0",
     "ts-jest": "^26.2.0"
   },
-  "dependencies": {
-    "husky": "^6.0.0"
-  }
+  "dependencies": {}
 }
