@@ -10,7 +10,8 @@
     "link:yarn": "lerna run --stream --concurrency 1 link:yarn",
     "lint": "lerna run --stream --concurrency 1 lint",
     "prepare": "yarn build",
-    "test": "lerna run test --stream --concurrency 9999"
+    "test": "lerna run test --stream --concurrency 9999",
+    "test-since": "lerna run test --since --stream --concurrency 9999"
   },
   "workspaces": [
     "packages/eslint-config-typescript",
@@ -27,5 +28,8 @@
     "lerna": "^3.20.2",
     "prettier": "^1.17.0",
     "ts-jest": "^26.2.0"
+  },
+  "dependencies": {
+    "husky": "^6.0.0"
   }
 }
