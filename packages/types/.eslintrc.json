@@ -1,3 +1,4 @@
 {
-  "extends": "@amplitude/eslint-config-typescript"
+  "extends": "@amplitude/eslint-config-typescript",
+  "ignorePatterns": ["jest.config.js", "/dist", "/esm"]
 }

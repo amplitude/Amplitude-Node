@@ -23,7 +23,7 @@ describe('default identity behavior', () => {
     expect(identity.getDeviceId().length).toBe(DEVICE_ID_LENGTH);
   });
 
-  it('should use the passed in device ID ', () => {
+  it('should use the passed in device ID', () => {
     const identity = new DefaultIdentity();
     identity.initializeDeviceId(DEVICE_ID);
 

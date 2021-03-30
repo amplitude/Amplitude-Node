@@ -19,5 +19,11 @@
   },
   "bugs": {
     "url": "https://github.com/amplitude/Amplitude-Node/issues"
+  },
+  "peerDependencies": {
+    "eslint": ">= 7"
+  },
+  "dependencies": {
+    "eslint-config-prettier": "^8.1.0"
   }
 }

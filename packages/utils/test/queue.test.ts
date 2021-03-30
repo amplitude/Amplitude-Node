@@ -71,19 +71,18 @@ describe('async queue utility', () => {
     const hook = new PromiseHook();
     const queue = new AsyncQueue();
 
-    let didError = false;
     const firstPromise = queue.addToQueue<string>(async () => await Promise.reject(new Error('PROMISE_ONE')));
     const secondPromise = queue.addToQueue<string>(hook.createPromise('PROMISE_TWO'));
 
     expect(hook.lastPromiseTag).toBe(null);
 
+    let errorMessage = '';
     try {
       await firstPromise;
     } catch (err) {
-      expect(err.message).toBe('PROMISE_ONE');
-      didError = true;
+      errorMessage = err.message;
     }
-    expect(didError).toBe(true);
+    expect(errorMessage).toBe('PROMISE_ONE');
 
     await secondPromise;
     expect(hook.lastPromiseTag).toBe('PROMISE_TWO');

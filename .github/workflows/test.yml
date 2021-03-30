@@ -21,7 +21,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-timeout 300000
 
       - name: Bootstrap
         run: yarn lerna bootstrap
@@ -29,5 +29,8 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Lint (ESLint + Prettier)
+        run: yarn lint-since
+
       - name: Test
-        run: yarn test
+        run: yarn test-since
