@@ -14,7 +14,7 @@ describe('isValidateProperties', () => {
   });
 
   it('should fail on invalid properties with function as value', () => {
-    const testFunc = () => {
+    const testFunc = (): string => {
       return 'test';
     };
     const inValidProperties = {

@@ -1,4 +1,5 @@
 import { isBrowserEnv, isNodeEnv, prototypeJsFix } from '@amplitude/utils';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { JSDOM, DOMWindow } from 'jsdom';
 
 // Augment built-ins APIs for prototypeJsFix tests
@@ -22,11 +23,13 @@ const processPlaceholder = global.process;
 
 function setupBrowserTest(): void {
   global.window = dom.window;
-  delete global.process;
+  // Note: Used to get around not being able to delete non-optional fields for the sake of testing
+  global.process = undefined as any;
 }
 
 function cleanupBrowserTest(): void {
-  delete global.window;
+  global.window = undefined as any;
+  // Note: Used to get around not being able to delete non-optional fields for the sake of testing
   global.process = processPlaceholder;
 }
 

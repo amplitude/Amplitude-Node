@@ -11,14 +11,14 @@ const _isValidObject = (properties: { [key: string]: any }): boolean => {
       logger.warn('invalid properties format. Skipping operation');
       return false;
     }
-    let value = properties[key];
+    const value = properties[key];
     if (!isValidProperties(key, value)) return false;
   }
   return true;
 };
 
 const isValidProperties = (property: string, value: any): boolean => {
-  if (typeof property != 'string') return false;
+  if (typeof property !== 'string') return false;
   if (Array.isArray(value)) {
     for (const valueElement of value) {
       if (Array.isArray(valueElement)) {
