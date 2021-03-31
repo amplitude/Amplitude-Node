@@ -31,7 +31,8 @@ One of the important aspects and functionalities of the Node SDK is its **abilit
 Network requests can fail for a variety of reasons, and it is important that the SDK provides a layer of **robustness** and **correctness** when these failures happen.
 
 By default, the Node SDK will retry events on loop after a short pause if it finds that a request has failed; however, this
-strategy is not ideal for every use case. As such, you can provide your own `retryClass` so long as it implements a `sendEventsWithRetry` function. For example, there is a secondary `OfflineRetryHandler` that is meant for a more opinionated use case where network requests may not always be available for long periods of time:
+strategy is not ideal for every use case. As such, you can provide your own `retryClass` that implements the exported `Retry` interface (currently a single `sendEventsWithRetry` function).
+For example, there is a secondary `OfflineRetryHandler` that is meant for a more opinionated use case where network requests may not always be available for long periods of time:
 
 ```
 import { init, OfflineRetryHandler } from "@amplitude/node"
@@ -39,5 +40,6 @@ import { init, OfflineRetryHandler } from "@amplitude/node"
 const amplitudeClient = init('YOUR_API_KEY', { retryClass: new OfflineRetryHandler('YOUR_API_KEY') })
 ```
 
+As well as a `BaseRetryHandler` that does **no** retrying at all but contains several helper functions to extend from.
 ## Need Help?
 If you have any problems or issues over our SDK, feel free to [create a github issue](https://github.com/amplitude/Amplitude-Node/issues/new) or submit a request on [Amplitude Help](https://help.amplitude.com/hc/en-us/requests/new).
