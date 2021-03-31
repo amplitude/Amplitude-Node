@@ -23,12 +23,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-timeout 300000
 
-      - name: Bootstrap
-        run: yarn lerna bootstrap
-
-      - name: Build
-        run: yarn build
-
       - name: Lint (ESLint + Prettier)
         run: yarn lint-since
 
