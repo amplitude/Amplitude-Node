@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Check out Git repository
+      - name: Checkout Git Repository
         uses: actions/checkout@v2
 
       - name: Setup Node.js ${{ matrix.node-version }}
@@ -20,14 +20,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: yarn install --frozen-lockfile --network-timeout 300000 --ignore-scripts
 
-      - name: Bootstrap
+      - name: Bootstrap (Build Files + Link Dependents)
         run: yarn lerna bootstrap
 
       - name: Lint (ESLint + Prettier)
         run: yarn lint-since
 
-      - name: Test
+      - name: Run Unit Tests
         run: yarn test-since
