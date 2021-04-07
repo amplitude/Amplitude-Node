@@ -9,6 +9,7 @@ export const isValidEvent = (event: Event): boolean => {
 
   const hasDeviceId = event.device_id !== undefined;
   const hasUserId = event.user_id !== undefined;
+  const hasEventProperties = event.event_properties !== undefined;
 
   if (!hasDeviceId && !hasUserId) {
     logger.warn('Invalid event: expected at least one of device or user id');
@@ -22,6 +23,11 @@ export const isValidEvent = (event: Event): boolean => {
 
   if (hasUserId && typeof event.user_id !== 'string') {
     logger.warn('Invalid event: expected user id to be a string if present');
+    return false;
+  }
+
+  if (hasEventProperties && typeof event.event_properties !== 'object') {
+    logger.warn('Invalid event properties: expected event properties to be type object');
     return false;
   }
 
