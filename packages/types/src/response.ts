@@ -59,6 +59,10 @@ export type Response =
       body?: RateLimitBody;
     }
   | {
+      status: Status.Timeout;
+      statusCode: number;
+    }
+  | {
       status: Exclude<Status, StatusWithResponseBody>;
       statusCode: number;
     };

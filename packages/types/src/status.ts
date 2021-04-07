@@ -14,4 +14,6 @@ export enum Status {
   Invalid = 'invalid',
   /** A server-side error ocurred during submission. */
   Failed = 'failed',
+  /** a server or client side error occuring when a request takes too long and is cancelled */
+  Timeout = 'Timeout',
 }

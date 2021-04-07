@@ -106,6 +106,7 @@ export const mapJSONToResponse = (responseJSON: any): Response | null => {
           throttledEvents: responseJSON.throttled_events ?? [],
         },
       };
+    case Status.Timeout:
     default:
       return {
         status,
