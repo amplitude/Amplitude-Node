@@ -43,15 +43,16 @@ export class RetryHandler extends BaseRetryHandler {
    */
   public async sendEventsWithRetry(events: readonly Event[]): Promise<Response> {
     let response: Response = { status: Status.Unknown, statusCode: 0 };
-    const eventsToSend = this._pruneEvents(events);
+    let eventsToSend: Event[] = [];
     try {
+      eventsToSend = this._pruneEvents(events);
       response = await this._transport.sendPayload(this._getPayload(eventsToSend));
       if (response.status !== Status.Success) {
         throw new Error(response.status);
       }
     } catch {
       if (this._shouldRetryEvents()) {
-        this._onEventsError(events, response);
+        this._onEventsError(eventsToSend, response);
       }
     }
 
@@ -71,19 +72,21 @@ export class RetryHandler extends BaseRetryHandler {
   // to the retry buffer they should be in
   private _pruneEvents(events: readonly Event[]): Event[] {
     const prunedEvents: Event[] = [];
-    events.forEach(event => {
-      const { user_id: userId = '', device_id: deviceId = '' } = event;
-      // We can ignore events with neither. They would fail anyways when sent as event.
-      if (userId.length > 0 || deviceId.length > 0) {
-        const retryBuffer = this._getRetryBuffer(userId, deviceId);
-        if (retryBuffer !== null) {
-          retryBuffer.push(event);
-          this._eventsInRetry++;
-        } else {
-          prunedEvents.push(event);
+    if (Array.isArray(events)) {
+      for (const event of events) {
+        const { user_id: userId = '', device_id: deviceId = '' } = event;
+        // We can ignore events with neither. They would fail anyways when sent as event.
+        if (userId.length > 0 || deviceId.length > 0) {
+          const retryBuffer = this._getRetryBuffer(userId, deviceId);
+          if (retryBuffer !== null) {
+            retryBuffer.push(event);
+            this._eventsInRetry++;
+          } else {
+            prunedEvents.push(event);
+          }
         }
       }
-    });
+    }
 
     return prunedEvents;
   }
