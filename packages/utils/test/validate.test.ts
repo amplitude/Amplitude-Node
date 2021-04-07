@@ -59,7 +59,7 @@ describe('isValidEvent', () => {
     const validEvent: Event = {
       event_type: 'VALID_BUT_FAKE_EVENT_TYPE',
       device_id: 'VALID_BUT_FAKE_DEVICE_ID',
-      event_properties: {fake_but_valid_key: "fake_but_valid_value"},
+      event_properties: { fake_but_valid_key: 'fake_but_valid_value' },
     };
 
     expect(isValidEvent(validEvent)).toBe(true);
@@ -74,5 +74,4 @@ describe('isValidEvent', () => {
 
     expect(isValidEvent(invalidEvent)).toBe(false);
   });
-
 });
