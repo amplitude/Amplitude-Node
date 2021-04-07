@@ -1,4 +1,4 @@
-import { Options, Payload, Response, Transport, TransportOptions } from '@amplitude/types';
+import { Options, Payload, Response, Status, Transport, TransportOptions } from '@amplitude/types';
 import { AsyncQueue, mapJSONToResponse, mapHttpMessageToResponse } from '@amplitude/utils';
 
 import * as http from 'http';
@@ -47,11 +47,11 @@ export class HTTPTransport implements Transport {
    * @inheritDoc
    */
   public async sendPayload(payload: Payload): Promise<Response> {
-    const call = async (): Promise<Response> => await this._sendWithModule(payload);
+    const call = async (): Promise<Response> => await this._sendWithModule(payload, REQUEST_CANCEL_TIMEOUT);
 
     // Queue up the call to send the payload.
     // Wait 10 seconds for each request in queue before removing it
-    return await this._requestQueue.addToQueue(call, REQUEST_CANCEL_TIMEOUT);
+    return await this._requestQueue.addToQueue(call);
   }
 
   /** Returns a build request option object used by request */
@@ -74,8 +74,14 @@ export class HTTPTransport implements Transport {
   }
 
   /** JSDoc */
-  protected async _sendWithModule(payload: Payload): Promise<Response> {
+  protected async _sendWithModule(payload: Payload, limitInMs: number): Promise<Response> {
     return await new Promise<Response>((resolve, reject) => {
+      // set timeout within promise so that it can resolve itself if time is exceeded
+      if (limitInMs > 0) {
+        setTimeout(() => {
+          resolve({ status: Status.Timeout, statusCode: 0 });
+        }, limitInMs);
+      }
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
         res.setEncoding('utf8');
         let rawData = '';
