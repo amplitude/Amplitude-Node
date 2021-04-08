@@ -76,12 +76,7 @@ export class HTTPTransport implements Transport {
   /** JSDoc */
   protected async _sendWithModule(payload: Payload, limitInMs: number): Promise<Response> {
     return await new Promise<Response>((resolve, reject) => {
-      // set timeout within promise so that it can resolve itself if time is exceeded
-      if (limitInMs > 0) {
-        setTimeout(() => {
-          resolve({ status: Status.Timeout, statusCode: 0 });
-        }, limitInMs);
-      }
+      let timeoutId: NodeJS.Timeout;
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
         res.setEncoding('utf8');
         let rawData = '';
@@ -91,6 +86,9 @@ export class HTTPTransport implements Transport {
         });
         // On completion, parse the data and resolve.
         res.on('end', () => {
+          if (timeoutId !== undefined) {
+            clearTimeout(timeoutId);
+          }
           if (res.complete && rawData.length > 0) {
             try {
               const responseWithBody = mapJSONToResponse(JSON.parse(rawData));
@@ -106,7 +104,16 @@ export class HTTPTransport implements Transport {
           resolve(mapHttpMessageToResponse(res));
         });
       });
-      req.on('error', reject);
+      // set timeout within promise so that it can resolve itself if time is exceeded
+      if (limitInMs > 0) {
+        timeoutId = setTimeout(() => {
+          req.destroy();
+          resolve({ status: Status.Timeout, statusCode: 0 });
+        }, limitInMs);
+      }
+      req.on('error', error => {
+        reject(error);
+      });
       req.end(JSON.stringify(payload));
     });
   }
