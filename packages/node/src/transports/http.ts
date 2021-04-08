@@ -111,9 +111,7 @@ export class HTTPTransport implements Transport {
           resolve({ status: Status.Timeout, statusCode: 0 });
         }, limitInMs);
       }
-      req.on('error', error => {
-        reject(error);
-      });
+      req.on('error', reject);
       req.end(JSON.stringify(payload));
     });
   }
