@@ -46,8 +46,8 @@ export class HTTPTransport implements Transport {
   /**
    * @inheritDoc
    */
-  public async sendPayload(payload: Payload): Promise<Response> {
-    const call = async (): Promise<Response> => await this._sendWithModule(payload, REQUEST_CANCEL_TIMEOUT);
+  public async sendPayload(payload: Payload, limitInMs = REQUEST_CANCEL_TIMEOUT): Promise<Response> {
+    const call = async (): Promise<Response> => await this._sendWithModule(payload, limitInMs);
 
     // Queue up the call to send the payload.
     // Wait 10 seconds for each request in queue before removing it
