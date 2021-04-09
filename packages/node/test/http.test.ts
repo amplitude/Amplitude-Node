@@ -1,6 +1,6 @@
 import { HTTPTransport } from '../src';
 import { AMPLITUDE_SERVER_URL, DEFAULT_OPTIONS } from '../src/constants';
-import { Response, Status } from '@amplitude/types';
+import { Status } from '@amplitude/types';
 import * as nock from 'nock';
 
 const anyMatch = (): boolean => true;
@@ -49,7 +49,7 @@ describe('HTTPTransport tests', () => {
     });
 
     it('should timeout if the request takes longer than the timeout period', async () => {
-      const delay = 5; // 10 milisecond request delay
+      const delay = 10; // 10 milisecond request delay
       const timeoutLimit = 1; // 1 milisecond allowed request delay
 
       nock(AMPLITUDE_SERVER_URL)
