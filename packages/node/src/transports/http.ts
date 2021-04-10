@@ -21,9 +21,6 @@ export interface HTTPRequest {
   ): http.ClientRequest;
 }
 
-// Automatially cancel requests that have been waiting for 10+ s
-const REQUEST_CANCEL_TIMEOUT = 10 * 1000;
-
 /** Base Transport class implementation */
 export class HTTPTransport implements Transport {
   /** The Agent used for corresponding transport */
@@ -34,6 +31,7 @@ export class HTTPTransport implements Transport {
 
   /** Create instance and set this.dsn */
   public constructor(public options: TransportOptions) {
+    this.options = options;
     if (options.serverUrl.startsWith('http://')) {
       this.module = http;
     } else if (options.serverUrl.startsWith('https://')) {
@@ -51,7 +49,7 @@ export class HTTPTransport implements Transport {
 
     // Queue up the call to send the payload.
     // Wait 10 seconds for each request in queue before removing it
-    return await this._requestQueue.addToQueue(call, REQUEST_CANCEL_TIMEOUT);
+    return await this._requestQueue.addToQueue(call, this.options.requestCancelTimeout);
   }
 
   /** Returns a build request option object used by request */
@@ -108,6 +106,7 @@ export class HTTPTransport implements Transport {
 
 export const setupDefaultTransport = (options: Options): Transport => {
   const transportOptions: TransportOptions = {
+    requestCancelTimeout: options.requestCancelTimeout,
     serverUrl: options.serverUrl,
     headers: {
       'Content-Type': 'application/json',

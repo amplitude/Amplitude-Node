@@ -22,4 +22,6 @@ export const DEFAULT_OPTIONS: Options = {
   // By default, events flush on the next event loop
   uploadIntervalInSec: 0,
   minIdLength: null,
+  // By default, set the request timeout to 10 seconds.
+  requestCancelTimeout: 10000,
 };
