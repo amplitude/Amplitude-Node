@@ -1,4 +1,4 @@
-import { Options, Payload, Response, Transport, TransportOptions } from '@amplitude/types';
+import { Options, Payload, Response, Status, Transport, TransportOptions } from '@amplitude/types';
 import { AsyncQueue, mapJSONToResponse, mapHttpMessageToResponse } from '@amplitude/utils';
 
 import * as http from 'http';
@@ -46,12 +46,12 @@ export class HTTPTransport implements Transport {
   /**
    * @inheritDoc
    */
-  public async sendPayload(payload: Payload): Promise<Response> {
-    const call = async (): Promise<Response> => await this._sendWithModule(payload);
+  public async sendPayload(payload: Payload, limitInMs = REQUEST_CANCEL_TIMEOUT): Promise<Response> {
+    const call = async (): Promise<Response> => await this._sendWithModule(payload, limitInMs);
 
     // Queue up the call to send the payload.
     // Wait 10 seconds for each request in queue before removing it
-    return await this._requestQueue.addToQueue(call, REQUEST_CANCEL_TIMEOUT);
+    return await this._requestQueue.addToQueue(call);
   }
 
   /** Returns a build request option object used by request */
@@ -74,8 +74,9 @@ export class HTTPTransport implements Transport {
   }
 
   /** JSDoc */
-  protected async _sendWithModule(payload: Payload): Promise<Response> {
+  protected async _sendWithModule(payload: Payload, limitInMs: number): Promise<Response> {
     return await new Promise<Response>((resolve, reject) => {
+      let timeoutId: NodeJS.Timeout;
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
         res.setEncoding('utf8');
         let rawData = '';
@@ -85,6 +86,9 @@ export class HTTPTransport implements Transport {
         });
         // On completion, parse the data and resolve.
         res.on('end', () => {
+          if (timeoutId !== undefined) {
+            clearTimeout(timeoutId);
+          }
           if (res.complete && rawData.length > 0) {
             try {
               const responseWithBody = mapJSONToResponse(JSON.parse(rawData));
@@ -100,6 +104,13 @@ export class HTTPTransport implements Transport {
           resolve(mapHttpMessageToResponse(res));
         });
       });
+      // set timeout within promise so that it can resolve itself if time is exceeded
+      if (limitInMs > 0) {
+        timeoutId = setTimeout(() => {
+          req.destroy();
+          resolve({ status: Status.Timeout, statusCode: 0 });
+        }, limitInMs);
+      }
       req.on('error', reject);
       req.end(JSON.stringify(payload));
     });

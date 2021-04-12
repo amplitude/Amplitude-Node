@@ -19,6 +19,10 @@ export function mapHttpCodeToStatus(code: number): Status {
     return Status.PayloadTooLarge;
   }
 
+  if (code === 408) {
+    return Status.Timeout;
+  }
+
   if (code >= 400 && code < 500) {
     return Status.Invalid;
   }
