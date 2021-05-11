@@ -23,8 +23,8 @@ function convertMaxRetries(maxRetries: number): number[] {
   return retryTimeouts;
 }
 
-function isNodeError(err): boolean {
-  return err.code  !== undefined && err.errno !== undefined && err.syscall !== undefined 
+function isNodeError(err: Error & NodeJS.ErrnoException): boolean {
+  return err.code !== undefined && err.errno !== undefined && err.syscall !== undefined;
 }
 
 export class RetryHandler extends BaseRetryHandler {
