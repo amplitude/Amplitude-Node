@@ -61,6 +61,9 @@ export class RetryHandler extends BaseRetryHandler {
           statusCode: 0,
           error: err,
         };
+      } else {
+        logger.warn('Unknown error caught when sending events');
+        logger.warn(err);
       }
       if (this._shouldRetryEvents()) {
         this._onEventsError(eventsToSend, response);
