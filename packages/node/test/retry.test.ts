@@ -182,4 +182,29 @@ describe('default retry mechanisms', () => {
       expect(transport.failCount).toBe(1);
     });
   });
+
+  it('should return NodeJS error in response during client side errors', async () => {
+    const { transport, retry } = generateRetryHandler();
+    transport.sendPayload = jest.fn().mockImplementation(() => {
+      class StubbedNodeError extends Error {
+        errno: string;
+        code: string;
+        syscall: string;
+        constructor() {
+          super();
+          this.errno = 'ENOTFOUND';
+          this.code = 'ENOTFOUND';
+          this.syscall = 'getaddrinfo';
+        }
+      }
+
+      throw new StubbedNodeError();
+    });
+
+    const payload = [generateEvent(PASSING_USER_ID)];
+    const response = await retry.sendEventsWithRetry(payload);
+
+    expect(response.status).toBe(Status.SystemError);
+    expect(response.statusCode).toBe(0);
+  });
 });

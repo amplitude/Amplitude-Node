@@ -16,4 +16,6 @@ export enum Status {
   Failed = 'failed',
   /** a server or client side error occuring when a request takes too long and is cancelled */
   Timeout = 'Timeout',
+  /** NodeJS runtime environment error.. E.g. disconnected from network */
+  SystemError = 'SystemError',
 }
