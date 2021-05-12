@@ -185,7 +185,7 @@ describe('default retry mechanisms', () => {
 
   it('should return NodeJS error in response during client side errors', async () => {
     const { transport, retry } = generateRetryHandler();
-    transport.sendPayload = jest.fn().mockImplementation(() => {
+    const sendPayloadSpy = jest.spyOn(transport, 'sendPayload').mockImplementation(() => {
       class StubbedNodeError extends Error {
         errno: string;
         code: string;
@@ -206,5 +206,6 @@ describe('default retry mechanisms', () => {
 
     expect(response.status).toBe(Status.SystemError);
     expect(response.statusCode).toBe(0);
+    sendPayloadSpy.mockRestore();
   });
 });
