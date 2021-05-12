@@ -65,6 +65,11 @@ export type Response =
   | {
       status: Exclude<Status, StatusWithResponseBody>;
       statusCode: number;
+    }
+  | {
+      status: Status.SystemError;
+      statusCode: 0;
+      error: NodeJS.ErrnoException;
     };
 
 /** The Response to expect if a request might have been sent but it was skipped

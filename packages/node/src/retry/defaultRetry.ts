@@ -23,6 +23,10 @@ function convertMaxRetries(maxRetries: number): number[] {
   return retryTimeouts;
 }
 
+function isNodeError(err: Error & NodeJS.ErrnoException): boolean {
+  return err.code !== undefined && err.errno !== undefined && err.syscall !== undefined;
+}
+
 export class RetryHandler extends BaseRetryHandler {
   // A map of maps to event buffers for failed events
   // The first key is userId (or ''), and second is deviceId (or '')
@@ -50,7 +54,17 @@ export class RetryHandler extends BaseRetryHandler {
       if (response.status !== Status.Success) {
         throw new Error(response.status);
       }
-    } catch {
+    } catch (err) {
+      if (isNodeError(err)) {
+        response = {
+          status: Status.SystemError,
+          statusCode: 0,
+          error: err,
+        };
+      } else {
+        logger.warn('Unknown error caught when sending events');
+        logger.warn(err);
+      }
       if (this._shouldRetryEvents()) {
         this._onEventsError(eventsToSend, response);
       }

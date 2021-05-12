@@ -24,7 +24,7 @@
   "devDependencies": {
     "@amplitude/eslint-config-typescript": "^1.5.4",
     "@types/jest": "^26.0.14",
-    "@types/node": "^13.11.1",
+    "@types/node": "^15.0.2",
     "eslint": "^7.0.0",
     "eslint-plugin-jest": "^24.1.5",
     "jest": "^26.5.3",
