@@ -116,7 +116,7 @@ export class NodeClient implements Client<Options> {
    * @param identify the Identify instance containing user property information
    * @returns a Promise containing metadata about the success of sending this identify to the Amplitude API
    */
-  public async identify(userId: string, deviceId: string, identify: Identify): Promise<Response> {
+  public async identify(userId: string | null, deviceId: string | null, identify: Identify): Promise<Response> {
     if (!(identify instanceof Identify)) {
       logger.warn('Invalid Identify object. Skipping operation.');
       return await Promise.resolve(SKIPPED_RESPONSE);
