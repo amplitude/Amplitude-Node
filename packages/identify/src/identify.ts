@@ -21,16 +21,30 @@ export class Identify {
   protected _groups: { [groupName: string]: string } = {};
 
   /** Create a user identify event out of this identify */
-  public identifyUser(userId: string, deviceId: string | null = null): IdentifyEvent {
+  public identifyUser(userId: string | null, deviceId: string | null = null): IdentifyEvent {
     const identifyEvent: IdentifyEvent = {
       event_type: SpecialEventType.IDENTIFY,
       groups: { ...this._groups },
       user_properties: this.getUserProperties(),
-      user_id: userId,
     };
 
-    if (deviceId !== null && deviceId.length > 0) {
+    let hasUserId = false;
+    let hasDeviceId = false;
+
+    if (typeof userId === 'string' && userId.length > 0) {
+      hasUserId = true;
+      identifyEvent.user_id = userId;
+    }
+
+    if (typeof deviceId === 'string' && deviceId.length > 0) {
+      hasDeviceId = true;
       identifyEvent.device_id = deviceId;
+    }
+
+    if (!hasUserId && !hasDeviceId) {
+      logger.warn(
+        'Creating identify event without device or user ID - this event will be rejected unless one is attached',
+      );
     }
 
     return identifyEvent;

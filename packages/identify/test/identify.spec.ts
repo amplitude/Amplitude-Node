@@ -17,6 +17,24 @@ describe('Identify API', () => {
     expect(event.event_type).toBe(SpecialEventType.IDENTIFY);
   });
 
+  it('should create an identify event even if user ID is null', () => {
+    const identify = new Identify();
+    const event = identify.identifyUser(null, DEVICE_ID);
+
+    expect(event.device_id).toBe(DEVICE_ID);
+    expect(event.user_id).toBe(undefined);
+    expect(event.event_type).toBe(SpecialEventType.IDENTIFY);
+  });
+
+  it('should create an identify event even if device ID is null', () => {
+    const identify = new Identify();
+    const event = identify.identifyUser(USER_ID, null);
+
+    expect(event.device_id).toBe(undefined);
+    expect(event.user_id).toBe(USER_ID);
+    expect(event.event_type).toBe(SpecialEventType.IDENTIFY);
+  });
+
   it('should create a group identify event with the correct top-level fields', () => {
     const identify = new Identify();
     const event = identify.identifyGroup(GROUP_NAME, GROUP_VALUE);
