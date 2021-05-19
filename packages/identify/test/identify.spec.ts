@@ -22,7 +22,7 @@ describe('Identify API', () => {
     const event = identify.identifyUser(null, DEVICE_ID);
 
     expect(event.device_id).toBe(DEVICE_ID);
-    expect(event.user_id).toBe(null);
+    expect(event.user_id).toBe(undefined);
     expect(event.event_type).toBe(SpecialEventType.IDENTIFY);
   });
 
@@ -30,7 +30,7 @@ describe('Identify API', () => {
     const identify = new Identify();
     const event = identify.identifyUser(USER_ID, null);
 
-    expect(event.device_id).toBe(null);
+    expect(event.device_id).toBe(undefined);
     expect(event.user_id).toBe(USER_ID);
     expect(event.event_type).toBe(SpecialEventType.IDENTIFY);
   });
