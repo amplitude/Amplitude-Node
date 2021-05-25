@@ -233,6 +233,6 @@ describe('Identify API', () => {
     identify.preInsert('PROPERTY_NAME', 'PROPERTY_VALUE');
     const event = identify.identifyGroup(GROUP_NAME, GROUP_VALUE);
 
-    expect(event.user_properties).toStrictEqual({});
+    expect(event.group_properties).toStrictEqual({});
   });
 });
