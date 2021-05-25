@@ -37,12 +37,18 @@ describe('Identify API', () => {
 
   it('should create a group identify event with the correct top-level fields', () => {
     const identify = new Identify();
+    identify.set('PROPERTY_NAME', 'PROPERTY_VALUE');
+
     const event = identify.identifyGroup(GROUP_NAME, GROUP_VALUE);
+    const expectedProperties = {
+      [IdentifyOperation.SET]: { PROPERTY_NAME: 'PROPERTY_VALUE' },
+    };
 
     expect(event.device_id !== undefined).toBe(true);
     expect(event.user_id).toBe(undefined);
     expect(event.event_type).toBe(SpecialEventType.GROUP_IDENTIFY);
     expect(event.groups).toStrictEqual({ [GROUP_NAME]: GROUP_VALUE });
+    expect(event.group_properties).toStrictEqual(expectedProperties);
   });
   it('should see user property when using set', () => {
     const identify = new Identify();
@@ -227,6 +233,6 @@ describe('Identify API', () => {
     identify.preInsert('PROPERTY_NAME', 'PROPERTY_VALUE');
     const event = identify.identifyGroup(GROUP_NAME, GROUP_VALUE);
 
-    expect(event.user_properties).toStrictEqual({});
+    expect(event.group_properties).toStrictEqual({});
   });
 });

@@ -46,8 +46,17 @@ export interface IdentifyUserProperties {
 }
 
 export interface IdentifyEvent extends BaseEvent {
-  event_type: SpecialEventType.IDENTIFY | SpecialEventType.GROUP_IDENTIFY;
+  event_type: SpecialEventType.IDENTIFY;
   user_properties:
+    | IdentifyUserProperties
+    | {
+        [key in Exclude<string, IdentifyOperation>]: any;
+      };
+}
+
+export interface GroupIdentifyEvent extends BaseEvent {
+  event_type: SpecialEventType.GROUP_IDENTIFY;
+  group_properties:
     | IdentifyUserProperties
     | {
         [key in Exclude<string, IdentifyOperation>]: any;

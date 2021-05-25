@@ -1,4 +1,4 @@
 import { BaseEvent } from './baseEvent';
-import { IdentifyEvent } from './identify';
+import { IdentifyEvent, GroupIdentifyEvent } from './identify';
 
-export type Event = BaseEvent | IdentifyEvent;
+export type Event = BaseEvent | IdentifyEvent | GroupIdentifyEvent;

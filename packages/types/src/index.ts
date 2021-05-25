@@ -1,7 +1,13 @@
 export { BaseEvent, SpecialEventType } from './baseEvent';
 export { Client } from './client';
 export { Event } from './event';
-export { IdentifyEvent, IdentifyOperation, IdentifyUserProperties, ValidPropertyType } from './identify';
+export {
+  IdentifyEvent,
+  GroupIdentifyEvent,
+  IdentifyOperation,
+  IdentifyUserProperties,
+  ValidPropertyType,
+} from './identify';
 export { Identity, IdentityListener, DEFAULT_IDENTITY_INSTANCE } from './identity';
 export { LogLevel } from './logger';
 export { Options } from './options';
