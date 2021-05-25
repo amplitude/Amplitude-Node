@@ -1,5 +1,6 @@
 import {
   IdentifyEvent,
+  GroupIdentifyEvent,
   IdentifyOperation,
   IdentifyUserProperties,
   ValidPropertyType,
@@ -50,11 +51,11 @@ export class Identify {
     return identifyEvent;
   }
 
-  public identifyGroup(groupName: string, groupValue: string): IdentifyEvent {
-    const identifyEvent: IdentifyEvent = {
+  public identifyGroup(groupName: string, groupValue: string): GroupIdentifyEvent {
+    const identifyEvent: GroupIdentifyEvent = {
       event_type: SpecialEventType.GROUP_IDENTIFY,
       groups: { [groupName]: groupValue },
-      user_properties: this.getGroupUserProperties(),
+      group_properties: this.getGroupUserProperties(),
       device_id: generateBase36Id(), // Generate a throw-away, non-colliding ID
     };
 
