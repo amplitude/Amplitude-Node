@@ -232,7 +232,7 @@ export class RetryHandler extends BaseRetryHandler {
     for (let numRetries = 0; numRetries < this._options.retryTimeouts.length; numRetries++) {
       const sleepDuration = this._options.retryTimeouts[numRetries];
       await asyncSleep(sleepDuration);
-      const isLastTry = numRetries === this._options.retryTimeouts.length;
+      const isLastTry = numRetries === this._options.retryTimeouts.length - 1;
       const eventsToRetry = eventsBuffer.slice(0, eventCount);
       const { shouldRetry, shouldReduceEventCount, eventIndicesToRemove } = await this._retryEventsOnce(
         userId,
@@ -253,12 +253,11 @@ export class RetryHandler extends BaseRetryHandler {
           });
 
         eventCount -= numEventsRemoved;
-        this._eventsInRetry -= eventCount;
-        if (eventCount < 1) {
-          break; // If we managed to remove all the events, break off early.
-        }
+        this._eventsInRetry -= numEventsRemoved;
       }
-      if (!shouldRetry) {
+
+      // If we managed to remove all the events or the payload should no longer be tried, break off early.
+      if (!shouldRetry || eventCount < 1) {
         break; // We ended!
       }
 
