@@ -20,7 +20,12 @@ export enum IdentifyOperation {
   CLEAR_ALL = '$clearAll',
 }
 
-export type ValidPropertyType = number | string | Array<string | number> | { [key: string]: ValidPropertyType };
+export type ValidPropertyType =
+  | number
+  | string
+  | boolean
+  | Array<string | number>
+  | { [key: string]: ValidPropertyType };
 
 interface BaseOperationConfig {
   [key: string]: ValidPropertyType;
