@@ -76,7 +76,7 @@ export class HTTPTransport implements Transport {
   /** JSDoc */
   protected async _sendWithModule(payload: Payload, limitInMs: number): Promise<Response> {
     return await new Promise<Response>((resolve, reject) => {
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: ReturnType<typeof setTimeout>;
       const req = this.module.request(this._getRequestOptions(), (res: http.IncomingMessage) => {
         res.setEncoding('utf8');
         let rawData = '';
