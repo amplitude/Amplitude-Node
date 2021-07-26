@@ -63,4 +63,12 @@ export interface Options {
    * As described here: https://developers.amplitude.com/docs/http-api-v2#schemaRequestOptions
    */
   minIdLength?: number | null;
+
+  /**
+   * Lifecycle callback that is executed after a retry attempt. Called in {@link Retry.sendEventsWithRetry}
+   *
+   * @param response Response from the given retry attempt
+   * @param retryTimeoutsIndex Index in retryTimeouts for how long Amplitude waited before this retry attempt.
+   */
+  onRetry?(response: Response, retryTimeoutsIndex: number): void;
 }
