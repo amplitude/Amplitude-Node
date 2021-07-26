@@ -1,6 +1,7 @@
 import { LogLevel } from './logger';
 import { Transport } from './transport';
 import { Retry } from './retry';
+import { Response } from './response';
 
 /**
  * Options that you can choose to configure against the client.
