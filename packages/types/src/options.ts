@@ -71,5 +71,5 @@ export interface Options {
    * @param response Response from the given retry attempt
    * @param retryTimeoutsIndex Index in retryTimeouts for how long Amplitude waited before this retry attempt.
    */
-  onRetry?(response: Response, retryTimeoutsIndex: number): void;
+  onRetry: ((response: Response, retryTimeoutsIndex: number) => boolean) | null;
 }
