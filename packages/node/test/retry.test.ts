@@ -52,6 +52,29 @@ describe('default retry mechanisms', () => {
     expect(transport.failCount).toBe(MOCK_RETRY_TIMEOUTS.length + 1);
   });
 
+  it('should call onRetry lifecycle callback after retries', async () => {
+    const onRetry = jest.fn();
+    const { retry } = generateRetryHandler(null, {
+      onRetry,
+      retryTimeouts: [50, 100, 200],
+    });
+    const payload = [generateEvent(FAILING_USER_ID)];
+
+    const response = await retry.sendEventsWithRetry(payload);
+
+    // Sleep and wait for retries to end
+    await asyncSleep(500);
+    expect(onRetry.mock.calls).toHaveLength(3);
+    // Test retryTimeoutsIndex
+    expect(onRetry.mock.calls[0][1]).toBe(0);
+    expect(onRetry.mock.calls[1][1]).toBe(1);
+    expect(onRetry.mock.calls[2][1]).toBe(2);
+
+    expect(onRetry.mock.calls[0][0]).toBe(response);
+    expect(onRetry.mock.calls[1][0]).toBe(response);
+    expect(onRetry.mock.calls[2][0]).toBe(response);
+  });
+
   it('will not throttle user ids that are not throttled', async () => {
     const { transport, retry } = generateRetryHandler();
     const payload = [generateEvent(FAILING_USER_ID), generateEvent(PASSING_USER_ID)];
