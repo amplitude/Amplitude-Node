@@ -1,6 +1,7 @@
 import { LogLevel } from './logger';
 import { Transport } from './transport';
 import { Retry } from './retry';
+import { Response } from './response';
 
 /**
  * Options that you can choose to configure against the client.
@@ -63,4 +64,13 @@ export interface Options {
    * As described here: https://developers.amplitude.com/docs/http-api-v2#schemaRequestOptions
    */
   minIdLength?: number | null;
+
+  /**
+   * Lifecycle callback that is executed after a retry attempt. Called in {@link Retry.sendEventsWithRetry}
+   *
+   * @param response Response from the given retry attempt
+   * @param attemptNumber Index in retryTimeouts for how long Amplitude waited before this retry attempt. Starts at 0.
+   * @param isLastRetry True if attemptNumber === retryTimeouts.length - 1
+   */
+  onRetry: ((response: Response, attemptNumber: number, isLastRetry: boolean) => boolean) | null;
 }

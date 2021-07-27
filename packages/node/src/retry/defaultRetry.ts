@@ -8,6 +8,7 @@ interface RetryMetadata {
   shouldRetry: boolean;
   shouldReduceEventCount: boolean;
   eventIndicesToRemove: number[];
+  response: Response;
 }
 
 /**
@@ -217,7 +218,7 @@ export class RetryHandler extends BaseRetryHandler {
       shouldRetry = false; // End the retry loop
     }
 
-    return { shouldRetry, shouldReduceEventCount, eventIndicesToRemove };
+    return { shouldRetry, shouldReduceEventCount, eventIndicesToRemove, response };
   }
 
   private async _retryEventsOnLoop(userId: string, deviceId: string): Promise<void> {
@@ -234,11 +235,13 @@ export class RetryHandler extends BaseRetryHandler {
       await asyncSleep(sleepDuration);
       const isLastTry = numRetries === this._options.retryTimeouts.length;
       const eventsToRetry = eventsBuffer.slice(0, eventCount);
-      const { shouldRetry, shouldReduceEventCount, eventIndicesToRemove } = await this._retryEventsOnce(
+      const { shouldRetry, shouldReduceEventCount, eventIndicesToRemove, response } = await this._retryEventsOnce(
         userId,
         deviceId,
         eventsToRetry,
       );
+      if (this._options.onRetry !== null)
+        this._options.onRetry(response, numRetries, numRetries === this._options.retryTimeouts.length - 1);
 
       if (eventIndicesToRemove.length > 0) {
         let numEventsRemoved = 0;
