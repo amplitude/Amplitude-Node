@@ -69,7 +69,7 @@ export interface Options {
    * Lifecycle callback that is executed after a retry attempt. Called in {@link Retry.sendEventsWithRetry}
    *
    * @param response Response from the given retry attempt
-   * @param retryTimeoutsIndex Index in retryTimeouts for how long Amplitude waited before this retry attempt.
+   * @param retryTimeoutsIndex Index in retryTimeouts for how long Amplitude waited before this retry attempt. Starts at 0.
    */
-  onRetry: ((response: Response, retryTimeoutsIndex: number) => boolean) | null;
+  onRetry: ((response: Response, attemptNumber: number) => boolean) | null;
 }
