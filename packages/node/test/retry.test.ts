@@ -66,13 +66,17 @@ describe('default retry mechanisms', () => {
     await asyncSleep(500);
     expect(onRetry.mock.calls).toHaveLength(3);
     // Test retryTimeoutsIndex
+    expect(onRetry.mock.calls[0][0]).toBe(response);
+    expect(onRetry.mock.calls[1][0]).toBe(response);
+    expect(onRetry.mock.calls[2][0]).toBe(response);
+
     expect(onRetry.mock.calls[0][1]).toBe(0);
     expect(onRetry.mock.calls[1][1]).toBe(1);
     expect(onRetry.mock.calls[2][1]).toBe(2);
 
-    expect(onRetry.mock.calls[0][0]).toBe(response);
-    expect(onRetry.mock.calls[1][0]).toBe(response);
-    expect(onRetry.mock.calls[2][0]).toBe(response);
+    expect(onRetry.mock.calls[0][2]).toBe(false);
+    expect(onRetry.mock.calls[1][2]).toBe(false);
+    expect(onRetry.mock.calls[2][2]).toBe(true);
   });
 
   it('should not call onRetry lifecycle callback after retries', async () => {

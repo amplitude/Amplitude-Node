@@ -241,7 +241,7 @@ export class RetryHandler extends BaseRetryHandler {
         eventsToRetry,
       );
       if (this._options.onRetry !== null && response.status !== Status.Success)
-        this._options.onRetry(response, numRetries);
+        this._options.onRetry(response, numRetries, numRetries === this._options.retryTimeouts.length - 1);
 
       if (eventIndicesToRemove.length > 0) {
         let numEventsRemoved = 0;
