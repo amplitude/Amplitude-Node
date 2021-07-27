@@ -63,7 +63,7 @@ describe('default retry mechanisms', () => {
     const response = await retry.sendEventsWithRetry(payload);
 
     // Sleep and wait for retries to end
-    await asyncSleep(500);
+    await asyncSleep(1000);
     expect(onRetry.mock.calls).toHaveLength(3);
     // Test retryTimeoutsIndex
     expect(onRetry.mock.calls[0][0]).toBe(response);
@@ -79,7 +79,7 @@ describe('default retry mechanisms', () => {
     expect(onRetry.mock.calls[2][2]).toBe(true);
   });
 
-  it('should not call onRetry lifecycle callback after retries', async () => {
+  it('should not call onRetry lifecycle callback after successful sends', async () => {
     const onRetry = jest.fn();
     const { retry } = generateRetryHandler(null, {
       onRetry,
