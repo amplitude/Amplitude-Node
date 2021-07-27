@@ -240,7 +240,7 @@ export class RetryHandler extends BaseRetryHandler {
         deviceId,
         eventsToRetry,
       );
-      if (this._options.onRetry !== null && response.status !== Status.Success)
+      if (this._options.onRetry !== null)
         this._options.onRetry(response, numRetries, numRetries === this._options.retryTimeouts.length - 1);
 
       if (eventIndicesToRemove.length > 0) {
