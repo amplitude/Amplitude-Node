@@ -1,4 +1,4 @@
-import { Event, Options, Transport, Payload, PayloadOptions, Status, Response, Retry } from '@amplitude/types';
+import { Event, Options, Transport, Payload, PayloadOptions, Response, Retry } from '@amplitude/types';
 import { setupDefaultTransport } from '../transports';
 import { DEFAULT_OPTIONS } from '../constants';
 
