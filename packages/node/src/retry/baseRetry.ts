@@ -17,7 +17,7 @@ export class BaseRetryHandler implements Retry {
    * @inheritDoc
    */
   public async sendEventsWithRetry(events: readonly Event[]): Promise<Response> {
-    let response: Response = await this._transport.sendPayload(this._getPayload(events));
+    const response: Response = await this._transport.sendPayload(this._getPayload(events));
     return response;
   }
 
