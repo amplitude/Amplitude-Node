@@ -13,6 +13,7 @@ describe('HTTPTransport tests', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      requestTimeoutMillisec: DEFAULT_OPTIONS.requestTimeoutMillisec,
     };
     const httpTransport = new HTTPTransport(transportOptions);
 

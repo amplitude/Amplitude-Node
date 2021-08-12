@@ -66,6 +66,11 @@ export interface Options {
   minIdLength?: number | null;
 
   /**
+   * Configurable timeout
+   */
+  requestTimeoutMillisec: number;
+
+  /**
    * Lifecycle callback that is executed after a retry attempt. Called in {@link Retry.sendEventsWithRetry}
    *
    * @param response Response from the given retry attempt

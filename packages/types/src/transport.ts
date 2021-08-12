@@ -34,4 +34,6 @@ export interface TransportOptions {
   serverUrl: string;
   /** Define custom headers */
   headers: { [key: string]: string };
+  /** Configurable request timeout */
+  requestTimeoutMillisec: number;
 }
