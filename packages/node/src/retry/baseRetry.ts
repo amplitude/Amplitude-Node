@@ -1,4 +1,4 @@
-import { Event, Options, Transport, Payload, PayloadOptions, Status, Response, Retry } from '@amplitude/types';
+import { Event, Options, Transport, Payload, PayloadOptions, Response, Retry } from '@amplitude/types';
 import { setupDefaultTransport } from '../transports';
 import { DEFAULT_OPTIONS } from '../constants';
 
@@ -17,8 +17,7 @@ export class BaseRetryHandler implements Retry {
    * @inheritDoc
    */
   public async sendEventsWithRetry(events: readonly Event[]): Promise<Response> {
-    let response: Response = { status: Status.Unknown, statusCode: 0 };
-    response = await this._transport.sendPayload(this._getPayload(events));
+    const response: Response = await this._transport.sendPayload(this._getPayload(events));
     return response;
   }
 
