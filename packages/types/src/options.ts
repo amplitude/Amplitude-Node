@@ -68,7 +68,7 @@ export interface Options {
   /**
    * Configurable timeout
    */
-  requestTimeoutMillisec: number;
+  requestTimeoutMillis: number;
 
   /**
    * Lifecycle callback that is executed after a retry attempt. Called in {@link Retry.sendEventsWithRetry}

@@ -35,5 +35,5 @@ export interface TransportOptions {
   /** Define custom headers */
   headers: { [key: string]: string };
   /** Configurable request timeout */
-  requestTimeoutMillisec: number;
+  requestTimeoutMillis: number;
 }

@@ -24,5 +24,5 @@ export const DEFAULT_OPTIONS: Options = {
   minIdLength: null,
   onRetry: null,
   // Default 10 second event timeout
-  requestTimeoutMillisec: 10000,
+  requestTimeoutMillis: 10000,
 };

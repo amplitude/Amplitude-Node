@@ -44,7 +44,7 @@ export class HTTPTransport implements Transport {
   /**
    * @inheritDoc
    */
-  public async sendPayload(payload: Payload, limitInMs = this.options.requestTimeoutMillisec): Promise<Response> {
+  public async sendPayload(payload: Payload, limitInMs = this.options.requestTimeoutMillis): Promise<Response> {
     const call = async (): Promise<Response> => await this._sendWithModule(payload, limitInMs);
 
     // Queue up the call to send the payload.
@@ -121,7 +121,7 @@ export const setupDefaultTransport = (options: Options): Transport => {
     headers: {
       'Content-Type': 'application/json',
     },
-    requestTimeoutMillisec: options.requestTimeoutMillisec,
+    requestTimeoutMillis: options.requestTimeoutMillis,
   };
   return new HTTPTransport(transportOptions);
 };

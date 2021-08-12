@@ -12,7 +12,7 @@ export class TestTransport extends HTTPTransport {
       headers: {
         'Content-Type': 'application/json',
       },
-      requestTimeoutMillisec: 10000,
+      requestTimeoutMillis: 10000,
     });
   }
 
