@@ -23,4 +23,6 @@ export const DEFAULT_OPTIONS: Options = {
   uploadIntervalInSec: 0,
   minIdLength: null,
   onRetry: null,
+  // Default 10 second event timeout
+  requestTimeoutMillis: 10000,
 };

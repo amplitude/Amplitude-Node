@@ -13,6 +13,7 @@ describe('HTTPTransport tests', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      requestTimeoutMillis: DEFAULT_OPTIONS.requestTimeoutMillis,
     };
     const httpTransport = new HTTPTransport(transportOptions);
 
@@ -64,6 +65,28 @@ describe('HTTPTransport tests', () => {
       const resp = await httpTransport.sendPayload(testPayload, timeoutLimit);
       expect(resp.status).toBe(Status.Timeout);
       expect(resp.statusCode).toBe(0);
+    });
+
+    it('test request timeout options are accepted', async () => {
+      const transportOptions2 = {
+        serverUrl: DEFAULT_OPTIONS.serverUrl,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        requestTimeoutMillis: 15,
+      };
+      const httpTransport2 = new HTTPTransport(transportOptions2);
+
+      const testPayload = {
+        api_key: 'test',
+        events: [],
+      };
+
+      const sendPayloadSpy = jest.spyOn(httpTransport2, 'sendPayload');
+      await httpTransport2.sendPayload(testPayload, 15);
+
+      expect(sendPayloadSpy).toHaveBeenCalledWith(testPayload, 15);
+      sendPayloadSpy.mockRestore();
     });
   });
 });
