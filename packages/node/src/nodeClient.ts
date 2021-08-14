@@ -14,7 +14,7 @@ export class NodeClient implements Client<Options> {
   private _events: Event[] = [];
   private _responseListeners: Array<{ resolve: (response: Response) => void; reject: (err: Error) => void }> = [];
   private readonly _transportWithRetry: Retry;
-  private _flushTimer: NodeJS.Timeout | null = null;
+  private _flushTimer: ReturnType<typeof setTimeout>| null = null;
 
   /**
    * Initializes this client instance.
