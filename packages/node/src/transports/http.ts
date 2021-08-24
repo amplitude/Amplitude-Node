@@ -3,6 +3,7 @@ import { AsyncQueue, mapJSONToResponse, mapHttpMessageToResponse } from '@amplit
 
 import * as http from 'http';
 import * as https from 'https';
+import { REQUEST_TIMEOUT_MILLIS_DEFAULT } from '../constants';
 import * as url from 'url';
 
 /**
@@ -44,8 +45,9 @@ export class HTTPTransport implements Transport {
   /**
    * @inheritDoc
    */
-  public async sendPayload(payload: Payload, limitInMs = this.options.requestTimeoutMillis): Promise<Response> {
-    const call = async (): Promise<Response> => await this._sendWithModule(payload, limitInMs);
+  public async sendPayload(payload: Payload, limitInMs?: number): Promise<Response> {
+    const timeoutMS = limitInMs ?? this.options.requestTimeoutMillis ?? REQUEST_TIMEOUT_MILLIS_DEFAULT;
+    const call = async (): Promise<Response> => await this._sendWithModule(payload, timeoutMS);
 
     // Queue up the call to send the payload.
     // Wait 10 seconds for each request in queue before removing it

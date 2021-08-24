@@ -6,6 +6,8 @@ export const BASE_RETRY_TIMEOUT_DEPRECATED = 100;
 export const BASE_RETRY_TIMEOUT_DEPRECATED_WARNING =
   'DEPRECATED. Please use retryTimeouts. It will be converted to retryTimeouts with exponential wait times (i.e. 100ms -> 200ms -> 400ms -> ...)';
 
+export const REQUEST_TIMEOUT_MILLIS_DEFAULT = 10000;
+
 // The overridable constants of the node SDK
 export const DEFAULT_OPTIONS: Options = {
   serverUrl: AMPLITUDE_SERVER_URL,
@@ -24,5 +26,5 @@ export const DEFAULT_OPTIONS: Options = {
   minIdLength: null,
   onRetry: null,
   // Default 10 second event timeout
-  requestTimeoutMillis: 10000,
+  requestTimeoutMillis: REQUEST_TIMEOUT_MILLIS_DEFAULT,
 };
