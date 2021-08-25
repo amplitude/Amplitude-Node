@@ -3,6 +3,7 @@ export { version as SDK_VERSION } from '../package.json';
 export const SDK_NAME = 'amplitude-node';
 export const AMPLITUDE_SERVER_URL = 'https://api2.amplitude.com/2/httpapi';
 export const BASE_RETRY_TIMEOUT_DEPRECATED = 100;
+// Default 10 second event timeout
 export const BASE_RETRY_TIMEOUT_DEPRECATED_WARNING =
   'DEPRECATED. Please use retryTimeouts. It will be converted to retryTimeouts with exponential wait times (i.e. 100ms -> 200ms -> 400ms -> ...)';
 
@@ -25,6 +26,5 @@ export const DEFAULT_OPTIONS: Options = {
   uploadIntervalInSec: 0,
   minIdLength: null,
   onRetry: null,
-  // Default 10 second event timeout
   requestTimeoutMillis: REQUEST_TIMEOUT_MILLIS_DEFAULT,
 };
