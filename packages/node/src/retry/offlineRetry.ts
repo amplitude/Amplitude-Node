@@ -21,7 +21,7 @@ export class OfflineRetryHandler extends BaseRetryHandler {
   public async sendEventsWithRetry(events: readonly Event[]): Promise<Response> {
     return await this._requestQueue.addToQueue(async () => {
       let response: Response = { status: Status.Unknown, statusCode: 0 };
-      const payload = this._getPayload(events)
+      const payload = this._getPayload(events);
 
       try {
         response = await this._transport.sendPayload(payload);
