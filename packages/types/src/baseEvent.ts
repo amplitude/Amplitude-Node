@@ -1,3 +1,4 @@
+import { Plan } from './plan';
 /**
  * Strings that have special meaning when used as an event's type
  * and have different specifications.
@@ -71,4 +72,5 @@ export interface BaseEvent {
   insert_id?: string;
 
   groups?: { [key: string]: any };
+  plan?: Plan;
 }
