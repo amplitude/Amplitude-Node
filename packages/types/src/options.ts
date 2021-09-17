@@ -2,6 +2,7 @@ import { LogLevel } from './logger';
 import { Transport } from './transport';
 import { Retry } from './retry';
 import { Response } from './response';
+import { Plan } from './plan';
 
 /**
  * Options that you can choose to configure against the client.
@@ -78,4 +79,8 @@ export interface Options {
    * @param isLastRetry True if attemptNumber === retryTimeouts.length - 1
    */
   onRetry: ((response: Response, attemptNumber: number, isLastRetry: boolean) => boolean) | null;
+  /**
+   * Tracking plan information
+   */
+  plan?: Plan;
 }

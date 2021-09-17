@@ -86,6 +86,7 @@ export class NodeClient implements Client<Options> {
     }
 
     this._annotateEvent(event);
+    this._observeEvent(event);
 
     return await new Promise((resolve, reject) => {
       // Add event to unsent events queue.
@@ -129,6 +130,13 @@ export class NodeClient implements Client<Options> {
   /** Add platform dependent field onto event. */
   private _annotateEvent(event: Event): void {
     event.library = `${SDK_NAME}/${SDK_VERSION}`;
+  }
+
+  /** Add plan field into event */
+  private _observeEvent(event: Event): void {
+    if (typeof event.plan === 'undefined' && typeof this._options.plan !== 'undefined') {
+      event.plan = this._options.plan;
+    }
   }
 
   private _setupDefaultTransport(): RetryHandler {
