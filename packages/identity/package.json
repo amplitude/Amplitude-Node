@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/identity",
-  "version": "1.8.2",
+  "version": "1.8.4",
   "description": "Identity Manager for JS-based SDK's to help track device and user ID's",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/main/packages/identity",
@@ -16,8 +16,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@amplitude/types": "^1.8.2",
-    "@amplitude/utils": "^1.8.2",
+    "@amplitude/types": "^1.8.4",
+    "@amplitude/utils": "^1.8.4",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
