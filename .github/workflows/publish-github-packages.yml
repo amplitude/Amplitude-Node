@@ -82,6 +82,6 @@ jobs:
 
       - name: Publish
         run: |
-          lerna publish {{ env.PACKAGE_VERSION }} --no-git-tag-version --no-push --force-publish --dist-tag ${{ env.DIST_TAG }} --yes --no-verify-access --ignore-prepublish
+          lerna publish ${{ env.PACKAGE_VERSION }} --no-git-tag-version --no-push --force-publish --dist-tag ${{ env.DIST_TAG }} --yes --no-verify-access --ignore-prepublish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
