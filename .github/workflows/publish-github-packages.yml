@@ -13,7 +13,7 @@ jobs:
     name: Authorize
     runs-on: ubuntu-latest
     steps:
-      - name: ${{ github.actor }} permission check to do a release
+      - name: Get ${{ github.actor }} user permissions
         uses: octokit/request-action@v2.0.0
         id: permission_check
         with:
@@ -21,12 +21,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract user permission level
+        run: |
+          echo "user_permission=${{ fromJson(steps.permission_check.outputs.data).permission }}" >> $GITHUB_ENV
+
+      - name: Determine write permission
+        run: |
+          echo "user_has_write_permission=${{ env.user_permission == 'write' || env.user_permission == 'admin' }}" >> $GITHUB_ENV
+
       - name: "Auth Success"
-        if: ${{ fromJson(steps.permission_check.outputs.data).permission == 'write' }}
+        if: ${{ env.user_has_write_permission }}
         run: echo "${{ github.actor }} is authorized."
 
       - name: "Auth Failed"
-        if: ${{ failure() || fromJson(steps.permission_check.outputs.data).permission != 'write' }}
+        if: ${{ failure() || !env.user_has_write_permission }}
         run: |
           echo "Unable to authorize ${{ github.actor }}. You must have write permission to run this workflow."
           exit 1
