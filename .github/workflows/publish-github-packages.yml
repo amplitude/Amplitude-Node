@@ -1,4 +1,4 @@
-name: Release
+name: Publish to Github Packages
 
 on:
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
           exit 1
 
   release:
-    name: Release
+    name: Publish to Github Packages
     runs-on: ubuntu-latest
     needs: [authorize]
     env:
@@ -67,7 +67,7 @@ jobs:
         with:
           registry-url: 'https://npm.pkg.github.com'
 
-      - name: Publish GitHub packages
+      - name: Publish
         run: lerna publish --no-git-tag-version --no-push --force-publish --dist-tag ${{ env.DIST_TAG }} --yes --no-verify-access --ignore-prepublish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
