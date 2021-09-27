@@ -26,7 +26,7 @@ const isValidProperties = (property: string, value: any): boolean => {
         return false;
       } else if (typeof valueElement === 'object') {
         return _isValidObject(value);
-      } else if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
+      } else if (!(typeof valueElement === 'number' || typeof valueElement === 'string') || !(typeof valueElement === 'boolean')) {
         logger.warn('invalid array element type ', typeof valueElement);
         return false;
       }

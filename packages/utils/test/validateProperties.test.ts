@@ -9,6 +9,7 @@ describe('isValidateProperties', () => {
         objKey1: 'objValue1',
         objKey2: 'objValue2',
       },
+      keyForBoolean: false,
     };
     expect(isValidProperties('property', validProperties)).toBe(true);
   });
@@ -37,6 +38,7 @@ describe('isValidateProperties', () => {
         objKey1: 'objValue1',
         objKey2: 'objValue2',
       },
+      keyForBoolean: false,
     };
     expect(isValidProperties(1 as any, validProperties)).toBe(false);
   });
