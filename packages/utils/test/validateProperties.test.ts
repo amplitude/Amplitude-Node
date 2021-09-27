@@ -4,7 +4,7 @@ describe('isValidateProperties', () => {
     const validProperties = {
       keyForString: 'stringValue',
       keyForNumber: 123,
-      keyForArray: ['test', 456, { arrayObjKey1: 'arrayObjValue1' }],
+      keyForArray: ['test', 456, { arrayObjKey1: 'arrayObjValue1' }, false],
       keyForObj: {
         objKey1: 'objValue1',
         objKey2: 'objValue2',
@@ -33,7 +33,7 @@ describe('isValidateProperties', () => {
     const validProperties = {
       keyForString: 'stringValue',
       keyForNumber: 123,
-      keyForArray: ['test', 456],
+      keyForArray: ['test', 456, false],
       keyForObj: {
         objKey1: 'objValue1',
         objKey2: 'objValue2',
