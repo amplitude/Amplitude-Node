@@ -26,14 +26,16 @@ const isValidProperties = (property: string, value: any): boolean => {
         return false;
       } else if (typeof valueElement === 'object') {
         return _isValidObject(value);
-      } else if (!(typeof valueElement === 'number' || typeof valueElement === 'string')) {
+      } else if (
+        !(typeof valueElement === 'number' || typeof valueElement === 'string' || typeof valueElement === 'boolean')
+      ) {
         logger.warn('invalid array element type ', typeof valueElement);
         return false;
       }
     }
   } else if (typeof value === 'object') {
     return _isValidObject(value);
-  } else if (!(typeof value === 'number' || typeof value === 'string')) {
+  } else if (!(typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean')) {
     logger.warn('invalid value type ', typeof value);
     return false;
   }

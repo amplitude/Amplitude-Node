@@ -4,11 +4,12 @@ describe('isValidateProperties', () => {
     const validProperties = {
       keyForString: 'stringValue',
       keyForNumber: 123,
-      keyForArray: ['test', 456, { arrayObjKey1: 'arrayObjValue1' }],
+      keyForArray: ['test', 456, { arrayObjKey1: 'arrayObjValue1' }, false],
       keyForObj: {
         objKey1: 'objValue1',
         objKey2: 'objValue2',
       },
+      keyForBoolean: false,
     };
     expect(isValidProperties('property', validProperties)).toBe(true);
   });
@@ -32,11 +33,12 @@ describe('isValidateProperties', () => {
     const validProperties = {
       keyForString: 'stringValue',
       keyForNumber: 123,
-      keyForArray: ['test', 456],
+      keyForArray: ['test', 456, false],
       keyForObj: {
         objKey1: 'objValue1',
         objKey2: 'objValue2',
       },
+      keyForBoolean: false,
     };
     expect(isValidProperties(1 as any, validProperties)).toBe(false);
   });
