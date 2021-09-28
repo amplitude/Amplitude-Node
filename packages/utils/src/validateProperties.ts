@@ -35,7 +35,7 @@ const isValidProperties = (property: string, value: any): boolean => {
     }
   } else if (typeof value === 'object') {
     return _isValidObject(value);
-  } else if (!(typeof value === 'number' || typeof value === 'string') || typeof value === 'boolean') {
+  } else if (!(typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean')) {
     logger.warn('invalid value type ', typeof value);
     return false;
   }
