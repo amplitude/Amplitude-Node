@@ -1,4 +1,4 @@
-import { Middleware, MiddlewarePayload, Next } from "@amplitude/types";
+import { Middleware, MiddlewarePayload, Next } from '@amplitude/types';
 
 export class MiddlewareRunner {
   private readonly _middlewares: Middleware[] = [];
@@ -20,7 +20,7 @@ export class MiddlewareRunner {
       }
     };
 
-    const _next: Next = (middlewareCount > 0) ? middlewareNext : next;
+    const _next: Next = middlewareCount > 0 ? middlewareNext : next;
 
     _next(payload);
   }

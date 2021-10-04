@@ -1,18 +1,9 @@
 import { Identify } from '@amplitude/identify';
-import {
-  Client,
-  Event,
-  Extra,
-  Middleware,
-  Options,
-  Response,
-  Retry,
-  SKIPPED_RESPONSE
-} from '@amplitude/types';
+import { Client, Event, Extra, Middleware, Options, Response, Retry, SKIPPED_RESPONSE } from '@amplitude/types';
 import { logger, isNodeEnv, isValidEvent } from '@amplitude/utils';
 import { RetryHandler } from './retry/defaultRetry';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
-import { MiddlewareRunner } from "./middleware/middlewareRunner";
+import { MiddlewareRunner } from './middleware/middlewareRunner';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -103,7 +94,7 @@ export class NodeClient implements Client<Options> {
     let middlewareCompleted = false;
     this._middlewareRunner.run({ event, extra }, () => {
       middlewareCompleted = true;
-    })
+    });
 
     if (!middlewareCompleted) {
       logger.warn('Middleware chain skipped logEvent action.');

@@ -1,7 +1,7 @@
 import { Event } from './event';
 import { Options } from './options';
 import { Response } from './response';
-import { Extra, Middleware } from "./middleware";
+import { Extra, Middleware } from './middleware';
 
 /**
  * User-Facing Amplitude SDK Client.
