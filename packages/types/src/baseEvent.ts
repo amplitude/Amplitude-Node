@@ -72,5 +72,11 @@ export interface BaseEvent {
   insert_id?: string;
 
   groups?: { [key: string]: any };
+
+  /**
+   * Tracking plan properties (optional)
+   */
+  event_version?: string; /* Semver of this event in the current tracking plan e.g. 1.0.0 */
+  event_id_in_plan?: string; /* Event uuid in the tracking plan, automatically set by Ampli */
   plan?: Plan;
 }

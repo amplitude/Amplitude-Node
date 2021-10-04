@@ -1,6 +1,7 @@
 import { Event } from './event';
 import { Options } from './options';
 import { Response } from './response';
+import { Extra, Middleware } from "./middleware";
 
 /**
  * User-Facing Amplitude SDK Client.
@@ -17,8 +18,16 @@ export interface Client<O extends Options = Options> {
    * Captures a manually created event and sends it to Amplitude.
    *
    * @param event The event to send to Amplitude.
+   * @param extra Unstructured extra data to pass to Middleware.
    */
-  logEvent(event: Event): Promise<Response>;
+  logEvent(event: Event, extra?: Extra): Promise<Response>;
+
+  /**
+   * Adds a new middleware function to run on each logEvent() call prior to sending to Amplitude.
+   *
+   * @param middleware The middleware method
+   */
+  addEventMiddleware(middleware: Middleware): Client;
 
   /**
    * Flush and send all the events which haven't been sent.
