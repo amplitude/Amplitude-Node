@@ -150,10 +150,13 @@ export class NodeClient implements Client<Options> {
     event.library = `${SDK_NAME}/${SDK_VERSION}`;
   }
 
-  /** Add plan field into event */
+  /** Merge plan field into event */
   private _observeEvent(event: Event): void {
-    if (typeof event.plan === 'undefined' && typeof this._options.plan !== 'undefined') {
-      event.plan = this._options.plan;
+    if (typeof this._options.plan !== 'undefined') {
+      event.plan = {
+        ...this._options.plan,
+        ...event.plan,
+      };
     }
   }
 
