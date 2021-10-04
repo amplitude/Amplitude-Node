@@ -8,7 +8,7 @@ export class MiddlewareRunner {
   }
 
   run(payload: MiddlewarePayload, next: Next): void {
-    let curMiddlewareIndex = 0;
+    let curMiddlewareIndex = -1;
     const middlewareCount = this._middlewares.length;
 
     const middlewareNext: Next = curPayload => {
