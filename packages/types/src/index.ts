@@ -16,3 +16,4 @@ export { RetryClass, Retry } from './retry';
 export { Status } from './status';
 export { Transport, TransportOptions, Payload, PayloadOptions } from './transport';
 export { Extra, Middleware, Next, MiddlewarePayload } from './middleware';
+export { IdentifyOptions, GroupOptions, TrackOptions } from './ampli';
