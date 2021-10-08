@@ -83,5 +83,5 @@ export interface Options {
   /**
    * Global tracking plan information
    */
-  plan?: Omit<Plan, 'event_version' | 'event_id'>;
+  plan?: Plan;
 }
