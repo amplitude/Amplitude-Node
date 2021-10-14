@@ -1,4 +1,4 @@
-import { Middleware, MiddlewarePayload, Next } from '@amplitude/types';
+import { Middleware, MiddlewarePayload, MiddlewareNext } from '@amplitude/types';
 
 export class MiddlewareRunner {
   private readonly _middlewares: Middleware[] = [];
@@ -21,11 +21,11 @@ export class MiddlewareRunner {
    * @param payload The payload data for the middleware to receive
    * @param next The function to call after all middleware completes. Only runs if next(payload) is called by all middlewares.
    */
-  run(payload: MiddlewarePayload, next: Next): void {
+  run(payload: MiddlewarePayload, next: MiddlewareNext): void {
     let curMiddlewareIndex = -1;
     const middlewareCount = this._middlewares.length;
 
-    const middlewareNext: Next = curPayload => {
+    const middlewareNext: MiddlewareNext = curPayload => {
       curMiddlewareIndex += 1;
       if (curMiddlewareIndex < middlewareCount) {
         this._middlewares[curMiddlewareIndex](curPayload, _next);
@@ -34,7 +34,7 @@ export class MiddlewareRunner {
       }
     };
 
-    const _next: Next = middlewareCount > 0 ? middlewareNext : next;
+    const _next: MiddlewareNext = middlewareCount > 0 ? middlewareNext : next;
 
     _next(payload);
   }

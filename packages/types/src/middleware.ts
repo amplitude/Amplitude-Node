@@ -18,7 +18,7 @@ export interface MiddlewarePayload {
 /**
  * Function called at the end of each Middleware to run the next middleware in the chain
  */
-export type Next = (payload: MiddlewarePayload) => void;
+export type MiddlewareNext = (payload: MiddlewarePayload) => void;
 
 /**
  * A function to run on the Event stream (each logEvent call)
@@ -26,4 +26,4 @@ export type Next = (payload: MiddlewarePayload) => void;
  * @param payload The event and extra data being sent
  * @param next Function to run the next middleware in the chain, not calling next will end the middleware chain
  */
-export type Middleware = (payload: MiddlewarePayload, next: Next) => void;
+export type Middleware = (payload: MiddlewarePayload, next: MiddlewareNext) => void;
