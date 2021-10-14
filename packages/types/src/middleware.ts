@@ -3,7 +3,7 @@ import { Event } from './event';
 /**
  * Unstructured object to let users pass extra data to middleware
  */
-export interface Extra {
+export interface MiddlewareExtra {
   [name: string]: any;
 }
 
@@ -12,7 +12,7 @@ export interface Extra {
  */
 export interface MiddlewarePayload {
   event: Event;
-  extra?: Extra;
+  extra?: MiddlewareExtra;
 }
 
 /**

@@ -1,5 +1,14 @@
 import { Identify } from '@amplitude/identify';
-import { Client, Event, Extra, Middleware, Options, Response, Retry, SKIPPED_RESPONSE } from '@amplitude/types';
+import {
+  Client,
+  Event,
+  Middleware,
+  MiddlewareExtra,
+  Options,
+  Response,
+  Retry,
+  SKIPPED_RESPONSE,
+} from '@amplitude/types';
 import { logger, isNodeEnv, isValidEvent } from '@amplitude/utils';
 import { RetryHandler } from './retry/defaultRetry';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
@@ -78,7 +87,7 @@ export class NodeClient implements Client<Options> {
   /**
    * @inheritDoc
    */
-  public async logEvent(event: Event, extra?: Extra): Promise<Response> {
+  public async logEvent(event: Event, extra?: MiddlewareExtra): Promise<Response> {
     if (this._options.optOut) {
       return await Promise.resolve(SKIPPED_RESPONSE);
     }

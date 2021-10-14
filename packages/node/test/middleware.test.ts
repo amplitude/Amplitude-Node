@@ -73,8 +73,11 @@ describe('middleware behavior', () => {
     for (let i = 0; i < middlewareCount; i += 1) {
       const nextMethod = i < middlewareCount - 1 ? middleware[i + 1] : next;
 
+      // Check middlware was called
       expect(middleware[i]).toHaveBeenCalledTimes(1);
+      // Check payload
       expect(middleware[i].mock.calls[0][0]).toEqual(getPayloadWithCount(i));
+      // Check this middleware method ran before the next one in the chain
       expect(middleware[i].mock.invocationCallOrder[0]).toBeLessThan(nextMethod.mock.invocationCallOrder[0]);
     }
 
