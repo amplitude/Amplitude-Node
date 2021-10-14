@@ -7,7 +7,7 @@ export class MiddlewareRunner {
    * Add a @middleware to the chain.
    *
    * The provided middleware must call next(payload) for the chain to continue.
-   * Otherwise following middleware will not be called.
+   * Otherwise any following middleware and next method will not be called.
    *
    * @param middleware A Middleware function
    */
@@ -19,7 +19,7 @@ export class MiddlewareRunner {
    * Runs the middleware chain with the given payload.
    *
    * @param payload The payload data for the middleware to receive
-   * @param next The function to call after all middleware completes. Only runs if next() is called by all middlewares.
+   * @param next The function to call after all middleware completes. Only runs if next(payload) is called by all middlewares.
    */
   run(payload: MiddlewarePayload, next: Next): void {
     let curMiddlewareIndex = -1;
