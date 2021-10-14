@@ -1,8 +1,18 @@
 import { Identify } from '@amplitude/identify';
-import { Client, Event, Options, Response, Retry, SKIPPED_RESPONSE } from '@amplitude/types';
+import {
+  Client,
+  Event,
+  Middleware,
+  MiddlewareExtra,
+  Options,
+  Response,
+  Retry,
+  SKIPPED_RESPONSE,
+} from '@amplitude/types';
 import { logger, isNodeEnv, isValidEvent } from '@amplitude/utils';
 import { RetryHandler } from './retry/defaultRetry';
 import { SDK_NAME, SDK_VERSION, DEFAULT_OPTIONS } from './constants';
+import { MiddlewareRunner } from './middleware/middlewareRunner';
 
 export class NodeClient implements Client<Options> {
   /** Project Api Key */
@@ -15,6 +25,7 @@ export class NodeClient implements Client<Options> {
   private _responseListeners: Array<{ resolve: (response: Response) => void; reject: (err: Error) => void }> = [];
   private readonly _transportWithRetry: Retry;
   private _flushTimer: NodeJS.Timeout | null = null;
+  private readonly _middlewareRunner: MiddlewareRunner;
 
   /**
    * Initializes this client instance.
@@ -27,6 +38,7 @@ export class NodeClient implements Client<Options> {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._setUpLogging();
     this._transportWithRetry = this._options.retryClass ?? this._setupDefaultTransport();
+    this._middlewareRunner = new MiddlewareRunner();
     if (!isNodeEnv()) {
       logger.warn(
         '@amplitude/node initialized in a non-node environment and will not work. If you are planning to add Amplitude to a browser environment, please use amplitude-js',
@@ -75,7 +87,7 @@ export class NodeClient implements Client<Options> {
   /**
    * @inheritDoc
    */
-  public async logEvent(event: Event): Promise<Response> {
+  public async logEvent(event: Event, extra?: MiddlewareExtra): Promise<Response> {
     if (this._options.optOut) {
       return await Promise.resolve(SKIPPED_RESPONSE);
     }
@@ -87,6 +99,16 @@ export class NodeClient implements Client<Options> {
 
     this._annotateEvent(event);
     this._observeEvent(event);
+
+    let middlewareCompleted = false;
+    this._middlewareRunner.run({ event, extra }, () => {
+      middlewareCompleted = true;
+    });
+
+    if (!middlewareCompleted) {
+      logger.warn('Middleware chain skipped logEvent action.');
+      return await Promise.resolve(SKIPPED_RESPONSE);
+    }
 
     return await new Promise((resolve, reject) => {
       // Add event to unsent events queue.
@@ -127,15 +149,23 @@ export class NodeClient implements Client<Options> {
     return await this.logEvent(identifyEvent);
   }
 
+  public addEventMiddleware(middleware: Middleware): NodeClient {
+    this._middlewareRunner.add(middleware);
+    return this;
+  }
+
   /** Add platform dependent field onto event. */
   private _annotateEvent(event: Event): void {
     event.library = `${SDK_NAME}/${SDK_VERSION}`;
   }
 
-  /** Add plan field into event */
+  /** Merge plan field into event */
   private _observeEvent(event: Event): void {
-    if (typeof event.plan === 'undefined' && typeof this._options.plan !== 'undefined') {
-      event.plan = this._options.plan;
+    if (typeof this._options.plan !== 'undefined') {
+      event.plan = {
+        ...this._options.plan,
+        ...event.plan,
+      };
     }
   }
 

@@ -15,3 +15,5 @@ export { Response, ResponseBody, SKIPPED_RESPONSE } from './response';
 export { RetryClass, Retry } from './retry';
 export { Status } from './status';
 export { Transport, TransportOptions, Payload, PayloadOptions } from './transport';
+export { Middleware, MiddlewareExtra, MiddlewareNext, MiddlewarePayload } from './middleware';
+export { EventOptions, GroupOptions, IdentifyOptions } from './ampli';

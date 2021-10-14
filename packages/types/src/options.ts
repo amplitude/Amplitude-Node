@@ -79,8 +79,9 @@ export interface Options {
    * @param isLastRetry True if attemptNumber === retryTimeouts.length - 1
    */
   onRetry: ((response: Response, attemptNumber: number, isLastRetry: boolean) => boolean) | null;
+
   /**
-   * Tracking plan information
+   * Global tracking plan information
    */
   plan?: Plan;
 }
