@@ -62,24 +62,19 @@ describe('middleware behavior', () => {
         count = +count + 1;
         next({ ...payload, extra: { count } });
       });
-    }
 
-    // Add middleware to run
-    for (let i = 0; i < middlewareCount; i += 1) {
       runner.add(middleware[i]);
     }
+
     // Run with payload with count = 0
     runner.run(getPayloadWithCount(0), next);
 
-    // Check all middleware was called
-    for (let i = 0; i < middlewareCount; i += 1) {
-      expect(middleware[i]).toHaveBeenCalledTimes(1);
-      expect(middleware[i].mock.calls[0][0]).toEqual(getPayloadWithCount(i));
-    }
-
-    // Check call order
+    // Check all middleware was called in order
     for (let i = 0; i < middlewareCount; i += 1) {
       const nextMethod = i < middlewareCount - 1 ? middleware[i + 1] : next;
+
+      expect(middleware[i]).toHaveBeenCalledTimes(1);
+      expect(middleware[i].mock.calls[0][0]).toEqual(getPayloadWithCount(i));
       expect(middleware[i].mock.invocationCallOrder[0]).toBeLessThan(nextMethod.mock.invocationCallOrder[0]);
     }
 
