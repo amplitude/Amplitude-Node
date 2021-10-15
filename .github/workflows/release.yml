@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       packageVersion:
-        description: "The version to publish (e.g. prerelease, patch, major). Defaults to lerna conventional commits."
-        required: false
-        default: ""
+        description: "The version to publish (e.g. prerelease, patch, major, 1.2.3)"
+        required: true
       distTag:
         description: "The dist-tag to publish (e.g. latest, beta)"
         required: true
