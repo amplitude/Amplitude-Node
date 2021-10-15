@@ -55,6 +55,16 @@ jobs:
       - name: Test
         run: yarn test
 
+      - name: Configure Git User
+        run: |
+          git config --global user.name amplitude-sdk-bot
+          git config --global user.email amplitude-sdk-bot@users.noreply.github.com
+
+      - name: Configure NPM User
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN }}" > ~/.npmrc
+          npm whoami
+
       - name: Publish to NPM
         run: |
           lerna publish ${{ env.PACKAGE_VERSION }} --dist-tag ${{ env.DIST_TAG }} --yes
