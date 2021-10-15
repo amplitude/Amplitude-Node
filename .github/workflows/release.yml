@@ -70,3 +70,4 @@ jobs:
           lerna publish ${{ env.PACKAGE_VERSION }} --dist-tag ${{ env.DIST_TAG }} --yes
         env:
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PUBLISH_TOKEN }}
