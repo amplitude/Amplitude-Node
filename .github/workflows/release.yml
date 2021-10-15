@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       packageVersion:
-        description: "The version to publish (e.g. prerelease, patch, major). Defaults to lerna conventional commits."
-        required: false
-        default: ""
+        description: "The version to publish (e.g. prerelease, patch, major, 1.2.3)"
+        required: true
       distTag:
         description: "The dist-tag to publish (e.g. latest, beta)"
         required: true
@@ -55,6 +54,16 @@ jobs:
 
       - name: Test
         run: yarn test
+
+      - name: Configure Git User
+        run: |
+          git config --global user.name amplitude-sdk-bot
+          git config --global user.email amplitude-sdk-bot@users.noreply.github.com
+
+      - name: Configure NPM User
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_PUBLISH_TOKEN }}" > ~/.npmrc
+          npm whoami
 
       - name: Publish to NPM
         run: |
