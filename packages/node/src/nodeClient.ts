@@ -92,6 +92,9 @@ export class NodeClient implements Client<Options> {
       return await Promise.resolve(SKIPPED_RESPONSE);
     }
 
+    this._annotateEvent(event);
+    this._observeEvent(event);
+
     let middlewareCompleted = false;
     this._middlewareRunner.run({ event, extra }, () => {
       middlewareCompleted = true;
@@ -106,9 +109,6 @@ export class NodeClient implements Client<Options> {
       logger.warn('Found invalid event - skipping logEvent action.');
       return await Promise.resolve(SKIPPED_RESPONSE);
     }
-
-    this._annotateEvent(event);
-    this._observeEvent(event);
 
     return await new Promise((resolve, reject) => {
       // Add event to unsent events queue.
