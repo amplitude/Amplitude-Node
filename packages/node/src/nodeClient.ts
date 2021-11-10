@@ -92,11 +92,6 @@ export class NodeClient implements Client<Options> {
       return await Promise.resolve(SKIPPED_RESPONSE);
     }
 
-    if (!isValidEvent(event)) {
-      logger.warn('Found invalid event - skipping logEvent action.');
-      return await Promise.resolve(SKIPPED_RESPONSE);
-    }
-
     this._annotateEvent(event);
     this._observeEvent(event);
 
@@ -107,6 +102,11 @@ export class NodeClient implements Client<Options> {
 
     if (!middlewareCompleted) {
       logger.warn('Middleware chain skipped logEvent action.');
+      return await Promise.resolve(SKIPPED_RESPONSE);
+    }
+
+    if (!isValidEvent(event)) {
+      logger.warn('Found invalid event - skipping logEvent action.');
       return await Promise.resolve(SKIPPED_RESPONSE);
     }
 
