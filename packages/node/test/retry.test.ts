@@ -246,8 +246,12 @@ describe('default retry mechanisms', () => {
     const payload = [generateEvent(PASSING_USER_ID)];
     const response = await retry.sendEventsWithRetry(payload);
 
+    // Sleep and wait for retries to end
+    await asyncSleep(1000);
+
     expect(response.status).toBe(Status.SystemError);
     expect(response.statusCode).toBe(0);
+    expect(sendPayloadSpy).toBeCalledTimes(2);
     sendPayloadSpy.mockRestore();
   });
 });

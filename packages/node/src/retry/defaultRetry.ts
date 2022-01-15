@@ -189,36 +189,49 @@ export class RetryHandler extends BaseRetryHandler {
     deviceId: string,
     eventsToRetry: readonly Event[],
   ): Promise<RetryMetadata> {
-    const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
+    try {
+      const response = await this._transport.sendPayload(this._getPayload(eventsToRetry));
 
-    let shouldRetry = true;
-    let shouldReduceEventCount = false;
-    let eventIndicesToRemove: number[] = [];
+      let shouldRetry = true;
+      let shouldReduceEventCount = false;
+      let eventIndicesToRemove: number[] = [];
 
-    if (response.status === Status.RateLimit) {
-      // RateLimit: See if we hit the daily quota
-      if (response.body !== undefined) {
-        const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
-        if (deviceId in exceededDailyQuotaDevices || userId in exceededDailyQuotaUsers) {
-          shouldRetry = false; // This device/user may not be retried for a while. Just give up.
+      if (response.status === Status.RateLimit) {
+        // RateLimit: See if we hit the daily quota
+        if (response.body !== undefined) {
+          const { exceededDailyQuotaUsers, exceededDailyQuotaDevices } = response.body;
+          if (deviceId in exceededDailyQuotaDevices || userId in exceededDailyQuotaUsers) {
+            shouldRetry = false; // This device/user may not be retried for a while. Just give up.
+          }
         }
+
+        shouldReduceEventCount = true; // Reduce the payload to reduce risk of throttling
+      } else if (response.status === Status.PayloadTooLarge) {
+        shouldReduceEventCount = true;
+      } else if (response.status === Status.Invalid) {
+        if (eventsToRetry.length === 1) {
+          shouldRetry = false; // If there's only one event, just toss it.
+        } else {
+          eventIndicesToRemove = collectInvalidEventIndices(response); // Figure out which events need to go.
+        }
+      } else if (response.status === Status.Success) {
+        // Success! We sent the events
+        shouldRetry = false; // End the retry loop
       }
 
-      shouldReduceEventCount = true; // Reduce the payload to reduce risk of throttling
-    } else if (response.status === Status.PayloadTooLarge) {
-      shouldReduceEventCount = true;
-    } else if (response.status === Status.Invalid) {
-      if (eventsToRetry.length === 1) {
-        shouldRetry = false; // If there's only one event, just toss it.
-      } else {
-        eventIndicesToRemove = collectInvalidEventIndices(response); // Figure out which events need to go.
-      }
-    } else if (response.status === Status.Success) {
-      // Success! We sent the events
-      shouldRetry = false; // End the retry loop
+      return { shouldRetry, shouldReduceEventCount, eventIndicesToRemove, response };
+    } catch (err) {
+      return {
+        shouldRetry: false,
+        shouldReduceEventCount: false,
+        eventIndicesToRemove: [],
+        response: {
+          status: Status.SystemError,
+          statusCode: 0,
+          error: err instanceof Error ? err : new Error(String(err)),
+        }
+      };
     }
-
-    return { shouldRetry, shouldReduceEventCount, eventIndicesToRemove, response };
   }
 
   private async _retryEventsOnLoop(userId: string, deviceId: string): Promise<void> {
