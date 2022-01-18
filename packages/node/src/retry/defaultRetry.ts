@@ -229,7 +229,7 @@ export class RetryHandler extends BaseRetryHandler {
           status: Status.SystemError,
           statusCode: 0,
           error: err instanceof Error ? err : new Error(String(err)),
-        }
+        },
       };
     }
   }
