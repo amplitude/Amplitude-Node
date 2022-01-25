@@ -67,6 +67,7 @@ export class HTTPTransport implements Transport {
       headers,
       method: 'POST',
       hostname: url.hostname,
+      port: url.port,
       path: url.pathname,
     };
 

@@ -88,4 +88,29 @@ describe('HTTPTransport tests', () => {
       sendPayloadSpy.mockRestore();
     });
   });
+
+  describe('sendPayload test with different port', () => {
+    const SERVER_URL = 'https://localhost:3000/2/httpapi';
+    const transportOptions = {
+      serverUrl: SERVER_URL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const httpTransport = new HTTPTransport(transportOptions);
+
+    it('should succeed under default settings (no timeout delay)', async () => {
+      nock(SERVER_URL)
+        .post(anyMatch)
+        .reply(200);
+
+      const testPayload = {
+        api_key: 'test',
+        events: [],
+      };
+      const resp = await httpTransport.sendPayload(testPayload);
+      expect(resp.status).toBe(Status.Success);
+      expect(resp.statusCode).toBe(200);
+    });
+  });
 });
