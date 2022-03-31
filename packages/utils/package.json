@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/utils",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "description": "Utility functions for the Amplitude JavaScript SDK",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/main/packages/utils",
@@ -16,11 +16,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@amplitude/types": "^1.9.2",
+    "@amplitude/types": "^1.10.0",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "@amplitude/eslint-config-typescript": "^1.9.2",
+    "@amplitude/eslint-config-typescript": "^1.10.0",
     "@types/jest": "^26.0.14",
     "@types/jsdom": "^16.2.5",
     "eslint": "^7.0.0",
