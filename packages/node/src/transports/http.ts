@@ -92,9 +92,12 @@ export class HTTPTransport implements Transport {
           }
           if (res.complete && rawData.length > 0) {
             try {
-              const responseWithBody = mapJSONToResponse(JSON.parse(rawData));
-              if (responseWithBody !== null) {
-                return resolve(responseWithBody);
+              const content = JSON.parse(rawData);
+              if (Object.keys(content).length > 0) {
+                const responseWithBody = mapJSONToResponse(content);
+                if (responseWithBody !== null) {
+                  return resolve(responseWithBody);
+                }
               }
             } catch {
               // pass
