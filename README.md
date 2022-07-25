@@ -7,6 +7,15 @@
 
 [![npm version](https://badge.fury.io/js/%40amplitude%2Fnode.svg)](https://badge.fury.io/js/%40amplitude%2Fnode)
 
+# Announcement 📣
+Amplitude is introducing a NEW [SDK for Node](https://www.npmjs.com/package/@amplitude/analytics-node) [BETA]. This new SDK provides improved developer experience, helps users instrument data more seamlessly and provide more control over data being instrumented using custom plugins.
+
+To learn more about the new SDK, here are some useful links:
+
+* NPM: https://www.npmjs.com/package/@amplitude/analytics-node
+* GitHub: https://github.com/amplitude/Amplitude-TypeScript/tree/main/packages/analytics-node
+* Documentation: https://www.docs.developers.amplitude.com/data/sdks/typescript-node
+
 # Official Amplitude SDK for Node.js
 This is Amplitude Node.js SDK written in Typescript, the 1st backend SDK for Amplitude. At this moment, we keep it minimal and simple because we want to give more thoughts over different customers' needs. Modularization and flexiblity will be the main priorities for this SDK. We would like to hear your ideas as well on how you plan on using this library!
 
