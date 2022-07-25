@@ -8,7 +8,7 @@
 [![npm version](https://badge.fury.io/js/%40amplitude%2Fnode.svg)](https://badge.fury.io/js/%40amplitude%2Fnode)
 
 # Announcement 📣
-Amplitude is introducing a NEW [SDK for Node](https://www.npmjs.com/package/@amplitude/analytics-node) [BETA]. This new SDK provides improved developer experience, helps users instrument data more seamlessly and provide more control over data being instrumented using custom plugins.
+Amplitude is introducing a NEW [SDK for Node.js](https://www.npmjs.com/package/@amplitude/analytics-node) [BETA]. This new SDK provides improved developer experience, helps users instrument data more seamlessly and provide more control over data being instrumented using custom plugins.
 
 To learn more about the new SDK, here are some useful links:
 
