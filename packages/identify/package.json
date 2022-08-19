@@ -18,7 +18,7 @@
   "dependencies": {
     "@amplitude/types": "^1.10.0",
     "@amplitude/utils": "^1.10.0",
-    "tslib": "^2.4.0"
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",
