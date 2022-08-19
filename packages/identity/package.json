@@ -18,7 +18,7 @@
   "dependencies": {
     "@amplitude/types": "^1.10.0",
     "@amplitude/utils": "^1.10.0",
-    "tslib": "^1.9.3"
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@amplitude/eslint-config-typescript": "^1.10.0",
