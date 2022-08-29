@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/types",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "Types for all Amplitude JavaScript SDKs",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/main/packages/types",
@@ -16,7 +16,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@amplitude/eslint-config-typescript": "^1.10.0",
+    "@amplitude/eslint-config-typescript": "^1.10.1",
     "@types/jest": "^26.0.14",
     "eslint": "^7.0.0",
     "jest": "^26.5.3",
