@@ -1,4 +1,5 @@
 import { Plan } from './plan';
+import { IngestionMetadata } from './ingestionMetadata';
 /**
  * Strings that have special meaning when used as an event's type
  * and have different specifications.
@@ -73,4 +74,5 @@ export interface BaseEvent {
 
   groups?: { [key: string]: any };
   plan?: Plan;
+  ingestion_metadata?: IngestionMetadata;
 }

@@ -157,6 +157,14 @@ export class NodeClient implements Client<Options> {
   /** Add platform dependent field onto event. */
   private _annotateEvent(event: Event): void {
     event.library = `${SDK_NAME}/${SDK_VERSION}`;
+
+    // mount ingestion metadata information
+    if (typeof this._options.ingestionMetadata !== 'undefined') {
+      event.ingestion_metadata = {
+        ...this._options.ingestionMetadata,
+        ...event.ingestion_metadata,
+      };
+    }
   }
 
   /** Merge plan field into event */
