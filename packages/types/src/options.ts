@@ -3,6 +3,7 @@ import { Transport } from './transport';
 import { Retry } from './retry';
 import { Response } from './response';
 import { Plan } from './plan';
+import { IngestionMetadata } from './ingestionMetadata';
 
 /**
  * Options that you can choose to configure against the client.
@@ -84,4 +85,9 @@ export interface Options {
    * Global tracking plan information
    */
   plan?: Plan;
+
+  /**
+   * Ingestion metadata information
+   */
+  ingestionMetadata?: IngestionMetadata;
 }
