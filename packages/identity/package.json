@@ -1,6 +1,6 @@
 {
   "name": "@amplitude/identity",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "description": "Identity Manager for JS-based SDK's to help track device and user ID's",
   "repository": "git://github.com/amplitude/Amplitude-Node.git",
   "homepage": "https://github.com/amplitude/Amplitude-Node/tree/main/packages/identity",
@@ -16,12 +16,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@amplitude/types": "^1.10.1",
-    "@amplitude/utils": "^1.10.1",
+    "@amplitude/types": "^1.10.2",
+    "@amplitude/utils": "^1.10.2",
     "tslib": "^2.0.0"
   },
   "devDependencies": {
-    "@amplitude/eslint-config-typescript": "^1.10.1",
+    "@amplitude/eslint-config-typescript": "^1.10.2",
     "@types/jest": "^26.0.10",
     "eslint": "^7.0.0",
     "eslint-plugin-jest": "^24.1.5",
