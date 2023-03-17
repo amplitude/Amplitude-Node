@@ -79,7 +79,7 @@ export class NodeClient implements Client<Options> {
       responseListeners.forEach(({ resolve }) => resolve(response));
       return response;
     } catch (err) {
-      responseListeners.forEach(({ reject }) => reject(err));
+      responseListeners.forEach(({ reject }) => reject(err as Error));
       throw err;
     }
   }

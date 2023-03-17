@@ -24,7 +24,7 @@
   "devDependencies": {
     "@amplitude/eslint-config-typescript": "^1.10.2",
     "@types/jest": "^26.0.14",
-    "@types/node": "^15.0.2",
+    "@types/node": "^18.15.3",
     "eslint": "^7.0.0",
     "eslint-plugin-jest": "^24.1.5",
     "jest": "^26.5.3",
@@ -33,7 +33,7 @@
     "prettier": "^1.17.0",
     "rimraf": "^2.6.3",
     "ts-jest": "^26.2.0",
-    "typescript": "^3.9.2"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "run-p build:es5 build:esm",
