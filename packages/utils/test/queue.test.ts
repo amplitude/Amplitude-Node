@@ -80,7 +80,7 @@ describe('async queue utility', () => {
     try {
       await firstPromise;
     } catch (err) {
-      errorMessage = err.message;
+      errorMessage = (err as Error).message;
     }
     expect(errorMessage).toBe('PROMISE_ONE');
 

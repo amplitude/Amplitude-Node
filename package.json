@@ -27,7 +27,7 @@
   "devDependencies": {
     "eslint": "^7.0.0",
     "jest": "^26.5.3",
-    "lerna": "^3.20.2",
+    "lerna": "^6.5.1",
     "prettier": "^1.17.0",
     "ts-jest": "^26.2.0"
   },

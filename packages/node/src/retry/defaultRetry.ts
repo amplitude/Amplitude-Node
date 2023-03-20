@@ -56,11 +56,11 @@ export class RetryHandler extends BaseRetryHandler {
         throw new Error(response.status);
       }
     } catch (err) {
-      if (isNodeError(err)) {
+      if (isNodeError(err as Error)) {
         response = {
           status: Status.SystemError,
           statusCode: 0,
-          error: err,
+          error: err as Error,
         };
       } else {
         logger.warn('Unknown error caught when sending events');

@@ -22,6 +22,8 @@ const dom = new JSDOM();
 const processPlaceholder = global.process;
 
 function setupBrowserTest(): void {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   global.window = dom.window;
   // Note: Used to get around not being able to delete non-optional fields for the sake of testing
   global.process = undefined as any;
@@ -60,6 +62,8 @@ describe('isBrowserEnv', () => {
 describe('prototypeJsFix', () => {
   it('should delete Array.prototype.toJSON if Prototype.js injects Array.prototype.toJSON', () => {
     setupBrowserTest();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
     global.window.Prototype = {};
     // eslint-disable-next-line no-extend-native
     Array.prototype.toJSON = jest.fn();
