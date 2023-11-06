@@ -35,6 +35,6 @@ In order of what might be good to read to get acquainted with the Node SDK:
 - [(`@amplitude/identify`)](https://github.com/amplitude/Amplitude-Node/tree/main/packages/identify): A builder-type class that helps interface with the Identify API and the Node SDK. Use it to compose Identify events for both users and groups.
 - [(`@amplitude/identity`)](https://github.com/amplitude/Amplitude-Node/tree/main/packages/identity): A helper class to store the "identity" (device + user ID) of a certain event or client.
 - [(`@amplitude/utils`)](https://github.com/amplitude/Amplitude-Node/tree/main/packages/utils): A list of shared (mostly) polymorphic utilities across our javascript-based SDK's.
-- [("@amplitude/eslint-config-typescript`)](https://github.com/amplitude/Amplitude-Node/tree/main/packages/eslint-config-typescript): The ESLint configuration shared across our repositories.
+- [(`@amplitude/eslint-config-typescript`)](https://github.com/amplitude/Amplitude-Node/tree/main/packages/eslint-config-typescript): The ESLint configuration shared across our repositories.
 ## Need Help?
 If you have any problems or issues over our SDK, feel free to [create a github issue](https://github.com/amplitude/Amplitude-Node/issues/new) or submit a request on [Amplitude Help](https://help.amplitude.com/hc/en-us/requests/new).
