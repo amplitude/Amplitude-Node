@@ -9,6 +9,13 @@ jobs:
       matrix:
         node-version: [14.x, 16.x]
         os: [macOS-latest, ubuntu-latest]
+        exclude:
+          - node-version: 14.x
+            os: macOS-latest
+        include:
+          # Node 14 has no darwin-arm64 distribution for macOS-latest.
+          - node-version: 14.x
+            os: macos-15-intel
     runs-on: ${{ matrix.os }}
 
     steps:
