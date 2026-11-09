@@ -31,5 +31,12 @@
     "prettier": "^1.17.0",
     "ts-jest": "^26.2.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "resolutions": {
+    "**/micromatch": "4.0.8",
+    "**/lerna/semver": "7.7.3",
+    "**/@nrwl/devkit/semver": "7.7.3",
+    "**/nx/semver": "7.7.3",
+    "**/nx/js-yaml": "4.3.2"
+  }
 }
