@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14.x, 16.x]
+        node-version: [14.x, 16.x, 22.x, 24.x]
         os: [macOS-latest, ubuntu-latest]
         exclude:
           - node-version: 14.x
@@ -22,19 +22,29 @@ jobs:
       - name: Checkout Git Repository
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js for build tooling
         uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile --network-timeout 300000 --ignore-scripts
 
-      - name: Bootstrap (Build Files + Link Dependents)
-        run: yarn lerna bootstrap
+      - name: Build workspace packages
+        run: yarn build
 
       - name: Lint (ESLint + Prettier)
-        run: yarn lint-since
+        run: yarn lint
+
+      # Lerna/Nx require modern Node; execute Jest directly to retain SDK runtime coverage.
+      - name: Setup Node.js ${{ matrix.node-version }} for SDK tests
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
       - name: Run Unit Tests
-        run: yarn test-since
+        shell: bash
+        run: |
+          for package in identify identity node utils; do
+            (cd "packages/$package" && node ../../node_modules/jest/bin/jest.js --runInBand) || exit 1
+          done
