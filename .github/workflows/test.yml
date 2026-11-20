@@ -22,16 +22,21 @@ jobs:
       - name: Checkout Git Repository
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js for Install and Build
         uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24.x
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile --network-timeout 300000 --ignore-scripts
 
-      - name: Bootstrap (Build Files + Link Dependents)
-        run: yarn lerna bootstrap
+      - name: Build SDK
+        run: yarn build
+
+      - name: Setup Node.js ${{ matrix.node-version }} for Lint and Tests
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
       - name: Lint (ESLint + Prettier)
         run: yarn lint-since
