@@ -4,6 +4,25 @@
 
 ## Ramping Up
 
+Use Node.js 22.12 or later on the 22.x line (see `.nvmrc`) and Yarn Classic
+1.22.22 for development. CI and release workflows use Node 24. Lerna 9 and Nx 22
+require modern Node; the published SDK's Node.js requirement remains unchanged.
+
+Run `yarn install --frozen-lockfile` to install dependencies, link the Yarn
+workspaces, and build packages through the root `prepare` script. CI skips
+install scripts and runs `yarn build` explicitly. `lerna bootstrap` and the
+`useWorkspaces` setting were removed in newer Lerna versions.
+
+Run `yarn build`, `yarn lint`, and `yarn test` to validate changes. `yarn clean`
+removes generated package output; Yarn manages workspace dependency installation.
+CI builds and lints on Node 24, then runs each package's Jest suite directly on
+Node 14, 16, 22, and 24 to preserve SDK runtime coverage without invoking Lerna
+on unsupported Node versions.
+
+Nx is pinned to a release that fixes both SDK-544 command injection and local
+socket permission findings. Keep its version within Lerna's supported Nx range
+when updating the tooling.
+
 ### PR Commit Title Conventions
 
 PR titles should follow [conventional commit standards](https://www.conventionalcommits.org/en/v1.0.0/). This helps automate the [release](#release) process.
@@ -41,4 +60,3 @@ Releases are managed by [semantic-release](https://github.com/semantic-release/s
   `fix: null check bug`
 - Else no release
   `docs: update website`
-
