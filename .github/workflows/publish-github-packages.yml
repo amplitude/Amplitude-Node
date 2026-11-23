@@ -33,7 +33,7 @@ jobs:
       DIST_TAG: ${{ github.event.inputs.distTag }}
     strategy:
       matrix:
-        node-version: [ 22.x ]
+        node-version: [ 24.x ]
     steps:
       - name: Checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3

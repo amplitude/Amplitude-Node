@@ -5,8 +5,8 @@
 ## Ramping Up
 
 Use Node.js 22.12 or later on the 22.x line (see `.nvmrc`) and Yarn Classic
-1.22.22 for development and releases. Lerna 9 and Nx 22 require modern Node;
-the published SDK's Node.js requirement remains unchanged.
+1.22.22 for development. CI and release workflows use Node 24. Lerna 9 and Nx 22
+require modern Node; the published SDK's Node.js requirement remains unchanged.
 
 Run `yarn install --frozen-lockfile` to install dependencies, link the Yarn
 workspaces, and build packages through the root `prepare` script. CI skips
@@ -60,4 +60,3 @@ Releases are managed by [semantic-release](https://github.com/semantic-release/s
   `fix: null check bug`
 - Else no release
   `docs: update website`
-
