@@ -15,7 +15,7 @@ install scripts and runs `yarn build` explicitly. `lerna bootstrap` and the
 
 Run `yarn build`, `yarn lint`, and `yarn test` to validate changes. `yarn clean`
 removes generated package output; Yarn manages workspace dependency installation.
-CI builds and lints on Node 22, then runs each package's Jest suite directly on
+CI builds and lints on Node 24, then runs each package's Jest suite directly on
 Node 14, 16, 22, and 24 to preserve SDK runtime coverage without invoking Lerna
 on unsupported Node versions.
 
